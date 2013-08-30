@@ -14,47 +14,89 @@
         </script>
 
          <script>
-  var accountSelect;
+         var enterpriseSelect;
   require(["customizedModule/SelectX",
     "dojo/store/JsonRest",
+    "dojo/on",
+    "dojo/Deferred",
+    "dojo/promise/all",
     "dojo/domReady!"
-    ], function (SelectX, JsonRest) {
+    ], function (SelectX, JsonRest, on, Deferred, all) {
+    	
 
-    //construction requette pour entreprise_select
+    //construction requette pour entrepriseselect
     var enterpriseSelect_query = {};
-    var e = {t : 'entreprise', c : ['id', 'region', 'country', 'city', 'name', 'phone', 'email', 'type', 'cashAccount']}; //e pour entities
+    var e = [{t : 'enterprise', c : ['id', 'region', 'country', 'city', 'name', 'phone', 'email', 'type', 'cashAccount']}]; //e pour entities
     enterpriseSelect_query.e = e;
-    var requette = JSON.stringify(enterpriseSelect_query);
+    var requetteEntreprise = JSON.stringify(enterpriseSelect_query);
+    //fin construction de la requette
 
+    //construction store et select pour entreprise
     var enterpriseSelect_store = new JsonRest({
-      target: "/data",
+      target: "/data/Entreprise",
       getLabel: function (data) {
         return data.name + "-" + data.region;
       }
     });
 
+    enterpriseSelect = new SelectX({
+      store: enterpriseSelect_store,
+      style: "width: 135px",
+      query: '?' + requetteEntreprise
+    }, "enterpriseSelect");
+    //fin construction store et select pour entreprise
+    //construction requette pour account_select
+    var IDEntreprise;
+    var accountSelect_query = {};
+    var process =  getIDEntreprise();
+    process.then(function (value) {
+    	return all({IDAccount : initAccountSelect(value), IDFiscalYear : initFiscalYearSelect(value)});
+    });
+   
+
+
+    e = [{t : 'account', c : ['id', 'accountLocked', 'accountTxt', 'accountTypeId', 'accountCategory']}];
+    var c = [{t : 'account', cl : 'EnterpriseId', v : IDEntreprise, z : '='}];
+    accountSelect_query.e = e;
+    accountSelect_query.c = c;
+    var requetteAccount = JSON.stringify(accountSelect_query);
+
+    //construction store et select pour compte
     var accountSelection_store = new JsonRest({
-      target: 'data/account',
+      target: '/data/Account',
       getLabel: function (data) {
         return (data.id + "-" + data.accountTxt);
       }
     });
 
-    accountSelect = new SelectX({
+    var accountSelect = new SelectX({
       store: accountSelection_store,
       style: "width: 220px", //update this shit
-      query: '?q={"EnterpriseId":"' + 101 + '"}'
+      query: '?' + requetteAccount
     }, "accountSelect");
+     accountSelect.detect(enterpriseSelect, 'onChange', function(value) {
+ 	console.log('maman');
+      //var query = '?q={"EnterpriseId":"' + value + '"}'
+     // accountSelect.requery(query);
+    });
 
-    var enterpriseSelect = new SelectX({
-      store: enterpriseSelect_store,
-      style: "width: 135px",
-      query: '?' + requette
-    }, "enterpriseSelect");
+     //LES FONCTIONS
 
-    console.log("on est encore la !");
+     function getIDEntreprise(){
+     	var deferred = new Deferred();
+     	 enterpriseSelect.on("setStore", function() {
+                       IDEntreprise = this.get('value');
+                       deferred.resolve(IDEntreprise);                        
+                    });
+     	 return deferred.promise;
+     }
 
+     function getIDAccount(IDEntreprise) {
+
+     }
   });
+
+
   </script>
 
     </head>
@@ -84,3 +126,16 @@
         </div>
     </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+   
