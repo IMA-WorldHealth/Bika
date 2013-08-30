@@ -20,12 +20,6 @@ app.configure('jonathan', function () {
   app.use(auth);
 });
 
-app.post('/login', function (req, res) {
-	buidJSON(req.body);
-	console.log(req.body);
-  app.use(express.static(path.join(__dirname, 'public')));
-});
-
 app.get('/data', function (req, res) {
 	 var cb = function (err, ans) {
       if (err) {
@@ -41,7 +35,6 @@ app.get('/data', function (req, res) {
  console.log('la requette a executee est :', Qo);
 	//df.selectionner(Qo, cb);
 	res.send();
-
 });
 
 // using main.html until dedrick and I sync our repositories
