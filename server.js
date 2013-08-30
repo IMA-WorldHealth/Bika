@@ -9,10 +9,6 @@ var express = require('express')
 app.set('env', 'dbface'); // Change this to change application behavior
 
 app.configure('dbface', function () {
-  app.use(express.bodyParser());
-});
-
-app.configure('jonathan', function () {
   app.use(express.cookieParser());
   app.use(express.session({secret: 'open blowfish'}));
   app.use(express.bodyParser());
