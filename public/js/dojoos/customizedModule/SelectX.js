@@ -24,7 +24,7 @@ define('customizedModule/SelectX', ["dojo/_base/declare", "dojo/on", "dojo/topic
 
     _emitChange: function() {
       this._emit(this.id+"onChange");
-    },
+    },   
 
     constructor: function(args) {
       this.inherited(arguments);

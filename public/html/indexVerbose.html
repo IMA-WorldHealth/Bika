@@ -1,0 +1,550 @@
+i<html>
+    <head>
+        <!--Working file - this code should be organised into units etc.-->
+        <meta charset="utf-8">
+        <title>bika</title>
+
+        <link rel="stylesheet" href="dojo/resources/dojo.css"/>
+        <link rel="stylesheet" type="text/css" href="gridx/resources/claro/Gridx.css">
+        <link rel="stylesheet" href="dijit/themes/claro/claro.css" media="screen"/> <!-- sans claoro.css le combo ne s'affiche pas bien-->
+
+        <script>
+            dojoConfig = {
+                //async true causes the HTML to be displayed before executing the javascript - there must be a fix for this
+                async: false,
+                isDebug: true,
+                parseOnLoad: false
+            };
+        </script>
+
+        <script type="text/javascript" src="dojo/dojo.js"></script>
+    </head>
+    <body class="claro">
+        <script>
+        var enterpriseSelect_store;
+  var lang;
+        var enterpriseSelect;
+            require([
+        "dojo/_base/lang",
+                "dojo/parser",
+                "dojo/Deferred",
+                "dojo/promise/all",
+                "gridx/Grid",
+                "dojo/on",
+                "gridx/core/model/cache/Async",
+                "gridx/modules/SingleSort",
+                "gridx/modules/extendedSelect/Row",
+                "dojo/store/JsonRest",
+                "gridx/modules/CellWidget",
+                "dijit/form/ComboBox",
+                "dijit/form/Select",
+                "dojo/domReady!"
+            ], function(lang, parser, Deferred, all, Grid, on, Cache, SingleSort, Row, JsonRest, CellWidget, ComboBox, Select, Scroller) {
+                
+
+                /*
+                 * TODO
+                 * ----
+                 * -Inject components into functions as they are needed; in an attempt to make code more testable
+                 * -Use dojo/Deffered in init() to handle order of execution, data can be passed back up and used to set next method
+                        (current solution executes next method on component load complete - this event should trigger deffered.next, loose coupling and whatnothowwhen)
+                 *
+                 */
+
+                //REFERENCE for all functions to access grid - !global; ?bad; bro 
+                var masterGrid;
+                var slaveGrid;
+
+                //group store and select - extend select (bika/widgets etc.)
+                var fiscalYearSelect;
+                
+                var accountSelect;
+                var dateSelectFrom;
+                var dateSelectTo;
+
+                var gridPaintDependancies = [];
+                var gridDependancies = 3;
+
+                //final aysnchronous function assigns pageInitialised to true
+                var pageInitialised = false;
+
+                var deferred = new Deferred(function(reason) { 
+                    console.log("Deferred cancelled?");
+                });
+
+                settup();
+
+                function settup() { 
+                    console.log("[index.html] [settup()] asyncInitEnterprise().");
+                    
+                    var accountID;
+                    var fiscalYear;
+                    var enterpriseID;
+                    var dateFrom;
+                    var dateTo;
+
+                    var process = asyncInitEnterprise();
+                    process.then(function(result) { 
+                        console.log("[index.html] [settup()] asyncInitFiscal(" + result + ") asyncInitAccount(" + result + ").");
+                        enterpriseID = result;
+                        return all({
+                            fiscal: asyncInitFiscal(result), 
+                            account: asyncInitAccount(result)
+                        });
+                    }).then(function(result) { 
+                        console.log("[index.html] [settup()] asyncInitDateFrom(" + result.fiscal + ") asyncInitDateTo(" + result.fiscal + ").");
+                        fiscalYear = result.fiscal;
+                        accountID = result.account;
+                        return all({
+                            dateFrom: asyncInitDateFrom(result.fiscal),
+                            dateTo: asyncInitDateTo(result.fiscal)
+                        });
+                    }).then(function(result) { 
+                        console.log("[index.html] [settup()] asyncInitGrid(" + accountID + ", " + result.dateFrom + ", " + result.dateTo + ").");
+                        dateFrom = result.dateFrom;
+                        dateTo = result.dateTo;
+
+                        return asyncInitGrid(accountID, dateFrom, dateTo);
+                    }).then(function(result) { 
+                        console.log("[index.html] [settup()] pageInitialised=true.");
+                        pageInitialised = true;
+                    });
+                }
+
+                function asyncUpdateGrid() { 
+
+
+                }
+
+                function asyncInitEnterprise() { 
+
+                    console.log("[index.html] [asyncInitEnterprise()] Process started.");
+                    var deferred = new Deferred();
+
+                    enterpriseSelect_store = new JsonRest({
+                        target: "data/enterprise",
+                        getLabel: function(data) {
+                            return data.name + "-" + data.region;
+                        }
+                    });
+
+                    console.log("[index.html] [asyncInitEnterprise()] Initialise component: enterpriseSelect.");
+                    enterpriseSelect = new Select({
+                        store: enterpriseSelect_store,
+                        style: "width: 135px"
+                    }, "bika.unit.AccountStatement.enterpriseSelect");
+
+                    enterpriseSelect.on("setStore", function() { //Move on functions to seperate funciton i.e refreshFiscal() and changeFiscal()
+
+                        var defaultSelection = this.get('value');
+                        console.log("[index.html] [asyncInitEnterprise()] [enterpriseSelect.on('setStore')] Component ready; resolving deferred with " + defaultSelection + ".");
+                        //if initialising page 
+                        if (!pageInitialised) {
+                            deferred.resolve(defaultSelection);
+
+                            //initFiscal(defaultSelection);
+                            //initAccount(defaultSelection);
+                        }
+                    });
+
+                    enterpriseSelect.on("change", function(value) {
+
+                        //prime dependancies - upate required fields
+                        gridPaintDependancies[accountSelect] = null;
+                        gridPaintDependancies[dateSelectFrom] = null;
+                        gridPaintDependancies[dateSelectTo] = null;
+
+                        updateFiscal(value);
+                        updateAccount(value);
+                    });
+
+                    return deferred.promise;
+                }
+
+                function asyncInitFiscal(defaultEnterprise) { 
+                    
+
+                     console.log("[index.html] [asyncInitFiscal()] Process started.");
+
+                     var deferred = new Deferred();
+
+                     var fiscalYearSelect_store = new JsonRest({
+                        target: 'data/fiscalyear',
+                        getLabel: function(data) {
+                            return data.fiscalYearTxt;
+                        }
+                    });
+
+                    console.log("[index.html] [asyncInitFiscal()] Initialise component: fiscalYearSelect.");
+                    fiscalYearSelect = new Select({
+                        store: fiscalYearSelect_store,
+                        query: '?q={"EnterpriseId":"' + defaultEnterprise + '"}'
+
+                    }, "bika.unit.AccountStatement.fiscalYearSelect");
+
+                    fiscalYearSelect.on("setStore", function() {
+                        var defaultSelection = this.get('value');
+
+                        console.log("[index.html] [asyncInitFiscal()] [fiscalSelect.on('setStore')] Component ready; resolving deferred with " + defaultSelection + ".");
+
+                        if (!pageInitialised) {
+                            deferred.resolve(defaultSelection);
+                           // initDate(defaultSelection);
+                        //} else {
+                            //updateDate(defaultSelection);
+                        }
+                    });
+
+                    fiscalYearSelect.on("change", function(data) {
+
+                    });
+
+                    return deferred.promise;
+                }
+
+                function asyncInitAccount(defaultEnterprise) { 
+
+                    var deferred = new Deferred();
+
+                    console.log("[index.html] [asyncInitAccount()] Process started.");
+
+                    var accountSelection_store = new JsonRest({
+                        target: 'data/account/',
+                        getLabel: function(data) { 
+                            return (data.id + "-" + data.accountTxt);
+                        }
+                    });
+
+                    console.log("[index.html] [asyncInitAccount()] Initialise component: accountSelect.");
+                    accountSelect = new Select({
+                        store: accountSelection_store,
+                        style: "width: 220px", //update this shit
+                        query: '?q={"EnterpriseId":"' + defaultEnterprise + '"}',
+                    }, "bika.unit.AccountStatement.accountSelect");
+
+                    accountSelect.on("setStore", function() {
+
+                        var defaultSelection = this.get('value');
+                      
+
+                         console.log("[index.html] [asyncInitAccount()] [accountSelect.on('setStore')] Component ready; resolving deferred with " + defaultSelection + ".");
+
+                        //option to select all accounts - this will indicate all options should be selected
+                        accountSelect.addOption({});
+                        accountSelect.addOption({
+                            label: "*All accounts",
+                            value: "*"
+                        });
+
+                        deferred.resolve(defaultSelection);
+
+                        //**accountSelect.set('value', '*');
+                    })
+
+                    accountSelect.on("change", function(data) {
+                        //console.log("[index.html] Account selection changed; Update table [" + data + "]");
+
+                        gridPaintDependancies[this] = data;
+                        validateGridReady();
+
+                    });
+
+                    return deferred.promise;
+                }
+
+                function asyncInitDateFrom(defaultFiscal) { 
+
+                    console.log("[index.html] [asyncInitDateFrom()] Process started.");
+
+                    var deferred = new Deferred();
+
+                    var dateSelectFrom_store = new JsonRest({
+                        target: 'data/period/',
+                        getLabel: function(data, second) {
+                            return formatDate(data.periodStart);
+                        }
+                    });
+
+                     console.log("[index.html] [asyncInitDateFrom()] Initialise component: dateSelectFrom.");
+                    dateSelectFrom = new Select({
+                        store: dateSelectFrom_store,
+                        query: '?q={"FiscalYearId":"' + defaultFiscal + '"}'
+                    }, "bika.unit.AccountStatement.dateSelectFrom");
+
+                    dateSelectFrom.on("setStore", function() {
+                        var defaultSelection = this.get('displayedValue');
+
+                          console.log("[index.html] [asyncInitDartFrom()] [dateSelectFrom.on('setStore')] Component ready; resolving deferred with " + defaultSelection + ".");
+                        //gridPaintDependancies[this] = this.get('displayedValue');
+                        //console.log(this);
+                        //validateGridReady();
+                        deferred.resolve(defaultSelection);
+                    });
+
+                    dateSelectFrom.on("change", function(data) {
+                        gridPaintDependancies[this] = this.get('displayedValue');
+                        validateGridReady();
+                    });
+
+                    return deferred.promise;
+
+
+                }
+
+                function asyncInitDateTo(defaultFiscal) { 
+
+                     console.log("[index.html] [asyncInitDateTo()] Process started.");
+
+
+                    var deferred = new Deferred();
+                    var dateSelectTo_store = new JsonRest({
+                        target: 'data/period/',
+                        getLabel: function(data, second) {
+                            return formatDate(data.periodStop);
+                        }
+                    });
+
+                    console.log("[index.html] [asyncInitDateTo()] Initialise component: dateSelectFrom.");
+                    dateSelectTo = new Select({
+                        store: dateSelectTo_store,
+                        query: '?q={"FiscalYearId":"' + defaultFiscal + '"}'
+                    }, "bika.unit.AccountStatement.dateSelectTo");
+
+                    dateSelectTo.on("setStore", function() {
+                        var defaultSelection = this.get('displayedValue');
+
+                        console.log("[index.html] [asyncInitDateTo()] [dateSelectTo.on('setStore')] Component ready; resolving deferred with " + defaultSelection + ".");
+                        //gridPaintDependancies[this] = this.get('displayedValue');
+                        //console.log(this);
+                        //validateGridReady();
+                        deferred.resolve(defaultSelection);
+                    });
+
+
+                   dateSelectTo.on("change", function(data) {
+                        gridPaintDependancies[this] = this.get('displayedValue');
+                        validateGridReady();
+                    });
+
+                   return deferred.promise;
+
+                }
+
+                function asyncInitGrid(account, dateFrom, dateTo) { 
+
+                     console.log("[index.html] [asyncInitGrid()] Process started.");
+                    var deferred = new Deferred();
+
+                    //masterGrid store
+                    var masterGrid_store = new JsonRest({
+                        target: 'data/transaction/',
+                        idProperty: "lineId",
+                        sortParam: "s"
+                    });
+
+                    var columns = [{
+                        id: 'JournalId',
+                        field: 'journalId',
+                        name: 'JournalId'
+                    }, {
+                        id: 'LineId',
+                        field: 'lineId',
+                        name: 'LineId',
+                        editable: true
+                    }, {
+                        id: 'AccountId',
+                        field: 'accountId',
+                        name: 'AccountId',
+                        editable: true
+                    }, {
+                        id: 'Credit',
+                        field: 'credit',
+                        name: 'Credit',
+                        editable: true
+                    }, {
+                        id: 'Debit',
+                        field: 'debit',
+                        name: 'Debit'
+                    }, {
+                        id: 'docId',
+                        field: 'docId',
+                        name: 'DocId'
+                    }, {
+                        id: 'transNumber',
+                        field: 'transNumber',
+                        name: 'Transaction Number'
+                    }, {
+                        id: 'transDate',
+                        field: 'transDate',
+                        name: 'Transaction Date',
+                        formatter: function(data) {
+                            return formatDate(data.transactionDate);
+                            //return new Date(data.TransactionDate).toDateString();
+                        }
+                    }];
+
+                       console.log("[index.html] [asyncInitGrid()] Initialise component: masterGrid.");
+
+                    masterGrid = new Grid({
+                        id: 'master',
+                        style: "height: 100%", //add this to grid style css or some shyt
+                        cacheClass: Cache,
+                        store: masterGrid_store,
+                        query: '?q={"AccountId":"' + account + '"}',
+                        structure: columns,
+                        selectRowTriggerOnCell: true,
+                        modules: [
+                            CellWidget,
+                            SingleSort,
+                            Row
+                            //Bar
+                        ],
+                        autoHeight: true
+                    }, "bika.unit.AccountStatement.masterGrid");
+                    masterGrid.startup();
+
+                    deferred.resolve();
+
+                    return deferred.promise;
+                }
+
+                function updateFiscal(enterpriseId) {
+                    //console.log("[index.html] Select fiscal years for " + enterpriseId);
+
+                    fiscalYearSelect.query = '?q={"EnterpriseId":"' + enterpriseId + '"}';
+                    //remove currently available options
+                    fiscalYearSelect.removeOption(fiscalYearSelect.getOptions());
+                    //forces refresh of the Select; hacky ? --feeling meh
+                    fiscalYearSelect.setStore(fiscalYearSelect.store);
+                }
+
+                //Lists all accounts given enterpriseId
+
+                function updateAccount(enterpriseId) {
+                    
+                    // console.log("[index.html] Select accounts for " + enterpriseId);
+                    accountSelect.query = '?q={"EnterpriseId":"' + enterpriseId + '"}';
+                    accountSelect.removeOption(accountSelect.getOptions());
+                    accountSelect.setStore(accountSelect.store);
+                }
+
+                function updateDate(fiscalYearId) {
+
+                    //console.log("[index.html] Select dates for " + fiscalYearId);
+
+                    //messy as fuuuuu
+                    dateSelectFrom.query = '?q={"FiscalYearId":"' + fiscalYearId + '"}';
+                    dateSelectFrom.removeOption(dateSelectFrom.getOptions());
+                    dateSelectFrom.setStore(dateSelectFrom.store);
+
+                    dateSelectTo.query = '?q={"FiscalYearId":"' + fiscalYearId + '"}';
+                    dateSelectTo.removeOption(dateSelectTo.getOptions());
+                    dateSelectTo.setStore(dateSelectTo.store);
+
+                }
+
+                function updateGrid(account, dateFrom, dateTo) {
+
+                    //TODO 
+                    //-Include dateFrom and dateTo in request from server
+                    
+                    console.log("Grid is being updated with ", account, dateFrom, dateTo);
+                    masterGrid.model.clearCache();
+                    //If selected 'all accounts'c
+                    if (account == "*") {
+                        masterGrid.model.query();
+                    } else {
+                        masterGrid.model.query('?q={"AccountId":"' + account + '"}');
+                    }
+                    masterGrid.body.refresh();
+                }
+
+                function initSlaveGrid(defaultLineGrid) {
+
+                    //skeleton for initialising slave grid
+
+                    //final dependancy - everything else is set up 
+                    pageInitialised = true;
+
+                    //Slave grid is a join between transacations and accounts and updates based on LineId
+
+                    /*
+                    SELECT Transactions.CompanyID, Transactions.JournalID, Transactions.TransactionID, Transactions.AccountYearID, Transactions.VoucherNumber, Transactions.Text, Transactions.Debet, Transactions.DDFNum, Transactions.Credit, [accounts].[accountid] & "-" & [AccountText] AS x, *
+                    FROM Transactions INNER JOIN Accounts ON (Transactions.CompanyID = Accounts.CompanyID) AND (Transactions.AccountID = Accounts.AccountID);
+                    */
+
+                    //Slave grid depends on masterGrid, and is updated on row selection 
+                    //use bika/Grid/
+                }
+
+                function validateGridReady() {
+
+                    //check all dependancies have registered (been created)
+                    if (!(arrSize(gridPaintDependancies) < gridDependancies)) {
+
+                        var validate = true;
+                        //console.log("Dependancies loaded: [status]");
+                        for (dependancy in gridPaintDependancies) {
+                            //console.log(dependancy + " : " + gridPaintDependancies[dependancy]);
+                            if (gridPaintDependancies[dependancy] == null) {
+                                validate = false;
+                            }
+                        }
+
+                        if (validate) {
+                            if (pageInitialised) {
+                                updateGrid(gridPaintDependancies[accountSelect], gridPaintDependancies[dateSelectFrom], gridPaintDependancies[dateSelectTo]);
+                            } else {
+                                initGrid(gridPaintDependancies[accountSelect], gridPaintDependancies[dateSelectFrom], gridPaintDependancies[dateSelectTo]);
+                            }
+                        }
+                    }
+                }
+
+                //returns formated date string given date from database
+                function formatDate(dateString) {
+                    var obj = new Date(dateString);
+                    return obj.toDateString();
+                }
+
+                //get the size of an associative array - feel free to improve 
+                function arrSize(obj) {
+                    var size = 0,
+                        key;
+                    for (key in obj) {
+                        if (obj.hasOwnProperty(key)) size++;
+                    }
+                    return size;
+                };
+
+                parser.parse();
+            });
+        </script>
+        
+        <div>
+
+            <!--container div - ContentPane, BorderContainer etc.-->
+                <div id="headerSelection">
+                    <div id="bika.unit.AccountStatement.accountSelect"></div>
+                    <span>From:</span>
+                    <div id="bika.unit.AccountStatement.dateSelectFrom"></div>
+                    <span>To:</span>
+                    <div id="bika.unit.AccountStatement.dateSelectTo"></div>
+                </div>
+
+                <div id="bika.unit.AccountStatement.masterGrid"></div>
+
+                <div id="bika.unit.AccountStatement.slaveContent">  
+                    <div id="bika.unit.AccountStatement.slaveGrid"></div>
+                </div>
+
+                <div id="footerSelection" style="position: fixed; left: 0px; bottom: 0px;">
+                    <span>Enterprise</span>
+                    <div id="bika.unit.AccountStatement.enterpriseSelect"></div>
+                    <span>Fiscal Year</span>
+                    <div id="bika.unit.AccountStatement.fiscalYearSelect"></div>
+                </div>
+            <!--/container div-->
+        </div>
+    </body>
+</html>
