@@ -13,6 +13,7 @@
               };
         </script>
          <script>
+         var enterpriseSelect;
          require(["customizedModule/SelectX",
            "dojo/store/JsonRest",
            "dojo/on",
@@ -27,14 +28,14 @@
            ], function (SelectX, JsonRest, on, Deferred, all, Cache, SingleSort, Row, CellWidget, Grid) {
             
           // les composants
-           var enterpriseSelect;
+           
            var accountSelect;
            var fiscalYearSelect;
            var dateFromSelect, dateToSelect;
            var masterGrid;
            
            //autres
-           var IDAccount, dateFrom, dateTo;
+           var IDAccount, dateFrom, dateTo, initialistion = true;
 
            //les query
            var enterpriseSelect_query = {};
@@ -57,7 +58,9 @@
            }).then(function (result) {
             if(result.IDAccount && result.dateFrom && result.dateTo) {
               initGrid(result);
-            }
+              initialistion = false;
+
+                          }
            });
 
 
@@ -79,6 +82,7 @@
              style: "width: 135px",
              query: '?' + requetteEntreprise
            }, "enterpriseSelect");
+
              var deferred = new Deferred();
                enterpriseSelect.on("setStore", function () {
                var IDEntreprise = this.get('value');
@@ -146,15 +150,12 @@
                 fiscalYearSelect.requery(query);
                 });
 
-             fiscalYearSelect.on("change", function(data){
-              console.log("hdslkglglgsd");
-
-             });
                                  var deferred = new Deferred();
              fiscalYearSelect.on("setStore", function () {
                var IDFiscalYear = this.get('value');
                deferred.resolve(IDFiscalYear);
                       });
+             
              return deferred.promise;
            }
 
@@ -187,11 +188,17 @@
               requetteDateFrom = JSON.stringify(dateFrom_query);
                 var query = '?'+requetteDateFrom;
                 dateFromSelect.requery(query);
+                
     });
             var deferred = new Deferred();
              dateFromSelect.on("setStore", function() {
                         var dateF = this.get('displayedValue');
                         deferred.resolve(dateF);
+                       if(!initialistion){
+                         console.log('account',accountSelect.getValue());
+                console.log('datefrom', dateFromSelect.get('displayedValue'));
+                console.log('dateTo', dateToSelect.get('displayedValue'));
+                       }
                     });
              return deferred.promise;
            }
@@ -328,6 +335,11 @@
                 function convertToMysqlDate(dateString) {
                   var mySqlDate = new Date().toMySqlDate(dateString);
                   return mySqlDate;
+
+                }
+
+                function refreshPeriod(){
+                  console.log(fiscalYearSelect.get('displayedValue'));
 
                 }
          });
