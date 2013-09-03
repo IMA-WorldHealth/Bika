@@ -1,12 +1,14 @@
 // server.js
-var dbFace = require('./lib/database/dbFace');
-var queryHandler = require('./lib/database/myQueryHandler');
-var path = require('path');
-var url = require('url');
+
 var express = require('express')
+  , dbFace = require('./lib/database/dbFace')
+  , queryHandler = require('./lib/database/myQueryHandler')
+  , path = require('path')
+  , url = require('url')
+  , qs = require('querystring')
   , app = express();
 
-app.set('env', 'dbface'); // Change this to change application behavior
+app.set('env', 'jonathan'); // Change this to change application behavior
 
 app.configure('dbface', function () {
   app.use(express.bodyParser());
@@ -18,16 +20,11 @@ app.configure('jonathan', function () {
   app.use(express.bodyParser());
   var auth = require('./lib/auth');
   app.use(auth);
-});
-
-app.post('/login', function (req, res) {
-	buidJSON(req.body);
-	console.log(req.body);
-  app.use(express.static(path.join(__dirname, 'public')));
+  app.use(express.static('public'));
 });
 
 app.get('/data', function (req, res) {
-	 var cb = function (err, ans) {
+   var cb = function (err, ans) {
       if (err) {
         throw err;
       } else {
@@ -39,33 +36,67 @@ app.get('/data', function (req, res) {
  var jsRequest = JSON.parse(myRequest);
  var Qo = queryHandler.getQueryObj(jsRequest);
  console.log('la requette a executee est :', Qo);
-	//df.selectionner(Qo, cb);
-	res.send();
+  //df.selectionner(Qo, cb);
+  res.send();
+});
+
+app.get('/reflect', function (req, res) {
+  res.json(req.session);
+  console.log(req.session.user_id);
 });
 
 app.get('/tree', function(req, res) {
-  console.log(req.query);
+  var myRequest = decodeURIComponent(url.parse(req.url).query);
+  var jsRequest = JSON.parse(myRequest);
+  var Qo = queryHandler.getQueryObj(jsRequest);
   var parsed = url.parse(req.url);
   var parent = qs.parse(parsed.query).parent;
   req.session.roleid = 0;
   var tableaurole = [];
   var tableaublanche = [];
   // Voici le chemin de la base de données
-  console.log(req.session.identification);
-  var sqlrole = "SELECT user_role.id, user_role.id_role_unit, role_unit.id_role, role_unit.id_unit, unit.hasChildren, unit.parent FROM user_role JOIN role_unit ON role_unit.id = user_role.id_role_unit JOIN unit ON unit.id = role_unit.id_unit WHERE user_role.id_user = " + req.session.identification;
-
+  var jsonQuery = {
+    'entities' : [{
+      t: 'user_role',
+      c: ['id', 'id_role_unit']
+    },
+    {
+      t: 'role_unit',
+      c: ['id_role', 'id_unit']
+    },
+    {
+      t: 'unit',
+      c: ['hasChildren', 'parent']
+    }],
+    'jcond' : [{
+      ts: ['role_unit', 'user_role'],
+      c: ['id', 'id_role_unit'],
+      l: 'AND' 
+    },
+    {
+      ts: ['unit', 'role_unit'],
+      c: ['id', 'id_unit'],
+      l: 'AND'
+    }],
+    'cond' : [{
+      t: 'user_role',
+      cl: 'id_user',
+      z: '=',
+      v: req.session.user_id
+    }]
+  };
   var racineRoot = -1;
   var b = 0;
   var tables;
   var roleuser;
   var nbrerole = 0;
   var nbrebranche = 0;
-  dbModule.gridb(sqlrole, function(err, ans) {
+  dbFace.selectionner(jsonQuery, function (err, ans) {
     if (err) {
       throw err;
     }
     if (ans.length > 0) {
-      for (b = 0; b < ans.length; b++) {
+      for (b; b < ans.length; b++) {
         roleuser = ans[b];
         /******************************************************************/
         // Ici on verifier le UNIT possede des enfants et a comme parent //
@@ -86,34 +117,46 @@ app.get('/tree', function(req, res) {
           racineRoot = 0;
         }
       }
-      tableaurole = "" + tableaurole;
-      tableaublanche = "" + tableaublanche;
-      var location = req.url;
-      var location = "" + location;
-      var taille = location.length;
-      var x = req.url.indexOf("id");
-      var y = req.url.indexOf("parent");
-      var egl = req.url.indexOf("=");
-      var egl = egl + 1;
-      // La variable colonne c'est le ID de l'element que vous avez cliquer     
-      var colonne = location.substring(egl, taille);
-      if (x !== -1) {
-        tables = "id";
-      }
-      if (y !== -1) {
-        tables = "parent";
-      }
+      tableaurole = tableaurole.join(',');
+      tableaublanche = tableaublanche.join(',');
+      colonne = Qo.cond[0].v;
+      tables =  Qo.cond[0].cl;
+
       /******************************************************************/
       // Pour l'appelle de la racine ROOT pour le super user           //
       /***************************************************************/
       if ((tables == "id") && (colonne == 0) && (racineRoot == 0)) {
         var q = "SELECT * FROM unit WHERE " + tables + " = ' " + colonne + " ' ";
+        q = {
+          'entities' : [{
+            t: 'unit',
+            c: ['id', 'name', 'desc', 'parent', 'hasChildren', 'url']
+          }],
+          'cond' : [{
+            t: 'unit',
+            cl: tables,
+            z: '=',
+            v: colonne
+          }]
+        };
       }
       /******************************************************************/
       // Pour l'appelle de la racine ROOT pour les autres user        //
       /***************************************************************/
       if ((tables == "id") && (colonne == 0) && (racineRoot != 0)) {
         var q = "SELECT * FROM unit WHERE " + tables + " = ' " + colonne + " ' ";
+        q = {
+          'entities' : [{
+            t: 'unit',
+            c: ['id', 'name', 'desc', 'parent', 'hasChildren', 'url']
+          }],
+          'cond' : [{
+            t: 'unit',
+            cl: tables,
+            z: '=',
+            v: colonne
+          }]
+        };
       }
       /******************************************************************/
       //           Pour les utilisateurs qui ne sont pas super User    //
@@ -124,10 +167,47 @@ app.get('/tree', function(req, res) {
           if (colonne == 0) { // Si la colonne est egale à ZERO On Recherche les roles de l'utilisateur
             console.log("COLONNE EST EGALE A ZERO " + colonne);
             var q = "SELECT * FROM unit WHERE " + tables + " = ' " + colonne + " ' AND id IN ( " + tableaurole + " ) ";
-            console.log(q);
+            q = {
+              'entities' : [{
+                t: 'unit',
+                c: ['id', 'name', 'desc', 'parent', 'hasChildren', 'url']
+              }],
+              'cond' : [{
+                t: 'unit',
+                cl: tables,
+                z: '=',
+                v: colonne,
+                l: 'AND'
+              },
+              {
+                t: 'unit',
+                cl: 'id',
+                z: 'IN',
+                v: "(" + tableaurole + ")"
+              }]
+            };
           }
           if (colonne != 0) { // Si la colonne est different de ZERO on recherche alors le sous elements qui lui sont assignés
             var q = "SELECT * FROM unit WHERE " + tables + " = ' " + colonne + " ' AND id IN ( " + tableaublanche + " ) ";
+            q = {
+              'entities' : [{
+                t: 'unit',
+                c: ['id', 'name', 'desc', 'parent', 'hasChildren', 'url']
+              }],
+              'cond' : [{
+                t: 'unit',
+                cl: tables,
+                z: '=',
+                v: colonne,
+                l: 'AND'
+              },
+              {
+                t: 'unit',
+                cl: 'id',
+                z: 'IN',
+                l: "(" + tableaublanche + ")"
+              }]
+            };
             console.log("LA COLONNE EST DIFFERENT DE ZERO0++++++++++++++++++++++++ ");
             console.log(q);
             console.log("____________________________________________" + tableaublanche);
@@ -137,24 +217,34 @@ app.get('/tree', function(req, res) {
       if ((tables == "parent") && (racineRoot == 0)) {
         //console.log("RACINE ROOT ________________");
         var q = "SELECT * FROM unit WHERE " + tables + " = ' " + colonne + " ' ";
+        q = {
+          'entities' : [{
+            t: 'unit',
+            c: ['id', 'name', 'desc', 'parent', 'hasChildren', 'url']
+          }],
+          'cond' : [{
+            t: 'unit',
+            cl: tables,
+            z: '=',
+            v: colonne,
+          }]
+        };
       }
-
-      dbModule.gridb(q, function(err, ans) {
+      dbFace.selectionner(q, function(err, ans) {
+        console.log('SECOND REQUEST EXECUTED');
         if (err) {
           throw err;
         }
-        console.log(ans);
-        res.json(ans);
+        console.log('ANS', ans);
+        res.send(ans);
+
       });
-      console.log('Message Sent Star');
     }
   });
 });
 
-
-// using main.html until dedrick and I sync our repositories
-app.get('/public/main.html', function (req, res, next) {
-  res.sendfile('./public/main.html')
+app.get('*', function (req, res) {
+  console.log('Missed URL:', req.url);
 });
 
 app.listen(3000, console.log(app.get('env'), "Rapid Prototype listening on port 3000"));
