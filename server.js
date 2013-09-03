@@ -1,5 +1,3 @@
-// Another comment, for testing
-// A comment, added by jonathan for testing
 // server.js
 var dbFace = require('./lib/database/dbFace');
 var queryHandler = require('./lib/database/myQueryHandler');
