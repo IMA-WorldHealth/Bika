@@ -19,7 +19,10 @@ define('customizedModule/SelectX', ["dojo/_base/declare", "dojo/on", "dojo/topic
 
     _emit: function(e) {
       // API: will emit `event`, `newval`
-      topic.publish(e, this.get('value'));
+      var resultValue = {};
+      resultValue.value = this.get('value');
+      resultValue.displayedValue = this.get('displayedValue');
+      topic.publish(e,resultValue);
     },
 
     _emitChange: function() {

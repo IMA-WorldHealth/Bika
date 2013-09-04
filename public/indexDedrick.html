@@ -13,7 +13,9 @@
               };
         </script>
          <script>
-         var enterpriseSelect;
+         var masterGrid;
+         var grid_store;
+         
          require(["customizedModule/SelectX",
            "dojo/store/JsonRest",
            "dojo/on",
@@ -24,18 +26,20 @@
                 "gridx/modules/extendedSelect/Row",
                 "gridx/modules/CellWidget",
                 "gridx/Grid",
+                "dojo/topic",
            "dojo/domReady!"
-           ], function (SelectX, JsonRest, on, Deferred, all, Cache, SingleSort, Row, CellWidget, Grid) {
+           ], function (SelectX, JsonRest, on, Deferred, all, Cache, SingleSort, Row, CellWidget, Grid, topic) {
             
           // les composants
            
            var accountSelect;
            var fiscalYearSelect;
            var dateFromSelect, dateToSelect;
-           var masterGrid;
+           var enterpriseSelect;
+           
            
            //autres
-           var IDAccount, dateFrom, dateTo, initialistion = true;
+           var IDAccount, dateFrom, dateTo, dependancies = {};
 
            //les query
            var enterpriseSelect_query = {};
@@ -44,6 +48,8 @@
            var dateFrom_query = {};
            var dateTo_query = {};
            var grid_query = {}; 
+
+           //ecouteur
            
            
 
@@ -58,9 +64,7 @@
            }).then(function (result) {
             if(result.IDAccount && result.dateFrom && result.dateTo) {
               initGrid(result);
-              initialistion = false;
-
-                          }
+                        }
            });
 
 
@@ -82,6 +86,7 @@
              style: "width: 135px",
              query: '?' + requetteEntreprise
            }, "enterpriseSelect");
+
 
              var deferred = new Deferred();
                enterpriseSelect.on("setStore", function () {
@@ -109,8 +114,8 @@
                style: "width: 220px", //update this shit
                query: '?' + requetteAccount
              }, "accountSelect");
-             accountSelect.detect(enterpriseSelect, 'onChange', function(value) {
-              accountSelect_query.c[0]['v'] = value;
+             accountSelect.detect(enterpriseSelect, 'onChange', function(item) {
+              accountSelect_query.c[0]['v'] = item.value;
               requetteAccount = JSON.stringify(accountSelect_query);
                 var query = '?'+requetteAccount;
                 accountSelect.requery(query);
@@ -143,13 +148,12 @@
                query: '?' + requetteFiscalYear
              }, "fiscalYearSelect");
 
-             fiscalYearSelect.detect(enterpriseSelect, 'onChange', function(value) {              
-              fiscalYearSelect_query.c[0]['v'] = value;
+             fiscalYearSelect.detect(enterpriseSelect, 'onChange', function(item) {              
+              fiscalYearSelect_query.c[0]['v'] = item.value;
               requetteFiscalYear = JSON.stringify(fiscalYearSelect_query);
                 var query = '?'+requetteFiscalYear;
                 fiscalYearSelect.requery(query);
                 });
-
                                  var deferred = new Deferred();
              fiscalYearSelect.on("setStore", function () {
                var IDFiscalYear = this.get('value');
@@ -161,8 +165,8 @@
 
            function getDateFrom(IDFY) {
             //preparation requette
-            e = [{t : 'period', c: ['fiscalYearId', 'id', 'periodStart', 'periodStop', 'order']}];
-            c = [{t : 'period', cl : 'fiscalYearId', v : IDFY, z : '='}];
+            var e = [{t : 'period', c: ['fiscalYearId', 'id', 'periodStart', 'periodStop', 'order']}];
+            var c = [{t : 'period', cl : 'fiscalYearId', v : IDFY, z : '='}];
 
             dateFrom_query.e = e;
             dateFrom_query.c = c;
@@ -183,8 +187,8 @@
                query: '?' + requetteDateFrom
             },"dateSelectFrom");
 
-             dateFromSelect.detect(fiscalYearSelect, 'onChange', function(value) {
-      dateFrom_query.c[0]['v'] = value;
+             dateFromSelect.detect(fiscalYearSelect, 'onChange', function(item) {
+      dateFrom_query.c[0]['v'] = item.value;
               requetteDateFrom = JSON.stringify(dateFrom_query);
                 var query = '?'+requetteDateFrom;
                 dateFromSelect.requery(query);
@@ -194,18 +198,14 @@
              dateFromSelect.on("setStore", function() {
                         var dateF = this.get('displayedValue');
                         deferred.resolve(dateF);
-                       if(!initialistion){
-                         console.log('account',accountSelect.getValue());
-                console.log('datefrom', dateFromSelect.get('displayedValue'));
-                console.log('dateTo', dateToSelect.get('displayedValue'));
-                       }
+                       
                     });
              return deferred.promise;
            }
 
            function getDateTo(IDFY) {
             //preparation requette
-            e = [{t : 'period', c: ['fiscalYearId', 'id', 'periodStart', 'periodStop', 'order']}];
+            var e = [{t : 'period', c: ['fiscalYearId', 'id', 'periodStart', 'periodStop', 'order']}];
 
             var c = [{t : 'period', cl : 'fiscalYearId', v : IDFY, z : '='}];
             dateTo_query.e = e;
@@ -227,8 +227,8 @@
                query: '?' + requetteDateTo
             },"dateSelectTo");
 
-                dateToSelect.detect(fiscalYearSelect, 'onChange', function(value) {
-      dateTo_query.c[0]['v'] = value;
+                dateToSelect.detect(fiscalYearSelect, 'onChange', function(item) {
+      dateTo_query.c[0]['v'] = item.value;
               requetteDateTo = JSON.stringify(dateTo_query);
                 var query = '?'+requetteDateTo;
                 dateToSelect.requery(query);
@@ -242,7 +242,7 @@
            }
 
            function initGrid(param) {
-            var grid_store = new JsonRest({
+             grid_store = new JsonRest({
                         target: 'data/transaction/',
                         idProperty: "lineId"
                     });
@@ -283,8 +283,8 @@
                         }
                     }];
 
-                    e = [{t : 'transaction', c : ['lineId', 'accountId', 'credit', 'debit', 'docId', 'description', 'transNumber', 'transDate', 'sysCurrency', 'transCurrency', 'exchangeRate']}];
-                    c = [{t : 'transaction', cl: 'accountId', v : param.IDAccount, z : '=', l : 'AND'}, 
+                    var e = [{t : 'transaction', c : ['lineId', 'accountId', 'credit', 'debit', 'docId', 'description', 'transNumber', 'transDate', 'sysCurrency', 'transCurrency', 'exchangeRate']}];
+                    var c = [{t : 'transaction', cl: 'accountId', v : param.IDAccount, z : '=', l : 'AND'}, 
                     {t : 'transaction', cl : 'transDate', v : convertToMysqlDate(param.dateFrom), z : '>=', l : 'AND'}, 
                     {t : 'transaction', cl : 'transDate', v : convertToMysqlDate(param.dateTo), z : '<='} ];
                     grid_query.e = e;
@@ -309,6 +309,9 @@
                         autoHeight: true
                     }, "masterGrid");
                     masterGrid.startup();
+                   registerAccount(grid_query);
+                   registerDateFrom(grid_query);
+                   registerDateTo(grid_query);
 
 
            }
@@ -337,11 +340,51 @@
                   return mySqlDate;
 
                 }
+                function registerAccount(gridRequette) {
+                  topic.subscribe(accountSelect.id+"onChange", function(item) {
+                    dependancies.IDAccount = item.value;
+                    if(dependancies.IDAccount && dependancies.dateFrom && dependancies.dateTo) {
+                      refreshGrid(gridRequette);
 
-                function refreshPeriod(){
-                  console.log(fiscalYearSelect.get('displayedValue'));
+                    }
+                  });
+                              }
 
-                }
+                               function registerDateFrom(gridRequette) {
+                  topic.subscribe(dateFromSelect.id+"onChange", function(item) {
+                    dependancies.dateFrom = item.displayedValue;
+                    if(dependancies.IDAccount && dependancies.dateFrom && dependancies.dateTo) {
+                      refreshGrid(gridRequette);
+
+                    }
+                  });
+                              }
+
+                              function registerDateTo(gridRequette) {
+                  topic.subscribe(dateToSelect.id+"onChange", function(item) {
+                    dependancies.dateTo = item.displayedValue;
+                    if(dependancies.IDAccount && dependancies.dateFrom && dependancies.dateTo) {
+                      refreshGrid(gridRequette);
+
+                    }
+                  });
+                              }
+
+                              function refreshGrid (requette) {
+                                requette.c[0]['v'] = dependancies.IDAccount;
+                                requette.c[1]['v'] = convertToMysqlDate(dependancies.dateFrom);
+                                requette.c[2]['v'] = convertToMysqlDate(dependancies.dateTo);
+                                
+                                masterGrid.model.clearCache();
+                                masterGrid.model.setStore(grid_store);
+                                //masterGrid['query'] = '?'+JSON.stringify(requette);
+                                masterGrid.model.query('?'+JSON.stringify(requette));
+                                masterGrid.body.refresh();
+                              }
+
+                
+
+                
          });
   </script>
 
