@@ -3,7 +3,6 @@
 var express = require('express')
   , dbFace = require('./lib/database/dbFace')
   , queryHandler = require('./lib/database/myQueryHandler')
-  , path = require('path')
   , url = require('url')
   , qs = require('querystring')
   , app = express();
@@ -37,8 +36,6 @@ app.get('/data', function (req, res) {
  var myRequest = decodeURIComponent(url.parse(req.url).query); 
  var jsRequest = JSON.parse(myRequest);
  var Qo = queryHandler.getQueryObj(jsRequest);
- console.log('la requette a executee est :', Qo);
-  //df.selectionner(Qo, cb);
   res.send();
 });
 
@@ -167,7 +164,6 @@ app.get('/tree', function(req, res) {
 
         if (colonne != racineRoot) { // Si la valeur cliquer est different racineRoot soit (-1) 
           if (colonne == 0) { // Si la colonne est egale à ZERO On Recherche les roles de l'utilisateur
-            console.log("COLONNE EST EGALE A ZERO " + colonne);
             var q = "SELECT * FROM unit WHERE " + tables + " = ' " + colonne + " ' AND id IN ( " + tableaurole + " ) ";
             q = {
               'entities' : [{
@@ -210,14 +206,10 @@ app.get('/tree', function(req, res) {
                 v: "(" + tableaublanche + ")"
               }]
             };
-            console.log("LA COLONNE EST DIFFERENT DE ZERO0++++++++++++++++++++++++ ");
-            console.log(q);
-            console.log("____________________________________________" + tableaublanche);
           }
         }
       } // Accès à tous les elements de l'Arbre
       if ((tables == "parent") && (racineRoot == 0)) {
-        //console.log("RACINE ROOT ________________");
         var q = "SELECT * FROM unit WHERE " + tables + " = ' " + colonne + " ' ";
         q = {
           'entities' : [{
@@ -233,11 +225,9 @@ app.get('/tree', function(req, res) {
         };
       }
       dbFace.selectionner(q, function(err, ans) {
-        console.log('SECOND REQUEST EXECUTED');
         if (err) {
           throw err;
         }
-        console.log('ANS', ans);
         res.send(ans);
 
       });

@@ -1,137 +1,137 @@
 <!DOCTYPE html>
 <html >
 <head>
-    <title>View all</title>
-    <style>
+  <title>Main Page</title>
+  <style>
 
-html, body {
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    background:#f3f7fc;
-}
-body > div{
-    width: 100%; 
-    height: 100%
-}
-#divLeading{
-    width: 200px;
-}
+    html, body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        background:#f3f7fc;
+    }
+    body > div{
+        width: 100%; 
+        height: 100%
+    }
+    #divLeading{
+        width: 200px;
+    }
 
-    </style>
-	<link rel="stylesheet" href="js/dojoos/dijit/themes/claro/claro.css"/>
-	<script>dojoConfig = {parseOnLoad: true}</script>
-	<script type="text/javascript" src="js/dojoos/dojo/dojo.js"></script>
-	<script>
-        var treeStore, divAll, tabManager, divTop, divLeading, divCenter, treeModel, unitsTree, menuContext, open, close;
-        require(["dijit/layout/BorderContainer", "dijit/Menu", "dijit/MenuItem", "dijit/MenuSeparator", "bika/TabManager/AddTabManager", "dijit/tree/ObjectStoreModel", "dijit/Tree", "dojo/store/JsonRest", "dojo/parser", "dijit/layout/ContentPane", "dojo/domReady!"],
-            function(BorderContainer, Menu, MenuItem, MenuSeparator, AddTabManager, ObjectStoreModel, Tree, JsonRest, parser, ContentPane, ready) {
-                //----------------------------------------------------------------------------------------------------------------------------------- 
-                treeStore = new JsonRest({
-                    target: '/tree',
-                    getChildren: function(object) {
-                        return this.query("?" + JSON.stringify({
-                            'entities': [{
-                                t: 'unit',
-                                c: ['id', 'name', 'desc', 'parent', 'hasChildren', 'url']
-                            }],
-                            'cond': [{
-                                t: 'unit',
-                                cl: 'parent',
-                                z: '=',
-                                v: object.id
-                            }]
-                        }));
-                    }
-                });
-                //-----------------------------------------------------------------------------------------------------------------------------------
-                divAll = new BorderContainer({
-                    type: "headline"
-                }, "divAll");
-                //-----------------------------------------------------------------------------------------------------------------------------------
-                tabManager = new AddTabManager({}, "divTab");
-                divTop = new ContentPane({
-                    region: 'top'
-                }, "divTop");
-                divLeading = new ContentPane({
-                    region: 'leading'
-                }, "divLeading");
-                divCenter = new ContentPane({
-                    region: 'center'
-                }, "divCenter");
-                divAll.addChild(divTop);
-                divAll.addChild(divCenter);
-                divAll.addChild(divLeading);
-                //----------------------------------------------------------------------------------------           
-                treeModel = new ObjectStoreModel({
-                    store: treeStore,
-                    query: "?" + JSON.stringify({
-                        'entities': [{
-                            t: 'unit',
-                            c: ['id', 'name', 'desc', 'parent', 'hasChildren', 'url']
-                        }],
-                        'cond': [{
-                            t: 'unit',
-                            cl: 'id',
-                            z: '=',
-                            v: 0
-                        }]
-                    }),
-                    mayHaveChildren: function(obj) {
-                        return obj.hasChildren;
-                    }
-                });
-                unitsTree = new Tree({
-                    model: treeModel,
-                    showRoot: false,
-                    onOpenClick: true,
-                    style: "cursor:pointer;",
-                    onClick: function(item) {
-                        if (item.hasChildren === 0) {
-                            tabManager.openTab(item.name, item.url, true);
-                        }
-                    }
-                }, "divTree");
-                menuContext = new Menu({
-                    targetNodeIds: ["divTree"],
-                    //selector: ".dijitTreeNode",
-                    selector: ".dijitTreeNodeContainer > .dijitTreeNode > .dijitTreeNodeContainer > .dijitTreeNode", // FIXME
-                    id: "menuContext",
-                    style: "display: none; cursor:pointer;",
-                });
-                open = new MenuItem({
-                    label: "Open in new tab",
-                    onClick: function(item) {
-                        var itemTree = dijit.byNode(this.getParent().currentTarget);
-                        if (itemTree.item.hasChildren === 0) {
-                            tabManager.newTab(itemTree.item.name, itemTree.item.url, true);
-                        }
-                    }
-                });
-                close = new MenuItem({
-                    label: "Close",
-                    disabled: true
-                });
-                menuContext.addChild(open);
-                menuContext.addChild(new MenuSeparator());
-                menuContext.addChild(close);
-                dojo.body().appendChild(divAll.domNode);
-                divAll.startup();
-                menuContext.startup();
-                unitsTree.startup();
+  </style>
+  <link rel="stylesheet" href="js/dojoos/dijit/themes/claro/claro.css"/>
+  <script>dojoConfig = {parseOnLoad: true}</script>
+  <script type="text/javascript" src="js/dojoos/dojo/dojo.js"></script>
+  <script>
+    require(["dijit/layout/BorderContainer", "dijit/Menu", "dijit/MenuItem", "dijit/MenuSeparator", "bika/TabManager/AddTabManager", "dijit/tree/ObjectStoreModel", "dijit/Tree", "dojo/store/JsonRest", "dojo/parser", "dijit/layout/ContentPane", "dojo/domReady!"],
+      function(BorderContainer, Menu, MenuItem, MenuSeparator, AddTabManager, ObjectStoreModel, Tree, JsonRest, parser, ContentPane, ready) {
+        var treeStore = new JsonRest({
+          target: '/tree',
+          getChildren: function(object) {
+            return this.query("?" + JSON.stringify({
+              'entities': [{
+                t: 'unit',
+                c: ['id', 'name', 'desc', 'parent', 'hasChildren', 'url']
+              }],
+              'cond': [{
+                t: 'unit',
+                cl: 'parent',
+                z: '=',
+                v: object.id
+              }]
+            }));
+          }
+        });
+        //-----------------------------------------------------------------------------------------------------------------------------------
+        divAll = new BorderContainer({
+          type: "headline"
+        }, "divAll");
+        //-----------------------------------------------------------------------------------------------------------------------------------
+        tabManager = new AddTabManager({}, "divTab");
+        divTop = new ContentPane({
+          region: 'top'
+        }, "divTop");
+        divLeading = new ContentPane({
+          region: 'leading'
+        }, "divLeading");
+        divCenter = new ContentPane({
+          region: 'center'
+        }, "divCenter");
+        divAll.addChild(divTop);
+        divAll.addChild(divCenter);
+        divAll.addChild(divLeading);
+        //----------------------------------------------------------------------------------------           
+        treeModel = new ObjectStoreModel({
+          store: treeStore,
+          query: "?" + JSON.stringify({
+            'entities': [{
+              t: 'unit',
+              c: ['id', 'name', 'desc', 'parent', 'hasChildren', 'url']
+            }],
+            'cond': [{
+              t: 'unit',
+              cl: 'id',
+              z: '=',
+              v: 0
+            }]
+          }),
+          mayHaveChildren: function(obj) {
+            return obj.hasChildren;
+          }
+        });
 
-            });
-	</script>
+        unitsTree = new Tree({
+          model: treeModel,
+          showRoot: false,
+          onOpenClick: true,
+          onClick: function(item) {
+            if (item.hasChildren === 0) {
+              tabManager.openTab(item.name, item.url, true);
+            }
+          }
+        }, "divTree");
+
+        menuContext = new Menu({
+          targetNodeIds: ["divTree"],
+          //selector: ".dijitTreeNode",
+          selector: ".dijitTreeNodeContainer > .dijitTreeNode > .dijitTreeNodeContainer > .dijitTreeNode", // FIXME
+          id: "menuContext",
+          style: "display: none;",
+        });
+        open = new MenuItem({
+          label: "Open in new tab",
+          onClick: function(item) {
+            var itemTree = dijit.byNode(this.getParent().currentTarget);
+            if (itemTree.item.hasChildren === 0) {
+              tabManager.newTab(itemTree.item.name, itemTree.item.url, true);
+            }
+          }
+        });
+
+        close = new MenuItem({
+          label: "Close",
+          disabled: true
+        });
+        menuContext.addChild(open);
+        menuContext.addChild(new MenuSeparator());
+        menuContext.addChild(close);
+        dojo.body().appendChild(divAll.domNode);
+        divAll.startup();
+        menuContext.startup();
+        unitsTree.startup();
+
+      });
+  </script>
 </head>
 <body class="claro">
-	<div id="divAll">	 
-		<div id="divTop"></div>
-		<div id="divLeading">
-		<div id="divTree"></div>
-		</div>
-		<div id="divCenter">
-		<div id="divTab"></div>
-		</div>
-	</div>
+  <div id="divAll">  
+    <div id="divTop"></div>
+    <div id="divLeading">
+    <div id="divTree"></div>
+    </div>
+    <div id="divCenter">
+    <div id="divTab"></div>
+    </div>
+  </div>
 </body>
 </html>
