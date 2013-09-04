@@ -136,5 +136,4 @@ define("bika/TabManager/AddTabManager",
                 dojo.safeMixin(this.args);
       }
     });
-  }
-  );
+  });

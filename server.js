@@ -8,16 +8,18 @@ var express = require('express')
   , qs = require('querystring')
   , app = express();
 
-app.set('env', 'jonathan'); // Change this to change application behavior
+app.set('env', 'production'); // Change this to change application behavior
 
+// To speed up development, I am moving auth to "production environment"
 app.configure('dbface', function () {
   app.use(express.bodyParser());
+  app.use(express.static('public')); // Change this when employing authentification
 });
 
-app.configure('jonathan', function () {
+app.configure('production', function () {
+  app.use(express.bodyParser());
   app.use(express.cookieParser());
   app.use(express.session({secret: 'open blowfish'}));
-  app.use(express.bodyParser());
   var auth = require('./lib/auth');
   app.use(auth);
   app.use(express.static('public'));
@@ -243,8 +245,4 @@ app.get('/tree', function(req, res) {
   });
 });
 
-app.get('*', function (req, res) {
-  console.log('Missed URL:', req.url);
-});
-
-app.listen(3000, console.log(app.get('env'), "Rapid Prototype listening on port 3000"));
+app.listen(3000, console.log('Environment:', app.get('env'), "Rapid Prototype listening on port 3000"));
