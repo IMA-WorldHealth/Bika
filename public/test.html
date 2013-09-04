@@ -4,7 +4,7 @@
   <title>Testing onChange Methods with dropdowns</title>
   <link rel="stylesheet" href="./js/dojoos/dijit/themes/claro/claro.css" media="screen"/>
   <link rel="stylesheet" href="./js/dojoos/gridx/resources/claro/Gridx.css"/>
-  <script src="js/dojo/dojoos/dojo.js"></script>
+  <script src="./js/dojoos/dojo/dojo.js"></script>
   <script>
   var first;
   var next;
@@ -13,49 +13,96 @@
     "dojo/store/JsonRest",
     "dojo/topic",
     "dojo/domReady!"
-    ], function (SelectX, JsonRest,topic) {
+  ], function(SelectX, JsonRest, topic) {
 
+    function formatDate(dateString) {
+      var obj = new Date(dateString);
+      return obj.toDateString();
+    }
+
+
+    function createFirst() {
+
+      var e = [{
+        t: 'enterprise',
+        c: ['id', 'region', 'country', 'city', 'name', 'phone', 'email', 'type', 'cashAccount']
+      }]; //e pour entities
       var first_store = new JsonRest({
-        target : '/data/period',
-        getLabel : function (data) {
-          return formatDate(data.periodStart);
+        target: '/data/Enterprise',
+        getLabel: function(data) {
+          return data.name + "-" + data.region;
         }
       });
 
       first = new SelectX({
-        store : first_store,
+        store: first_store,
         style: "width: 220px", //update this shit
-        query: '?' + requetteDateFrom
-      },"first");
+        query: '?' + JSON.stringify({
+          e: e
+        })
+      }, "init");
 
+    }
+
+    function createNext() {
+      var e = [{t : 'account', c : ['id', 'accountLocked', 'accountTxt', 'accountTypeId', 'accountCategory']}];
+      var c = [{t : 'account', cl : 'enterpriseId', v : 101, z : '='}];
+      var q = {e: e,c: c};
       var next_store = new JsonRest({
-        target : '/data/period',
-        getLabel : function (data) {
-          return formatDate(data.periodStop);
+        target: '/data/Account',
+        getLabel: function(data) {
+          return (data.id + "-" + data.accountTxt);
         }
       });
 
       next = new SelectX({
-        store : next_store,
+        store: next_store,
         style: "width: 220px", //update this shit
-        query: '?' + requetteDateTo
-      },"next");
+        query: '?' + JSON.stringify(q)
+      }, "next");
+
+      next.detect(first, 'onChange', function (i) {
+        c.v = i.value;
+        q = {e: e, c: c};
+        console.log(q.c.v);
+        console.log(JSON.stringify(q));
+        next.requery("?" + JSON.stringify(q));
+      });
+
+    }
+
+    function createFinal() {
+      var e = [{
+        t: 'period',
+        c: ['fiscalYearId', 'id', 'periodStart', 'periodStop', 'order']
+      }];
+      var c = [{t: 'period', cl: 'fiscalYearId', v: "*", z: '='}];
+      var q = {e: e, c: c};
 
       var final_store = new JsonRest({
-        target : '/data/period',
-        getLabel : function (data) {
+        target: '/data/period',
+        getLabel: function(data) {
           return formatDate(data.periodStop);
         }
       });
 
       final = new SelectX({
-        store : final_store,
+        store: final_store,
         style: "width: 220px", //update this shit
-        query: '?' + requetteDateTo
-      },"final");
+        query: '?' + JSON.stringify(q)
+      }, "final");
 
+      final.detect(next, 'onChange', function (i) {
+        c.v = i.value;
+        q = {e: e, c: c};
+        final.requery("?" + JSON.stringify(q));
+      });
 
+    }
 
+    createFirst();
+    createNext();
+    createFinal();
   });
   </script>
 </head>
