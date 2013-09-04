@@ -45,6 +45,7 @@ define('customizedModule/SelectX', ["dojo/_base/declare", "dojo/on", "dojo/topic
       this.query = query;
       this.removeOption(this.getOptions());
       this.setStore(this.store);
+      this.set('value', this.get('value')); // work-around to allow select chaining
     },
 
     startup: function() {
