@@ -1,57 +1,5 @@
-// server.js
 
-var express = require('express')
-  , dbFace = require('./lib/database/dbFace')
-  , queryHandler = require('./lib/database/myQueryHandler')
-  , url = require('url')
-  , qs = require('querystring')
-  , path = require('path')
-  , app = express();
-
-app.set('env', 'integration'); // Change this to change application behavior
-
-// To speed up development, I am moving auth to "production environment"
-app.configure('integration', function () {
-  app.use(express.bodyParser());
- app.use(express.static(path.join(__dirname, 'public'))); // Change this when employing authentification
-});
-
-app.configure('production', function () {
-  app.use(express.bodyParser());
-  app.use(express.cookieParser());
-  app.use(express.session({secret: 'open blowfish'}));
-  var auth = require('./lib/auth');
-  app.use(auth);
-  app.use(express.static('public'));
-});
-
-app.get('/data/:table', function (req, res) {
-	 var cb = function (err, ans) {
-      if (err) {
-        throw err;
-      } else {
-
-      if ('transaction' == req.params.table) res.setHeader('Content-Range', '0-0/' + ans.length);
-        res.json(ans);
-      }
-    };
-  var myRequest = decodeURIComponent(url.parse(req.url).query);
-  var jsRequest;  
-  try{
-    jsRequest = JSON.parse(myRequest);
-  }catch(e){
-    jsRequest = JSON.parse(JSON.stringify(myRequest));
-  }
-  var Qo = queryHandler.getQueryObj(jsRequest);
-  dbFace.selectionner(Qo, cb);
-});
-
-app.get('/reflect', function (req, res) {
-  res.json(req.session);
-  console.log(req.session.user_id);
-});
-
-app.get('/tree', function(req, res) {
+var getTree = function() {
   var myRequest = decodeURIComponent(url.parse(req.url).query);
   var jsRequest = JSON.parse(myRequest);
   var Qo = queryHandler.getQueryObj(jsRequest);
@@ -60,7 +8,6 @@ app.get('/tree', function(req, res) {
   req.session.roleid = 0;
   var tableaurole = [];
   var tableaublanche = [];
-  // Voici le chemin de la base de données
   var jsonQuery = {
     'entities' : [{
       t: 'user_role',
@@ -132,8 +79,7 @@ app.get('/tree', function(req, res) {
       // Pour l'appelle de la racine ROOT pour le super user           //
       /***************************************************************/
       if ((tables == "id") && (colonne == 0) && (racineRoot == 0)) {
-        var q = "SELECT * FROM unit WHERE " + tables + " = ' " + colonne + " ' ";
-        q = {
+        var q = {
           'entities' : [{
             t: 'unit',
             c: ['id', 'name', 'desc', 'parent', 'hasChildren', 'url']
@@ -149,9 +95,8 @@ app.get('/tree', function(req, res) {
       /******************************************************************/
       // Pour l'appelle de la racine ROOT pour les autres user        //
       /***************************************************************/
-      if ((tables == "id") && (colonne == 0) && (racineRoot != 0)) {
-        var q = "SELECT * FROM unit WHERE " + tables + " = ' " + colonne + " ' ";
-        q = {
+      if ((tables === "id") && (colonne === 0) && (racineRoot !== 0)) {
+        var q = {
           'entities' : [{
             t: 'unit',
             c: ['id', 'name', 'desc', 'parent', 'hasChildren', 'url']
@@ -240,6 +185,6 @@ app.get('/tree', function(req, res) {
       });
     }
   });
-});
+};
 
-app.listen(3000, console.log('Environment:', app.get('env'), "Rapid Prototype listening on port 3000"));
+exports.getTree = getTree;
