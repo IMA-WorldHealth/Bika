@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Testing onChange Methods with dropdowns</title>
+  <link rel="stylesheet" href="./js/dojoos/dijit/themes/claro/claro.css" media="screen"/>
+  <link rel="stylesheet" href="./js/dojoos/gridx/resources/claro/Gridx.css"/>
+  <script src="./js/dojoos/dojo/dojo.js"></script>
+  <script>
+  var first;
+  var next;
+  var final;
+  require(["customizedModule/SelectX",
+    "dojo/store/JsonRest",
+    "dojo/topic",
+    "dojo/domReady!"
+  ], function(SelectX, JsonRest, topic) {
+
+    function formatDate(dateString) {
+      var obj = new Date(dateString);
+      return obj.toDateString();
+    }
+
+
+    function createFirst() {
+
+      var e = [{
+        t: 'enterprise',
+        c: ['id', 'region', 'country', 'city', 'name', 'phone', 'email', 'type', 'cashAccount']
+      }]; //e pour entities
+      var first_store = new JsonRest({
+        target: '/data/Enterprise',
+        getLabel: function(data) {
+          return data.name + "-" + data.region;
+        }
+      });
+
+      first = new SelectX({
+        store: first_store,
+        style: "width: 220px", //update this shit
+        query: '?' + JSON.stringify({
+          e: e
+        })
+      }, "init");
+
+    }
+
+    function createNext() {
+      var e = [{t : 'fiscalyear', c : ['id', 'numberOfMonths', 'fiscalYearTxt', 'transactionStartNumber', 'transactionStopNumber', 'fiscalYearNumber']}];
+      var c = [{t : 'fiscalyear', cl : 'enterpriseId', v : 101, z : '='}];
+      var q = {e: e,c: c};
+      var next_store = new JsonRest({
+        target: '/data/fiscalYear',
+        getLabel: function(data) {
+          return (data.fiscalYearTxt);
+        }
+      });
+
+      next = new SelectX({
+        store: next_store,
+        style: "width: 220px", //update this shit
+        query: '?' + JSON.stringify(q)
+      }, "next");
+
+      next.detect(first, 'onChange', function (i) {
+        c[0].v = i.value;
+        q = {e: e, c: c};
+        var x = {e: e, c: c};
+        next.requery("?" + JSON.stringify(q));
+      });
+
+    }
+
+    function createFinal() {
+      var e = [{
+        t: 'period',
+        c: ['fiscalYearId', 'id', 'periodStart', 'periodStop', 'order']
+      }];
+      var c = [{t: 'period', cl: 'fiscalYearId', v: "2013001", z: '='}];
+      var q = {e: e, c: c};
+
+      var final_store = new JsonRest({
+        target: '/data/period',
+        getLabel: function(data) {
+          return formatDate(data.periodStop);
+        }
+      });
+
+      final = new SelectX({
+        store: final_store,
+        style: "width: 220px", //update this shit
+        onChange: function() {
+          console.log("[final] Internal onChange fired.");
+        },
+        query: '?' + JSON.stringify(q)
+      }, "final");
+
+      final.detect(next, 'onChange', function (i) {
+        console.log("i", i);
+        c[0].v = i.value;
+        q = {e: e, c: c};
+        console.log(JSON.stringify(q));
+        final.requery("?" + JSON.stringify(q));
+      });
+
+    }
+
+    createFirst();
+    createNext();
+    createFinal();
+  });
+  </script>
+</head>
+<body class="claro">
+  <div id="init"></div>
+  <div id="next"></div>
+  <div id="final"></div>
+</body>
+</html>
