@@ -8,7 +8,7 @@ var express = require('express')
   , path = require('path')
   , app = express();
 
-app.set('env', 'integration'); // Change this to change application behavior
+app.set('env', 'production'); // Change this to change application behavior
 
 // To speed up development, I am moving auth to "production environment"
 app.configure('integration', function () {
@@ -46,10 +46,7 @@ app.get('/data/:table', function (req, res) {
   dbFace.selectionner(Qo, cb);
 });
 
-app.get('/reflect', function (req, res) {
-  res.json(req.session);
-  console.log(req.session.user_id);
-});
+
 
 app.get('/tree', function(req, res) {
   var myRequest = decodeURIComponent(url.parse(req.url).query);

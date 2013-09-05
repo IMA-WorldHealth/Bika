@@ -1,5 +1,5 @@
 define("bika/TabManager/AddTabManager", 
-  ["dijit/layout/TabContainer", "dijit/layout/ContentPane","dojo/_base/declare"], 
+  ["dijit/layout/TabContainer", "dojox/layout/ContentPane","dojo/_base/declare"], 
   function(TabContainer, ContentPane, declare){
     return declare("bika.TabManager.AddTabManager",TabContainer,{
 //open a new tab
