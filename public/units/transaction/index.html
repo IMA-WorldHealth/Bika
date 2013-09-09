@@ -95,7 +95,7 @@
                store: accountSelection_store,
                style: "width: 220px", //update this shit
                query: '?' + requetteAccount,
-               maxHeight:10              
+               //maxHeight:10              
              }, "accountSelect");
              accountSelect.detect(enterpriseSelect, 'onChange', function (item) {
                accountSelect_query.c[0]['v'] = item.value;
@@ -389,6 +389,7 @@
     <body class = "claro">
       <div id="principal">
        <div id="headerSelection">
+       <span>Account :</span>
           <div id="accountSelect"></div>
           <span>From:</span>
           <div id="dateSelectFrom"></div>
