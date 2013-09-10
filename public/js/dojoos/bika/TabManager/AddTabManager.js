@@ -75,7 +75,9 @@ define("bika/TabManager/AddTabManager",
 
         }       
       },
-//create a new tab      
+//create a new tab 
+
+                 
       newTab: function( title, href, closable) {
         var add = true;
         var newTab = true;

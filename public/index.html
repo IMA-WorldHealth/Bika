@@ -2,13 +2,31 @@
 <html >
 <head>
   <title>Main Page</title>
-  <link rel = "stylesheet" type = "text/css" href="./css/principal.css" media="screen" />
+  <link rel="stylesheet" href="./css/principal.css" media="screen" />
   <link rel="stylesheet" href="js/dojoos/dijit/themes/claro/claro.css"/>
   <script>dojoConfig = {parseOnLoad: true}</script>
   <script type="text/javascript" src="js/dojoos/dojo/dojo.js"></script>
   <script>
-    require(["dijit/layout/BorderContainer", "dijit/Menu", "dijit/MenuItem", "dijit/MenuSeparator", "bika/TabManager/AddTabManager", "dijit/tree/ObjectStoreModel", "dijit/Tree", "dojo/store/JsonRest", "dojo/parser", "dijit/layout/ContentPane", "dojo/domReady!"],
-      function(BorderContainer, Menu, MenuItem, MenuSeparator, AddTabManager, ObjectStoreModel, Tree, JsonRest, parser, ContentPane, ready) {
+  console.log('Here I am');
+  var bc;
+    require(["dijit/layout/BorderContainer", "dijit/Menu", "dijit/MenuItem", "dijit/MenuSeparator", "customizedModule/TabManager", "dijit/tree/ObjectStoreModel", "dijit/Tree", "dojo/store/JsonRest", "dojo/parser", "dijit/layout/ContentPane", "dojo/domReady!"],
+      function(BorderContainer, Menu, MenuItem, MenuSeparator, TabManager, ObjectStoreModel, Tree, JsonRest, parser, ContentPane) {
+
+        bc = new BorderContainer({
+        }, "bc");
+
+        var tabManager = new AddTabManager({}, "tab_container");
+        var sidebar = new ContentPane({
+          region: 'leading',
+        }, "sidebar");
+
+        var center_panel = new ContentPane({
+          region: 'center',
+        }, "center_panel");
+
+        bc.addChild(center_panel);
+        bc.addChild(sidebar);
+
         var treeStore = new JsonRest({
           target: '/tree',
           getChildren: function(object) {
@@ -27,25 +45,7 @@
           }
         });
 
-        var bc = new BorderContainer({
-          style: "height: 100%; width: 100%; margin: 0; padding: 0;"
-        }, "bc");
-
-        var tabManager = new AddTabManager({}, "tab_container");
-        var sidebar = new ContentPane({
-          region: 'leading',
-          style: 'width:15%;'
-        }, "sidebar");
-
-        var center_panel = new ContentPane({
-          region: 'center',
-          style: "margin:0; padding:0;"
-        }, "center_panel");
-
-        bc.addChild(center_panel);
-        bc.addChild(sidebar);
-
-        treeModel = new ObjectStoreModel({
+        var treeModel = new ObjectStoreModel({
           store: treeStore,
           query: "?" + JSON.stringify({
             'entities': [{
@@ -70,7 +70,7 @@
           onOpenClick: true,
           onClick: function(item) {
             if (item.hasChildren === 0) {
-              tabManager.openTab(item.name, item.url, true);
+              tabManager.addChildren(item.name, item.url, true, true);
             }
           }
         }, "tree");
@@ -87,7 +87,7 @@
           onClick: function(item) {
             var itemTree = dijit.byNode(this.getParent().currentTarget);
             if (itemTree.item.hasChildren === 0) {
-              tabManager.newTab(itemTree.item.name, itemTree.item.url, true);
+              tabManager.addChildren(itemTree.item.name, itemTree.item.url, true, false);
             }
           }
         });
