@@ -1,141 +1,114 @@
-<html>
-    <head>
-        <title>GRIDX BIKA</title>
-        <link rel="stylesheet" href="./js/dojoos/dijit/themes/claro/claro.css" media="screen"/>
-        <link rel="stylesheet" href="./js/dojoos/gridx/resources/claro/Gridx.css"/>
-        <script src="./js/dojoos/dojo/dojo.js" data-dojo-config="async:true" ></script>
-         <script>
-            var dojoConfig = {
-                //async true causes the HTML to be displayed before executing the javascript - there must be a fix for this
-                async: false,
-                isDebug: true,
-                parseOnLoad: false
-              };
-        </script>
+<!DOCTYPE html>
+<html >
+<head>
+  <title>Main Page</title>
+  <link rel = "stylesheet" type = "text/css" href="./css/principal.css" media="screen" />
+  <link rel="stylesheet" href="js/dojoos/dijit/themes/claro/claro.css"/>
+  <script>dojoConfig = {parseOnLoad: true}</script>
+  <script type="text/javascript" src="js/dojoos/dojo/dojo.js"></script>
+  <script>
+    require(["dijit/layout/BorderContainer", "dijit/Menu", "dijit/MenuItem", "dijit/MenuSeparator", "bika/TabManager/AddTabManager", "dijit/tree/ObjectStoreModel", "dijit/Tree", "dojo/store/JsonRest", "dojo/parser", "dijit/layout/ContentPane", "dojo/domReady!"],
+      function(BorderContainer, Menu, MenuItem, MenuSeparator, AddTabManager, ObjectStoreModel, Tree, JsonRest, parser, ContentPane, ready) {
+        var treeStore = new JsonRest({
+          target: '/tree',
+          getChildren: function(object) {
+            return this.query("?" + JSON.stringify({
+              'entities': [{
+                t: 'unit',
+                c: ['id', 'name', 'desc', 'parent', 'hasChildren', 'url']
+              }],
+              'cond': [{
+                t: 'unit',
+                cl: 'parent',
+                z: '=',
+                v: object.id
+              }]
+            }));
+          }
+        });
 
-         <script>
-         var enterpriseSelect;
-  require(["customizedModule/SelectX",
-    "dojo/store/JsonRest",
-    "dojo/on",
-    "dojo/Deferred",
-    "dojo/promise/all",
-    "dojo/domReady!"
-    ], function (SelectX, JsonRest, on, Deferred, all) {
-    	
+        var bc = new BorderContainer({
+          style: "height: 100%; width: 100%; margin: 0; padding: 0;"
+        }, "bc");
 
-    //construction requette pour entrepriseselect
-    var enterpriseSelect_query = {};
-    var e = [{t : 'enterprise', c : ['id', 'region', 'country', 'city', 'name', 'phone', 'email', 'type', 'cashAccount']}]; //e pour entities
-    enterpriseSelect_query.e = e;
-    var requetteEntreprise = JSON.stringify(enterpriseSelect_query);
-    //fin construction de la requette
+        var tabManager = new AddTabManager({}, "tab_container");
+        var sidebar = new ContentPane({
+          region: 'leading',
+          style: 'width:15%;'
+        }, "sidebar");
 
-    //construction store et select pour entreprise
-    var enterpriseSelect_store = new JsonRest({
-      target: "/data/Entreprise",
-      getLabel: function (data) {
-        return data.name + "-" + data.region;
-      }
-    });
+        var center_panel = new ContentPane({
+          region: 'center',
+          style: "margin:0; padding:0;"
+        }, "center_panel");
 
-    enterpriseSelect = new SelectX({
-      store: enterpriseSelect_store,
-      style: "width: 135px",
-      query: '?' + requetteEntreprise
-    }, "enterpriseSelect");
-    //fin construction store et select pour entreprise
-    //construction requette pour account_select
-    var IDEntreprise;
-    var accountSelect_query = {};
-    var process =  getIDEntreprise();
-    process.then(function (value) {
-    	return all({IDAccount : initAccountSelect(value), IDFiscalYear : initFiscalYearSelect(value)});
-    });
-   
+        bc.addChild(center_panel);
+        bc.addChild(sidebar);
 
+        treeModel = new ObjectStoreModel({
+          store: treeStore,
+          query: "?" + JSON.stringify({
+            'entities': [{
+              t: 'unit',
+              c: ['id', 'name', 'desc', 'parent', 'hasChildren', 'url']
+            }],
+            'cond': [{
+              t: 'unit',
+              cl: 'id',
+              z: '=',
+              v: 0
+            }]
+          }),
+          mayHaveChildren: function(obj) {
+            return obj.hasChildren;
+          }
+        });
 
-    e = [{t : 'account', c : ['id', 'accountLocked', 'accountTxt', 'accountTypeId', 'accountCategory']}];
-    var c = [{t : 'account', cl : 'EnterpriseId', v : IDEntreprise, z : '='}];
-    accountSelect_query.e = e;
-    accountSelect_query.c = c;
-    var requetteAccount = JSON.stringify(accountSelect_query);
+        var unitsTree = new Tree({
+          model: treeModel,
+          showRoot: false,
+          onOpenClick: true,
+          onClick: function(item) {
+            if (item.hasChildren === 0) {
+              tabManager.openTab(item.name, item.url, true);
+            }
+          }
+        }, "tree");
 
-    //construction store et select pour compte
-    var accountSelection_store = new JsonRest({
-      target: '/data/Account',
-      getLabel: function (data) {
-        return (data.id + "-" + data.accountTxt);
-      }
-    });
+        var menuContext = new Menu({
+          targetNodeIds: ["tree"],
+          selector: ".dijitTreeNodeContainer > .dijitTreeNode > .dijitTreeNodeContainer > .dijitTreeNode", // FIXME
+          id: "menuContext",
+          style: "display: none;",
+        });
+        
+        var open = new MenuItem({
+          label: "Open in new tab",
+          onClick: function(item) {
+            var itemTree = dijit.byNode(this.getParent().currentTarget);
+            if (itemTree.item.hasChildren === 0) {
+              tabManager.newTab(itemTree.item.name, itemTree.item.url, true);
+            }
+          }
+        });
+        
+        menuContext.addChild(open);
 
-    var accountSelect = new SelectX({
-      store: accountSelection_store,
-      style: "width: 220px", //update this shit
-      query: '?' + requetteAccount
-    }, "accountSelect");
-     accountSelect.detect(enterpriseSelect, 'onChange', function(value) {
- 	console.log('maman');
-      //var query = '?q={"EnterpriseId":"' + value + '"}'
-     // accountSelect.requery(query);
-    });
+        bc.startup();
+        menuContext.startup();
+        unitsTree.startup();
 
-     //LES FONCTIONS
-
-     function getIDEntreprise(){
-     	var deferred = new Deferred();
-     	 enterpriseSelect.on("setStore", function() {
-                       IDEntreprise = this.get('value');
-                       deferred.resolve(IDEntreprise);                        
-                    });
-     	 return deferred.promise;
-     }
-
-     function getIDAccount(IDEntreprise) {
-
-     }
-  });
-
-
+      });
   </script>
-
-    </head>
-    <body class = "claro">
-     <div>
-
-                <div id="headerSelection">
-                    <div id="accountSelect"></div>
-                    <span>From:</span>
-                    <div id="dateSelectFrom"></div>
-                    <span>To:</span>
-                    <div id="dateSelectTo"></div>
-                </div>
-
-                <div id="masterGrid"></div>
-
-                <div id="slaveContent">  
-                    <div id="slaveGrid"></div>
-                </div>
-
-                <div id="footerSelection" style="position: fixed; left: 0px; bottom: 0px;">
-                    <span>Enterprise</span>
-                    <div id="enterpriseSelect"></div>
-                    <span>Fiscal Year</span>
-                    <div id="fiscalYearSelect"></div>
-                </div>
-        </div>
-    </body>
+</head>
+<body class="claro">
+  <div id="bc">  
+    <div id="sidebar">
+      <div id="tree"></div>
+    </div>
+    <div id="center_panel">
+      <div id="tab_container"></div>
+    </div>
+  </div>
+</body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-   
