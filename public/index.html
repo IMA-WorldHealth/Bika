@@ -26,25 +26,25 @@
             }));
           }
         });
-        //-----------------------------------------------------------------------------------------------------------------------------------
-        divAll = new BorderContainer({
-          type: "headline"
-        }, "divAll");
-        //-----------------------------------------------------------------------------------------------------------------------------------
-        tabManager = new AddTabManager({}, "divTab");
-        divTop = new ContentPane({
-          region: 'top'
-        }, "divTop");
-        divLeading = new ContentPane({
-          region: 'leading'
-        }, "divLeading");
-        divCenter = new ContentPane({
-          region: 'center'
-        }, "divCenter");
-        divAll.addChild(divTop);
-        divAll.addChild(divCenter);
-        divAll.addChild(divLeading);
-        //----------------------------------------------------------------------------------------           
+
+        var bc = new BorderContainer({
+          style: "height: 100%; width: 100%; margin: 0; padding: 0;"
+        }, "bc");
+
+        var tabManager = new AddTabManager({}, "tab_container");
+        var sidebar = new ContentPane({
+          region: 'leading',
+          style: 'width:15%;'
+        }, "sidebar");
+
+        var center_panel = new ContentPane({
+          region: 'center',
+          style: "margin:0; padding:0;"
+        }, "center_panel");
+
+        bc.addChild(center_panel);
+        bc.addChild(sidebar);
+
         treeModel = new ObjectStoreModel({
           store: treeStore,
           query: "?" + JSON.stringify({
@@ -64,7 +64,7 @@
           }
         });
 
-        unitsTree = new Tree({
+        var unitsTree = new Tree({
           model: treeModel,
           showRoot: false,
           onOpenClick: true,
@@ -73,16 +73,16 @@
               tabManager.openTab(item.name, item.url, true);
             }
           }
-        }, "divTree");
+        }, "tree");
 
-        menuContext = new Menu({
-          targetNodeIds: ["divTree"],
-          //selector: ".dijitTreeNode",
+        var menuContext = new Menu({
+          targetNodeIds: ["tree"],
           selector: ".dijitTreeNodeContainer > .dijitTreeNode > .dijitTreeNodeContainer > .dijitTreeNode", // FIXME
           id: "menuContext",
           style: "display: none;",
         });
-        open = new MenuItem({
+        
+        var open = new MenuItem({
           label: "Open in new tab",
           onClick: function(item) {
             var itemTree = dijit.byNode(this.getParent().currentTarget);
@@ -91,16 +91,10 @@
             }
           }
         });
-
-        close = new MenuItem({
-          label: "Close",
-          disabled: true
-        });
+        
         menuContext.addChild(open);
-        menuContext.addChild(new MenuSeparator());
-        menuContext.addChild(close);
-        dojo.body().appendChild(divAll.domNode);
-        divAll.startup();
+
+        bc.startup();
         menuContext.startup();
         unitsTree.startup();
 
@@ -108,13 +102,12 @@
   </script>
 </head>
 <body class="claro">
-  <div id="divAll">  
-    <div id="divTop"></div>
-    <div id="divLeading">
-    <div id="divTree"></div>
+  <div id="bc">  
+    <div id="sidebar">
+      <div id="tree"></div>
     </div>
-    <div id="divCenter">
-    <div id="divTab"></div>
+    <div id="center_panel">
+      <div id="tab_container"></div>
     </div>
   </div>
 </body>
