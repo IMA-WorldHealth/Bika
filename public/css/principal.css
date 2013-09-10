@@ -1,17 +1,26 @@
+/* styles for the whole application */
 
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
 
-    html, body {
-        width: 100%;
-        height: 100%;
-        margin: 0;
-        background:#f3f7fc;
-    }
-  div#divAll{
-        width: 100%; 
-        height: 100%;
-    }
-    #divLeading{
-        width: 200px;
-    }
+#bc {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
 
-  
+#sidebar {
+  width: 15%;
+}
+
+#center_panel {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
