@@ -7,8 +7,8 @@
   <script>dojoConfig = {parseOnLoad: true}</script>
   <script type="text/javascript" src="js/dojoos/dojo/dojo.js"></script>
   <script>
-    require(["dijit/layout/BorderContainer", "dijit/Menu", "dijit/MenuItem", "dijit/MenuSeparator", "bika/TabManager/AddTabManager", "dijit/tree/ObjectStoreModel", "dijit/Tree", "dojo/store/JsonRest", "dojo/parser", "dijit/layout/ContentPane", "dojo/domReady!"],
-      function(BorderContainer, Menu, MenuItem, MenuSeparator, AddTabManager, ObjectStoreModel, Tree, JsonRest, parser, ContentPane, ready) {
+    require(["dijit/layout/BorderContainer", "dijit/Menu", "dijit/MenuItem", "dijit/MenuSeparator", "customizedModule/TabManager", "dijit/tree/ObjectStoreModel", "dijit/Tree", "dojo/store/JsonRest", "dojo/parser", "dijit/layout/ContentPane", "dojo/domReady!"],
+      function(BorderContainer, Menu, MenuItem, MenuSeparator, TabManager, ObjectStoreModel, Tree, JsonRest, parser, ContentPane, ready) {
         var treeStore = new JsonRest({
           target: '/tree',
           getChildren: function(object) {
@@ -31,7 +31,8 @@
           type: "headline"
         }, "divAll");
         //-----------------------------------------------------------------------------------------------------------------------------------
-        tabManager = new AddTabManager({}, "divTab");
+
+        var tabManager = new TabManager({}, "divTab");
         divTop = new ContentPane({
           region: 'top'
         }, "divTop");
@@ -64,13 +65,14 @@
           }
         });
 
+
         unitsTree = new Tree({
           model: treeModel,
           showRoot: false,
           onOpenClick: true,
           onClick: function(item) {
             if (item.hasChildren === 0) {
-              tabManager.openTab(item.name, item.url, true);
+              tabManager.addChildren(item.name, item.url, true, true);
             }
           }
         }, "divTree");
@@ -87,7 +89,7 @@
           onClick: function(item) {
             var itemTree = dijit.byNode(this.getParent().currentTarget);
             if (itemTree.item.hasChildren === 0) {
-              tabManager.newTab(itemTree.item.name, itemTree.item.url, true);
+              tabManager.addChildren(itemTree.item.name, itemTree.item.url, true, false);
             }
           }
         });
@@ -103,6 +105,7 @@
         divAll.startup();
         menuContext.startup();
         unitsTree.startup();
+
 
       });
   </script>
