@@ -2,7 +2,7 @@
 <html >
 <head>
   <title>Main Page</title>
-  <link rel = "stylesheet" type = "text/css" href="./css/principal.css" media="screen" />
+  <link rel="stylesheet" href="./css/principal.css" media="screen" />
   <link rel="stylesheet" href="js/dojoos/dijit/themes/claro/claro.css"/>
   <script>dojoConfig = {parseOnLoad: true}</script>
   <script type="text/javascript" src="js/dojoos/dojo/dojo.js"></script>
@@ -13,33 +13,29 @@
           target: '/tree',
           getChildren: function(object) {
             return this.query("?" + JSON.stringify({
-              'entities': [{
-                t: 'unit',
-                c: ['id', 'name', 'desc', 'parent', 'hasChildren', 'url']
+              'entities' : [{
+                t : 'unit',
+                c : ['id', 'name', 'desc', 'parent', 'hasChildren', 'url']
               }],
-              'cond': [{
-                t: 'unit',
+              'cond' : [{
+                t : 'unit',
                 cl: 'parent',
-                z: '=',
-                v: object.id
+                z : '=',
+                v : object.id
               }]
             }));
           }
         });
 
-        var bc = new BorderContainer({
-          style: "height: 100%; width: 100%; margin: 0; padding: 0;"
-        }, "bc");
+        var bc = new BorderContainer({}, "bc");
 
         var tabManager = new AddTabManager({}, "tab_container");
         var sidebar = new ContentPane({
           region: 'leading',
-          style: 'width:15%;'
         }, "sidebar");
 
         var center_panel = new ContentPane({
           region: 'center',
-          style: "margin:0; padding:0;"
         }, "center_panel");
 
         bc.addChild(center_panel);
@@ -94,6 +90,7 @@
         
         menuContext.addChild(open);
 
+
         bc.startup();
         menuContext.startup();
         unitsTree.startup();
@@ -104,7 +101,13 @@
 <body class="claro">
   <div id="bc">  
     <div id="sidebar">
+      <div id="control_panel">
+        <!-- to be worked on --> 
+      </div>
       <div id="tree"></div>
+      <div id="change_enterprise">
+      
+      </div>
     </div>
     <div id="center_panel">
       <div id="tab_container"></div>
