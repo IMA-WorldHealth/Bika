@@ -336,7 +336,7 @@ CREATE TABLE IF NOT EXISTS `user` (
 DELETE FROM `user`;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
 INSERT INTO `user` (`id`, `username`, `password`, `first`, `last`, `email`, `loggedIn`) VALUES
-(1, 'jniles', 'K3mb3J@m', 'Jonathan', 'Niles', 'jonathanwniles@gmail.com', 0),
+(1, 'jniles', 'j', 'Jonathan', 'Niles', 'jonathanwniles@gmail.com', 0),
 (2, 'chris', 'c', 'CHRIS ', 'LOMAME', 'chris@ima.org', 0),
 (3, 'rdc', 'r', 'CONGO', 'DEMOCRATIQUE', 'rdc@rdc.cd', 0),
 (4, 'docta', 'd', 'Docteur House', 'Machine', 'd@his.cd', 0),
