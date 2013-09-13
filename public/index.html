@@ -2,8 +2,10 @@
 <html >
 <head>
   <title>Main Page</title>
+  <meta charset="utf-8">
   <link rel="stylesheet" href="./css/principal.css" media="screen" />
   <link rel="stylesheet" href="js/dojoos/dijit/themes/claro/claro.css"/>
+  <link rel="stylesheet" href="./css/icons/iconic_fill/iconic_fill.css"/>
   <script>dojoConfig = {parseOnLoad: true}</script>
   <script type="text/javascript" src="js/dojoos/dojo/dojo.js"></script>
   <script>
@@ -75,7 +77,7 @@
           targetNodeIds: ["tree"],
           selector: ".dijitTreeNodeContainer > .dijitTreeNode > .dijitTreeNodeContainer > .dijitTreeNode", // FIXME
           id: "menuContext",
-          style: "display: none;",
+          style: "display: none;"
         });
         
         var open = new MenuItem({
@@ -99,14 +101,17 @@
   </script>
 </head>
 <body class="claro">
-  <div id="bc">  
+  <div id="bc">
     <div id="sidebar">
-      <div id="control_panel">
-        <!-- to be worked on --> 
+      <div class="dock">
+        <ul>
+          <li><a class="iconic cog" href="/logout"></a></li>
+          <li><a class="iconic equalizer" href="#"></a></li>
+          <li><a class="iconic home" href="#"></a></li>
+        </ul>
       </div>
       <div id="tree"></div>
       <div id="change_enterprise">
-      
       </div>
     </div>
     <div id="center_panel">

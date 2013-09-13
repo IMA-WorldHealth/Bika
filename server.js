@@ -517,4 +517,8 @@ app.get('/tree', function(req, res) {
   });
 });
 
+app.get('*', function (req, res) {
+  console.log("missed req.url:", req.url);
+});
+
 app.listen(3000, console.log('Environment:', app.get('env'), "Rapid Prototype listening on port 3000"));
