@@ -11,11 +11,13 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 
 -- Dumping database structure for bika
+DROP DATABASE IF EXISTS `bika`;
 CREATE DATABASE IF NOT EXISTS `bika` /*!40100 DEFAULT CHARACTER SET utf8 */;
 USE `bika`;
 
 
 -- Dumping structure for table bika.account
+DROP TABLE IF EXISTS `account`;
 CREATE TABLE IF NOT EXISTS `account` (
   `enterpriseId` smallint(5) unsigned NOT NULL,
   `id` mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
@@ -31,9 +33,8 @@ CREATE TABLE IF NOT EXISTS `account` (
 ) ENGINE=InnoDB AUTO_INCREMENT=760501 DEFAULT CHARSET=utf8;
 
 -- Dumping data for table bika.account: ~197 rows (environ)
-DELETE FROM `account`;
 /*!40000 ALTER TABLE `account` DISABLE KEYS */;
-INSERT INTO `account` (`enterpriseId`, `id`, `accountLocked`, `accountTxt`, `accountTypeId`, `accountCategory`) VALUES
+REPLACE INTO `account` (`enterpriseId`, `id`, `accountLocked`, `accountTxt`, `accountTypeId`, `accountCategory`) VALUES
 	(101, 100000, 0, 'capital social', 1, '300'),
 	(101, 110000, 0, 'reserves', 1, '300'),
 	(101, 120000, 0, 'report', 1, '300'),
@@ -235,6 +236,7 @@ INSERT INTO `account` (`enterpriseId`, `id`, `accountLocked`, `accountTxt`, `acc
 
 
 -- Dumping structure for table bika.accounttype
+DROP TABLE IF EXISTS `accounttype`;
 CREATE TABLE IF NOT EXISTS `accounttype` (
   `id` mediumint(8) unsigned NOT NULL,
   `type` varchar(35) NOT NULL,
@@ -242,9 +244,8 @@ CREATE TABLE IF NOT EXISTS `accounttype` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- Dumping data for table bika.accounttype: ~6 rows (environ)
-DELETE FROM `accounttype`;
 /*!40000 ALTER TABLE `accounttype` DISABLE KEYS */;
-INSERT INTO `accounttype` (`id`, `type`) VALUES
+REPLACE INTO `accounttype` (`id`, `type`) VALUES
 	(1, 'income/expense'),
 	(2, 'balance'),
 	(3, 'total'),
@@ -255,6 +256,7 @@ INSERT INTO `accounttype` (`id`, `type`) VALUES
 
 
 -- Dumping structure for table bika.currency
+DROP TABLE IF EXISTS `currency`;
 CREATE TABLE IF NOT EXISTS `currency` (
   `id` tinyint(3) unsigned NOT NULL,
   `name` text NOT NULL,
@@ -263,9 +265,8 @@ CREATE TABLE IF NOT EXISTS `currency` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- Dumping data for table bika.currency: ~3 rows (environ)
-DELETE FROM `currency`;
 /*!40000 ALTER TABLE `currency` DISABLE KEYS */;
-INSERT INTO `currency` (`id`, `name`, `symbol`) VALUES
+REPLACE INTO `currency` (`id`, `name`, `symbol`) VALUES
 	(1, 'Franc Congolais', 'FC'),
 	(2, 'United States Dollar', 'USD'),
 	(3, 'Euro', 'EU');
@@ -273,6 +274,7 @@ INSERT INTO `currency` (`id`, `name`, `symbol`) VALUES
 
 
 -- Dumping structure for table bika.enterprise
+DROP TABLE IF EXISTS `enterprise`;
 CREATE TABLE IF NOT EXISTS `enterprise` (
   `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
   `region` varchar(70) NOT NULL,
@@ -289,15 +291,15 @@ CREATE TABLE IF NOT EXISTS `enterprise` (
 ) ENGINE=InnoDB AUTO_INCREMENT=103 DEFAULT CHARSET=utf8;
 
 -- Dumping data for table bika.enterprise: ~2 rows (environ)
-DELETE FROM `enterprise`;
 /*!40000 ALTER TABLE `enterprise` DISABLE KEYS */;
-INSERT INTO `enterprise` (`id`, `region`, `country`, `city`, `name`, `phone`, `email`, `type`, `cashAccount`) VALUES
+REPLACE INTO `enterprise` (`id`, `region`, `country`, `city`, `name`, `phone`, `email`, `type`, `cashAccount`) VALUES
 	(101, 'Kinshasa', 'RDC', 'Kinshasa', 'IMA', '9419614377', 'jniles@example.com', '1', 570000),
 	(102, 'Bandundu', 'RDC', 'Kikwit', 'IMAKik', '--', 'jniles@example.com', '1', 570000);
 /*!40000 ALTER TABLE `enterprise` ENABLE KEYS */;
 
 
 -- Dumping structure for table bika.fiscalyear
+DROP TABLE IF EXISTS `fiscalyear`;
 CREATE TABLE IF NOT EXISTS `fiscalyear` (
   `enterpriseId` smallint(5) unsigned NOT NULL,
   `id` mediumint(8) unsigned NOT NULL,
@@ -312,15 +314,15 @@ CREATE TABLE IF NOT EXISTS `fiscalyear` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- Dumping data for table bika.fiscalyear: ~2 rows (environ)
-DELETE FROM `fiscalyear`;
 /*!40000 ALTER TABLE `fiscalyear` DISABLE KEYS */;
-INSERT INTO `fiscalyear` (`enterpriseId`, `id`, `numberOfMonths`, `fiscalYearTxt`, `transactionStartNumber`, `transactionStopNumber`, `fiscalYearNumber`) VALUES
+REPLACE INTO `fiscalyear` (`enterpriseId`, `id`, `numberOfMonths`, `fiscalYearTxt`, `transactionStartNumber`, `transactionStopNumber`, `fiscalYearNumber`) VALUES
 	(101, 2013001, 12, 'The First Fiscal Year of Company 101', 0, 100, 1),
 	(102, 2013011, 12, 'The First Fiscal Year of Company 102', 1000, 1100, 1);
 /*!40000 ALTER TABLE `fiscalyear` ENABLE KEYS */;
 
 
 -- Dumping structure for table bika.journal
+DROP TABLE IF EXISTS `journal`;
 CREATE TABLE IF NOT EXISTS `journal` (
   `fiscalYearId` mediumint(8) unsigned NOT NULL,
   `id` mediumint(8) unsigned NOT NULL,
@@ -334,14 +336,14 @@ CREATE TABLE IF NOT EXISTS `journal` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- Dumping data for table bika.journal: ~1 rows (environ)
-DELETE FROM `journal`;
 /*!40000 ALTER TABLE `journal` DISABLE KEYS */;
-INSERT INTO `journal` (`fiscalYearId`, `id`, `date`, `userid`) VALUES
+REPLACE INTO `journal` (`fiscalYearId`, `id`, `date`, `userid`) VALUES
 	(2013001, 1000, '2013-07-23', 1);
 /*!40000 ALTER TABLE `journal` ENABLE KEYS */;
 
 
 -- Dumping structure for table bika.period
+DROP TABLE IF EXISTS `period`;
 CREATE TABLE IF NOT EXISTS `period` (
   `fiscalYearId` mediumint(8) unsigned NOT NULL,
   `id` smallint(6) NOT NULL,
@@ -354,14 +356,14 @@ CREATE TABLE IF NOT EXISTS `period` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- Dumping data for table bika.period: ~1 rows (environ)
-DELETE FROM `period`;
 /*!40000 ALTER TABLE `period` DISABLE KEYS */;
-INSERT INTO `period` (`fiscalYearId`, `id`, `periodStart`, `periodStop`, `order`) VALUES
+REPLACE INTO `period` (`fiscalYearId`, `id`, `periodStart`, `periodStop`, `order`) VALUES
 	(2013001, 1, '2013-07-01', '2013-07-31', '1');
 /*!40000 ALTER TABLE `period` ENABLE KEYS */;
 
 
 -- Dumping structure for table bika.role
+DROP TABLE IF EXISTS `role`;
 CREATE TABLE IF NOT EXISTS `role` (
   `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(60) NOT NULL,
@@ -371,9 +373,8 @@ CREATE TABLE IF NOT EXISTS `role` (
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
 
 -- Dumping data for table bika.role: ~5 rows (environ)
-DELETE FROM `role`;
 /*!40000 ALTER TABLE `role` DISABLE KEYS */;
-INSERT INTO `role` (`id`, `name`, `description`, `role_head`) VALUES
+REPLACE INTO `role` (`id`, `name`, `description`, `role_head`) VALUES
 	(1, 'Administrator', 'To be finished', 0),
 	(2, 'admin', 'Administrateur simple', 1),
 	(3, 'Finance', 'The Finance', 5),
@@ -383,6 +384,7 @@ INSERT INTO `role` (`id`, `name`, `description`, `role_head`) VALUES
 
 
 -- Dumping structure for table bika.role_unit
+DROP TABLE IF EXISTS `role_unit`;
 CREATE TABLE IF NOT EXISTS `role_unit` (
   `id` int(5) NOT NULL AUTO_INCREMENT,
   `id_role` smallint(5) unsigned NOT NULL,
@@ -395,9 +397,8 @@ CREATE TABLE IF NOT EXISTS `role_unit` (
 ) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=latin1;
 
 -- Dumping data for table bika.role_unit: ~19 rows (environ)
-DELETE FROM `role_unit`;
 /*!40000 ALTER TABLE `role_unit` DISABLE KEYS */;
-INSERT INTO `role_unit` (`id`, `id_role`, `id_unit`) VALUES
+REPLACE INTO `role_unit` (`id`, `id_role`, `id_unit`) VALUES
 	(1, 1, 0),
 	(3, 2, 2),
 	(4, 2, 3),
@@ -421,6 +422,7 @@ INSERT INTO `role_unit` (`id`, `id_role`, `id_unit`) VALUES
 
 
 -- Dumping structure for table bika.transaction
+DROP TABLE IF EXISTS `transaction`;
 CREATE TABLE IF NOT EXISTS `transaction` (
   `journalId` mediumint(8) unsigned NOT NULL,
   `lineId` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -444,9 +446,8 @@ CREATE TABLE IF NOT EXISTS `transaction` (
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
 
 -- Dumping data for table bika.transaction: ~5 rows (environ)
-DELETE FROM `transaction`;
 /*!40000 ALTER TABLE `transaction` DISABLE KEYS */;
-INSERT INTO `transaction` (`journalId`, `lineId`, `accountId`, `credit`, `debit`, `docId`, `description`, `transNumber`, `transDate`, `sysCurrency`, `transCurrency`, `exchangeRate`) VALUES
+REPLACE INTO `transaction` (`journalId`, `lineId`, `accountId`, `credit`, `debit`, `docId`, `description`, `transNumber`, `transDate`, `sysCurrency`, `transCurrency`, `exchangeRate`) VALUES
 	(1000, 1, 220700, 40, 0, '20', 'descrip 1', 3, '2013-07-23', 1, 1, 920.00),
 	(1000, 2, 220700, 0, 20, '40', 'descrip 2', 3, '2013-07-23', 1, 1, 930.00),
 	(1000, 3, 650100, 100, 0, '0', 'descrip 3', 4, '2013-02-15', 1, 1, 910.00),
@@ -456,6 +457,7 @@ INSERT INTO `transaction` (`journalId`, `lineId`, `accountId`, `credit`, `debit`
 
 
 -- Dumping structure for table bika.unit
+DROP TABLE IF EXISTS `unit`;
 CREATE TABLE IF NOT EXISTS `unit` (
   `id` mediumint(9) NOT NULL,
   `name` varchar(30) NOT NULL,
@@ -467,9 +469,8 @@ CREATE TABLE IF NOT EXISTS `unit` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- Dumping data for table bika.unit: ~25 rows (environ)
-DELETE FROM `unit`;
 /*!40000 ALTER TABLE `unit` DISABLE KEYS */;
-INSERT INTO `unit` (`id`, `name`, `desc`, `parent`, `hasChildren`, `url`) VALUES
+REPLACE INTO `unit` (`id`, `name`, `desc`, `parent`, `hasChildren`, `url`) VALUES
 	(0, 'Root', 'The unseen root node', NULL, 1, ''),
 	(1, 'Admin', 'The Administration Super-Category', 0, 1, ''),
 	(2, 'Enterprises', 'Manage the registered enterprises from here', 1, 0, '/units/enterprise/'),
@@ -499,6 +500,7 @@ INSERT INTO `unit` (`id`, `name`, `desc`, `parent`, `hasChildren`, `url`) VALUES
 
 
 -- Dumping structure for table bika.user
+DROP TABLE IF EXISTS `user`;
 CREATE TABLE IF NOT EXISTS `user` (
   `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
   `username` varchar(80) NOT NULL,
@@ -511,9 +513,8 @@ CREATE TABLE IF NOT EXISTS `user` (
 ) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8;
 
 -- Dumping data for table bika.user: ~12 rows (environ)
-DELETE FROM `user`;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` (`id`, `username`, `password`, `first`, `last`, `email`, `loggedIn`) VALUES
+REPLACE INTO `user` (`id`, `username`, `password`, `first`, `last`, `email`, `loggedIn`) VALUES
 	(1, 'jniles', 'K3mb3J@m', 'Jonathan', 'Niles', 'jonathanwniles@gmail.com', 0),
 	(2, 'chris', 'c', 'CHRIS ', 'LOMAME', 'chris@ima.org', 0),
 	(3, 'rdc', 'r', 'CONGO', 'DEMOCRATIQUE', 'rdc@rdc.cd', 0),
@@ -530,6 +531,7 @@ INSERT INTO `user` (`id`, `username`, `password`, `first`, `last`, `email`, `log
 
 
 -- Dumping structure for table bika.user_role
+DROP TABLE IF EXISTS `user_role`;
 CREATE TABLE IF NOT EXISTS `user_role` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `id_role` smallint(5) unsigned NOT NULL,
@@ -543,9 +545,8 @@ CREATE TABLE IF NOT EXISTS `user_role` (
 ) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=latin1;
 
 -- Dumping data for table bika.user_role: ~12 rows (environ)
-DELETE FROM `user_role`;
 /*!40000 ALTER TABLE `user_role` DISABLE KEYS */;
-INSERT INTO `user_role` (`id`, `id_role`, `id_user`, `allRight`) VALUES
+REPLACE INTO `user_role` (`id`, `id_role`, `id_user`, `allRight`) VALUES
 	(1, 1, 1, 1),
 	(2, 1, 2, 1),
 	(3, 1, 3, 1),
@@ -562,6 +563,7 @@ INSERT INTO `user_role` (`id`, `id_role`, `id_user`, `allRight`) VALUES
 
 
 -- Dumping structure for table bika.user_role_description
+DROP TABLE IF EXISTS `user_role_description`;
 CREATE TABLE IF NOT EXISTS `user_role_description` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `id_role_unit` int(5) NOT NULL,
@@ -574,9 +576,8 @@ CREATE TABLE IF NOT EXISTS `user_role_description` (
 ) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
 
 -- Dumping data for table bika.user_role_description: ~7 rows (environ)
-DELETE FROM `user_role_description`;
 /*!40000 ALTER TABLE `user_role_description` DISABLE KEYS */;
-INSERT INTO `user_role_description` (`id`, `id_role_unit`, `id_user`) VALUES
+REPLACE INTO `user_role_description` (`id`, `id_role_unit`, `id_user`) VALUES
 	(4, 4, 9),
 	(5, 5, 9),
 	(1, 8, 12),
