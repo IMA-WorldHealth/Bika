@@ -1,0 +1,77 @@
+<link rel="stylesheet" href="units/demos/charting/chart.css">
+<div id="wrapper">
+  <h1>Is Javascript's Math.random() really random?</h1>
+  <div id="random-test" style="width:800px; height: 400px;"></div>
+  <div id="notes">
+    <p> Range:<span id="max"></span>, Number of Cycles: <span id="cycles"></span></p>
+    <p>
+      The above graph is generated using the Dojo Toolkit's charting library and a 
+    custom-written function to explore the randomness of javascript's Math.random()
+    function.  Authors have asserted that Math.random() is cryptographically insecure
+    and a PRNG should be used instead.  What do you think?
+    </p>
+  <div id="rerun" onclick="rerun()">Run Again</div>
+  </div>
+</div>
+<script>
+  function testRandom(num_cycles, upper_bound) {
+    var r = Math.random, f = Math.floor, i = 0,
+        v, bins = {}, arr = [];
+  
+    for (i; i < upper_bound; i++) {
+      bins[i] = 0;
+    }
+  
+    i = 0;
+    do {
+      v = f(r()*upper_bound);
+      bins[v]++;
+      i++;
+    } while (i < num_cycles);
+    i = 0;
+    for (i; i < upper_bound; i++) {
+      arr.push(bins[i]);
+    }
+    return arr; 
+  }
+
+  // GLOBAL ? bad : bro?
+
+  var chart;
+
+  function rerun() {
+    var d = testRandom(1000000, 100);
+    chart.removeSeries("random");
+    chart.addSeries("random", d);
+    chart.render();
+  }
+
+  require(["dojox/charting/Chart", "dojox/charting/themes/Tom",
+    "dojox/charting/plot2d/Lines", "dojox/charting/plot2d/Markers",
+    "dojox/charting/axis2d/Default", "dojo/domReady!"
+    ], function(Chart, theme) {
+
+    var max = 100, cycles = 1000000;
+    
+    var data1000000x100 = testRandom(cycles, max);
+
+    chart = new Chart("random-test");
+
+    chart.setTheme(theme);
+    chart.addPlot("default", {
+      type: "Lines",
+      markers: true,
+    });
+
+    chart.addAxis("x");
+    chart.addAxis("y", {min: 0, max: cycles/max +1  , vertical: true, fixLower: "major", fixUpper: "major"});
+
+    chart.addSeries("random", data1000000x100);
+    
+    chart.render();
+
+    // update label info
+    document.getElementById('max').innerHTML = max;
+    document.getElementById('cycles').innerHTML = cycles;
+  });
+</script>
