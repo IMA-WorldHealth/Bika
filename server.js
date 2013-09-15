@@ -6,32 +6,29 @@ var express = require('express')
   , url = require('url')
   , qs = require('querystring')
   , path = require('path')
+  , auth = require('./lib/auth')
+  , error = require('./lib/error/404.js')
   , app = express();
 
 app.set('env', 'production'); // Change this to change application behavior
 
-// To speed up development, I am moving auth to "production environment"
-app.configure('integration', function () {
-  app.use(express.bodyParser());
- app.use(express.static(path.join(__dirname, 'public'))); // Change this when employing authentification
-});
-
 app.configure('production', function () {
-  app.use(express.bodyParser());
+  app.use(express.bodyParser()); // FIXME: Can we do better than body parser?  There seems to be /tmp file overflow risk.
   app.use(express.cookieParser());
   app.use(express.session({secret: 'open blowfish'}));
-  var auth = require('./lib/auth');
   app.use(auth);
   app.use(express.static('public'));
+  app.use(app.router);
+  app.use(error);
 });
 
 app.get('/data/:table', function (req, res) {
-	 var cb = function (err, ans) {
+  var cb = function (err, ans) {
       if (err) {
         throw err;
       } else {
 
-      if ('transaction' == req.params.table) res.setHeader('Content-Range', '0-0/' + ans.length);
+      if ('transaction' === req.params.table) res.setHeader('Content-Range', '0-0/' + ans.length);
         res.json(ans);
       }
     };
@@ -57,7 +54,6 @@ app.get('/tree', function(req, res) {
   req.session.roleid = 0;
   var tableaurole = [];
   var tableauAllrole = [];
-  //var tableaublanche = [];
   var tableauRight = [];
   var tableauHead = [];
   var tableauHeadLimite = [];
@@ -95,11 +91,6 @@ app.get('/tree', function(req, res) {
   var bb = 0;
   colonne = Qo.cond[0].v;
   tables =  Qo.cond[0].cl;
-  console.log("/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*");
-  console.log("COLOENNE ET TABLES");
-  console.log(colonne);
-  console.log(tables);
-  console.log("/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*");
   dbFace.selectionner(jsonQuery, function (err, ans) {
     if (err) {
       throw err;
@@ -131,8 +122,7 @@ app.get('/tree', function(req, res) {
               throw err;
             }
             res.send(ans);
-
-          });          
+          });
           break;          
         }
       }
@@ -143,7 +133,7 @@ app.get('/tree', function(req, res) {
         // ebvera au server
         //var resultat = createTree(colonne, tables, tableauHeadLimiteString, tableauBrancheString);
         function createTree(col,tab,tabHead,tabBran){
-          if((col == 0) && (tab == "id")) {
+          if((col === 0) && (tab === "id")) {
             q = {
               'entities' : [{
                 t: 'unit',
@@ -157,7 +147,7 @@ app.get('/tree', function(req, res) {
               }]
             };
           
-          } else if((col == 0) && (tab == "parent")){
+          } else if((col === 0) && (tab === "parent")){
             q = {
               'entities' : [{
                 t: 'unit',
@@ -233,18 +223,11 @@ app.get('/tree', function(req, res) {
         // on preleve la taille des chacunes des tableaux des roles
         var tableauroleLen = tableaurole.length;
         var tableaurolelimiteLen = tableaurolelimite.length;
-        console.log("___________L__________");
-        //console.log(tableauroleLen);
-        console.log(nbrerolelimite);
-        console.log(tableaurolelimite);
         /******************************************************************************/
         //  Si l'utilisateur a tous le droits dans un role et limites dans un autres //
         /****************************************************************************/        
         if((tableauroleLen > 0) && (tableaurolelimiteLen > 0)) {
-          console.log("Multi Role ");
           // cette utilisateur possedes tous les droits dans toutes ses branches
-          console.log(" Tous les droits dans toutes ses branches le Head ");
-          console.log(tableauHeadString);
           var nbrebranche = 0;
           var newSql = {
             'entities' : [{
@@ -263,16 +246,11 @@ app.get('/tree', function(req, res) {
               throw err;
             } else if (ans.length > 0) {
               var newtaille = ans.length;
-              console.log("___________NT__________");              
-              console.log(newtaille);
               for(var i = 0; i < ans.length; i++) {
                   unitUser = ans[i];
                   tableauBranche[nbrebranche] = unitUser.id_unit;
                   nbrebranche++;
-                  console.log(unitUser.id_unit);
               }
-              console.log(tableauAllrole);
-              console.log("--------------------------------------------------------");
 
               tableauBrancheString = tableauBranche.toString();
               var sqlLimite = {
@@ -301,8 +279,6 @@ app.get('/tree', function(req, res) {
                   throw err;
                 } else if (ans.length > 0) {
                   var newtaille = ans.length;
-                  console.log("___________Celui ci a deux roles dans le systeme __________");              
-                  console.log(newtaille);
                   for(var bb = 0; bb < ans.length; bb++) {
                       unitUser = ans[bb];
                       tableauBranche.push(unitUser.id_unit);
@@ -320,8 +296,6 @@ app.get('/tree', function(req, res) {
 
         } else if ((tableauroleLen > 0) && (tableaurolelimiteLen == 0)) {
           // cette utilisateur possedes tous les droits dans toutes ses branches
-          console.log(" Tous les droits dans toutes ses branches le Head ");
-          console.log(tableauHeadString);
           var nbrebranche = 0;
           var newSql = {
             'entities' : [{
@@ -340,24 +314,19 @@ app.get('/tree', function(req, res) {
               throw err;
             } else if (ans.length > 0) {
               var newtaille = ans.length;
-              console.log("___________NT__________");              
-              console.log(newtaille);
               for(var i = 0; i < ans.length; i++) {
                   unitUser = ans[i];
                   tableauBranche[nbrebranche] = unitUser.id_unit;
                   nbrebranche++;
-                  console.log(unitUser.id_unit);
               }
-              console.log(tableauBranche);
               tableauBrancheString = tableauBranche.toString();
               createTree(colonne, tables, tableauHeadString, tableauBrancheString);
             }
           });           
-        } else if ((tableauroleLen == 0) && (tableaurolelimiteLen > 0)) {
+        } else if ((tableauroleLen === 0) && (tableaurolelimiteLen > 0)) {
           // Cette n'a que des droits limités
           tableauHeadLimiteString = tableauHeadLimite.toString();                    
           var nbrebranche = 0;
-          console.log(tableauHeadLimiteString);
           var sqlLimite = {
             'entities' : [{
               t: 'role_unit',
@@ -385,140 +354,20 @@ app.get('/tree', function(req, res) {
               throw err;
             } else if (ans.length > 0) {
               var newtaille = ans.length;
-              console.log("___________NT__________");              
-              console.log(newtaille);
               for(var bb = 0; bb < ans.length; bb++) {
                   unitUser = ans[bb];
                   tableauBranche[nbrebranche] = unitUser.id_unit;
                   nbrebranche++;
               }
-              console.log(tableauBranche);
               tableauBrancheString = tableauBranche.toString();
               createTree(colonne, tables, tableauHeadLimiteString, tableauBrancheString);
             }
           });                    
 
-        } else {
-          console.log("C'est Utilisateur n'a aucun role et aucun droit");
         }
-
       }
-      //tableaurole = tableaurole.join(',');
-      //tableaublanche = tableaublanche.join(',');
-      //colonne = Qo.cond[0].v;
-      //tables =  Qo.cond[0].cl;
-
-      /******************************************************************/
-      // Pour l'appelle de la racine ROOT pour le super user           //
-      /***************************************************************/
-      /*if ((tables == "id") && (colonne == 0) && (racineRoot == 0)) {
-        var q = "SELECT * FROM unit WHERE " + tables + " = ' " + colonne + " ' ";
-        q = {
-          'entities' : [{
-            t: 'unit',
-            c: ['id', 'name', 'desc', 'parent', 'hasChildren', 'url']
-          }],
-          'cond' : [{
-            t: 'unit',
-            cl: tables,
-            z: '=',
-            v: colonne
-          }]
-        };
-      }*/
-      /******************************************************************/
-      // Pour l'appelle de la racine ROOT pour les autres user        //
-      /***************************************************************/
-      /*if ((tables == "id") && (colonne == 0) && (racineRoot != 0)) {
-        var q = "SELECT * FROM unit WHERE " + tables + " = ' " + colonne + " ' ";
-        q = {
-          'entities' : [{
-            t: 'unit',
-            c: ['id', 'name', 'desc', 'parent', 'hasChildren', 'url']
-          }],
-          'cond' : [{
-            t: 'unit',
-            cl: tables,
-            z: '=',
-            v: colonne
-          }]
-        };
-      }*/
-      /******************************************************************/
-      //           Pour les utilisateurs qui ne sont pas super User    //
-      /***************************************************************/
-      /*if ((tables == "parent") && (racineRoot != 0)) {
-
-        if (colonne != racineRoot) { // Si la valeur cliquer est different racineRoot soit (-1) 
-          if (colonne == 0) { // Si la colonne est egale à ZERO On Recherche les roles de l'utilisateur
-            var q = "SELECT * FROM unit WHERE " + tables + " = ' " + colonne + " ' AND id IN ( " + tableaurole + " ) ";
-            q = {
-              'entities' : [{
-                t: 'unit',
-                c: ['id', 'name', 'desc', 'parent', 'hasChildren', 'url']
-              }],
-              'cond' : [{
-                t: 'unit',
-                cl: tables,
-                z: '=',
-                v: colonne,
-                l: 'AND'
-              },
-              {
-                t: 'unit',
-                cl: 'id',
-                z: 'IN',
-                v: "(" + tableaurole + ")"
-              }]
-            };
-          }
-          if (colonne != 0) { // Si la colonne est different de ZERO on recherche alors le sous elements qui lui sont assignés
-            var q = "SELECT * FROM unit WHERE " + tables + " = ' " + colonne + " ' AND id IN ( " + tableaublanche + " ) ";
-            q = {
-              'entities' : [{
-                t: 'unit',
-                c: ['id', 'name', 'desc', 'parent', 'hasChildren', 'url']
-              }],
-              'cond' : [{
-                t: 'unit',
-                cl: tables,
-                z: '=',
-                v: colonne,
-                l: 'AND'
-              },
-              {
-                t: 'unit',
-                cl: 'id',
-                z: 'IN',
-                v: "(" + tableaublanche + ")"
-              }]
-            };
-          }
-        }
-      }*/ // Accès à tous les elements de l'Arbre
-      /*if ((tables == "parent") && (racineRoot == 0)) {
-        var q = "SELECT * FROM unit WHERE " + tables + " = ' " + colonne + " ' ";
-        q = {
-          'entities' : [{
-            t: 'unit',
-            c: ['id', 'name', 'desc', 'parent', 'hasChildren', 'url']
-          }],
-          'cond' : [{
-            t: 'unit',
-            cl: tables,
-            z: '=',
-            v: colonne,
-          }]
-        };
-      }*/
-
-
     }
   });
-});
-
-app.get('*', function (req, res) {
-  console.log("missed req.url:", req.url);
 });
 
 app.listen(3000, console.log('Environment:', app.get('env'), "Rapid Prototype listening on port 3000"));

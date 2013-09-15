@@ -1,14 +1,71 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Login to BikaLabs</title>
+    <title>Login to Bika</title>
+    <style>
+
+      html {
+        font-family: Arial, sans-serif;
+      }
+
+      form {
+        padding: 10px 50px 50px 50px;
+        display: block;
+        width: 300px;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 200px;
+      }
+
+      form > label {
+        text-align: center;
+        display: block;
+        font-size: 4em;
+      }
+
+      .row {
+        width: 100%;
+        display: block;
+        float: left;
+      }
+
+      .row label {
+        text-transform: uppercase;
+        font-weight: bold;
+        float: left;
+      }
+
+      .row input {
+        float: right;
+        border-radius: 4px;
+      }
+
+      .control {
+        width: 100%;
+      }
+
+      .control input {
+        border-radius: 4px;
+        padding: 5px;
+        border: none;
+      }
+
+    </style>
   </head>
   <body>
-    <h3>Bika</h3>
     <form action="/login" method="POST">
-      User: <input name="username" type="text" />
-      Password: <input name="password" type="password" />
-      <input type="submit"/>
+      <label>Bika</label>
+      <div class="row">
+          <label>User</label>
+          <input name="username" type="text" />
+      </div>
+      <div class="row">
+        <label>Password</label>
+        <input name="password" type="password" />
+      </div>
+      <div class="control">
+        <input type="submit" />
+      </div>
     </form>
   </body>
 </html>

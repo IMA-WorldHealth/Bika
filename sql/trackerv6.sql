@@ -495,9 +495,16 @@ REPLACE INTO `unit` (`id`, `name`, `desc`, `parent`, `hasChildren`, `url`) VALUE
 	(21, 'Billing A', 'Sous enfant de Billing', 20, 0, '/html/com'),
 	(22, 'Billing B', 'Deuxieme fils de Billing', 20, 0, '/html/deux'),
 	(23, 'Billing C', '3 Fils', 20, 0, 'Lien hypertext'),
-	(24, 'Balance', 'The Balance Sheet', 5, 0, '/units/balance/');
-/*!40000 ALTER TABLE `unit` ENABLE KEYS */;
+	(24, 'Balance', 'The Balance Sheet', 5, 0, '/units/balance/'),
+  (25, 'Transaction', 'The Transaction Page', 5, 0, '/units/transaction/'),
+  (26, 'Demo', 'Demos of key functionality', 0, 1, ''),
+  (27, 'FullGrid', 'Demo: Full-page grid', 26, 0, '/units/demos/fullgrid/'),
+  (28, 'PDFedit', 'Demo: PDFeditor', 26, 0, '/units/demos/pdfedit/'),
+  (29, 'Graphics', 'Demo: Dojo Charting', 26, 0, '/units/demos/charting/'),
+  (30, 'Error', 'Demo: This page doesn\'t exist', 26, 0, '/units/demos/error/'),
+  (31, 'Linkage', 'Demo: SelectX updates each other', 26, 0, '/units/demos/linkage/');
 
+/*!40000 ALTER TABLE `unit` ENABLE KEYS */;
 
 -- Dumping structure for table bika.user
 DROP TABLE IF EXISTS `user`;

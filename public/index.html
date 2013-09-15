@@ -75,7 +75,7 @@
 
         var menuContext = new Menu({
           targetNodeIds: ["tree"],
-          selector: ".dijitTreeNodeContainer > .dijitTreeNode > .dijitTreeNodeContainer > .dijitTreeNode", // FIXME
+          selector: ".dijitTreeNodeContainer > .dijitTreeNode > .dijitTreeNodeContainer > .dijitTreeNode", // FIXME: find a better selector
           id: "menuContext",
           style: "display: none;"
         });
@@ -91,8 +91,7 @@
         });
         
         menuContext.addChild(open);
-
-
+        
         bc.startup();
         menuContext.startup();
         unitsTree.startup();

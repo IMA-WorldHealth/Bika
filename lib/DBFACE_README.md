@@ -15,10 +15,7 @@ This module's role is to interact with the data bases. Here we find three main f
 
 This function is responsible for removing spaces in a string of characters, solves the problems associated accents and quotes.
 
-
-
 ### Error Handling ###
-
 
 ### A generic interface for all database activities ###
 
@@ -36,7 +33,7 @@ This method plays the role of interfacing between web server and our management 
       //code
     }
 
-`data` encapsulates the information necessary for the selection as json Format; exemple:
+`data` encapsulates the information necessary for the selection as json Format; for example:
 
     {entities:[{t:'account',c:['id']}, {t:'transaction',c:['id', 'accountID']}],
      jcond:[{ts:['account', 'transaction'], c:['id', 'accountID'], l:'AND'}],
