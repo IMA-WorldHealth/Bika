@@ -24,14 +24,10 @@ app.configure('production', function () {
 
 app.get('/data/:table', function (req, res) {
   var cb = function (err, ans) {
-      if (err) {
-        throw err;
-      } else {
-
-      if ('transaction' === req.params.table) res.setHeader('Content-Range', '0-0/' + ans.length);
-        res.json(ans);
-      }
-    };
+    if (err) throw err;
+    res.setHeader('Content-Range', '0-0/' + ans.length);
+    res.json(ans);
+  };
   var myRequest = decodeURIComponent(url.parse(req.url).query);
   var jsRequest;  
   try{
