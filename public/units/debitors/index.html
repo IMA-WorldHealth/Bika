@@ -1,0 +1,239 @@
+<link rel="stylesheet" href="css/debitors.css">
+<link rel="stylesheet" href="css/gridx_resources/gridx.css">
+  <form method='post' name='debitorsForm' id="formContent" action='/data/'>
+    <div id='bika.units.debitors.tab_form'></div> 
+  </form>
+</div>
+<div class="divGrid">
+  <div id="bika.units.debitors.gridx" class="grid"><div
+</div>	
+<script>
+  require([
+    "dojo/store/Memory",
+    "gridx/modules/CellWidget",
+    "dojo/store/JsonRest",
+    "dijit/layout/TabContainer",
+    "dojox/layout/ContentPane",
+    "gridx/Grid",
+    "gridx/core/model/cache/Async",
+    "gridx/modules/select/Row",
+    "customizedModule/SelectX",
+    "dijit/form/Select",
+    "dojo/domReady!"],
+    function (Memory, CellWidget, JsonRest, TabContainer, ContentPane,
+              Grid, Cache, Row, SelectX, Select) {
+
+    var grid_store = new JsonRest({
+      target : '/data/',
+      idProperty : "debitorID",
+      getLabel: function (data) {
+        return data.debitorID;
+      }
+    });
+
+    var state_store = new Memory({
+      data : [
+        {label : "MicroDevru Prices", id : 1}, 
+        {label : "NonMicroDevru Prices", id : 2}
+      ],
+      getLabel: function(data) {
+        return data.label;
+      }
+    });
+
+    var debitor_store = new JsonRest({
+      target: '/data/',
+      getLabel: function(data) {
+        return data.debitorID;
+      }
+    });
+
+    var country_store = new JsonRest({
+      target: '/data/',
+      getLabel: function(data) {
+        return data.city;
+      }
+    });
+    
+    var city_store = new JsonRest({
+      target: '/data/',
+      getLabel: function(data) {
+        return data.city;
+      }
+    });
+
+    var tc = new TabContainer({
+      style : "height: 50%; width: 60%; margin-left:1%;" // Update this
+    }, "bika.units.debitors.tab_form");
+
+    tc.addChild(new ContentPane({ title: 'Hi', content:'hasdhf'}))
+
+    var gen = new ContentPane({
+        title  : "General",
+        id     : "cpGen",
+        href   : "units/debitors/forms/general.html",
+        onShow : function() {
+            setTimeout(function() {
+                if (idRow > 0) {
+                    getValue();
+                }
+            },50);
+        }
+    });
+
+    var fac = new ContentPane({
+        title  : "La facturation",
+        id     : "cpFac",
+        href   : "units/debitors/forms/facturation.html",
+        onShow : function() {
+            setTimeout(function() {
+                if (idRow > 0){
+                    getValue();
+                }
+            },50);
+        }
+    });
+
+    var note = new ContentPane({
+      title  : "Note",
+      id     : "cpNote",
+      href   : "units/debitors/forms/note.html",
+      onShow : function() {
+          setTimeout(function() {
+              if (idRow > 0) {
+                  getValue();
+              }
+          },50);
+      }
+    });
+
+    var text = new ContentPane({
+      title  : "Texte",
+      id     : "cpText",
+      href   : "units/debitors/forms/texte.html",
+      onShow : function() {
+        setTimeout(function() {
+          if (idRow > 0){
+            getValue();
+          }
+        },50);
+      }
+    });
+    
+    //tc.addCild(gen);
+    //tc.addChild(fac);
+    //tc.addChild(note);
+    //tc.addChild(text);
+    tc.startup();
+
+    function getValue(){ // Update this to have getValue(rowId) instead of global variable
+        var dataDebitors = grid_store.query({id : idRow});
+        dataDebitors.forEach(function(item) {
+            tabElements = []; 
+            for (i = 0 ; i < debitorsForm.elements.length ; i += 1){
+                var champs = debitorsForm.elements[i].id;
+                tabElements.push(debitorsForm.elements[i]);
+                debitorsForm.elements[i] != null ? debitorsForm.elements[i].value = item[champs]||"" : "";
+            }
+        });
+    }
+
+    var group_query = {
+      e: [{t: 'debitor', c: ['*']}]
+    };
+
+    var group_occupied;
+
+    function createGroupSelect(cellWidget, column) {
+      var groupSelect;
+      if (!group_occupied) { // Fix for gridx's repetition of programmatic widgets
+        group_occupied = true;
+        group_Select = new Select({
+            store : state_store,
+            style : 'width: 100%;'
+        }).placeAt(cellWidget.domNode);
+      } else {
+        group_occupied = false;
+      }
+    }
+
+    var country_query = {
+      e: [{t: 'country', c: ['country_fr']}]
+    };
+
+    var country_occupied;
+
+    function createCountrySelect(cellWidget, column) {
+      var countrySelect;
+      if (!country_occupied) {
+        country_occupied = true;
+        countrySelect = new SelectX({
+            store : country_store,
+            query : '?' + JSON.stringify(country_query),
+            style : "width: 100%;"
+        }).placeAt(cellWidget.domNode);
+      } else {
+        country_occupied = false;
+      }
+    }
+
+    var city_query = {
+      e: [{t: 'location', c: ['city']}]
+    };
+
+    var city_occupied;
+
+    function createCitySelect(cellWidget, column) {
+      var citySelect;
+      if (!city_occupied) {
+        city_occupied = true;
+        citySelect = new SelectX({
+          store       : city_store,
+          query: '?' + JSON.stringify(city_query),
+          style: "width: 100%;"
+        }).placeAt(cellWidget.domNode);
+      } else {
+        city_occupied = false;
+      }
+     }
+
+    var columns = [
+        {id : 'debitorID', field : 'debitorID', name : 'Debiteur' , width : '60px'      , style : "text-align:center;font-size:13px;"},
+        {id : 'name'     , field : 'name'     , name : 'Name'     , style : "font-size:13px;"},
+        {id : 'address1' , field : 'address1' , name : 'Adresser' , style : "font-size:13px;"},
+        {id : 'groupID'  , field : 'groupID'  , name : 'Group'    , widgetsInCell : true, onCellWidgetCreated : createGroupSelect},
+        {id : 'address2' , field : 'address2' , name : 'Adresser' , style : "font-size:13px;"},
+        {id : 'country'  , field : 'country'  , name : 'Le pays'  , widgetsInCell : true, onCellWidgetCreated : createCountrySelect},
+        {id : 'city'     , field : 'city'     , name : 'City'     , widgetsInCell : true, onCellWidgetCreated: createCitySelect},
+        {id : 'phone'    , field : 'phone'    , name : 'Telephone', style : "font-size:13px;"}
+    ];
+
+    var grid_query = {
+      e: [{t: 'debitor', c: ['*']}]
+    };
+
+    grid = new Grid({
+        cacheClass   : Cache,
+        store        : grid_store,
+        query        : '?' + JSON.stringify(grid_query),
+        structure    : columns,
+        style        : "width : 100%; height : 350px;",
+        modules      : [
+          CellWidget,
+          Row
+        ]
+    }, 'bika.units.debitors.gridx');
+
+    grid.startup();
+
+    var sendData = function(champs){   
+      grid.model.clearCache();
+      grid_store.add({
+        valeur : document.getElementById(champs).value,
+        champs : champs,
+        debitor : idRow
+      });	 
+      grid.body.refresh();
+    }
+  });
+</script>

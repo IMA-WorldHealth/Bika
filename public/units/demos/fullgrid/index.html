@@ -1,0 +1,68 @@
+<link rel="stylesheet" href="js/dojoos/gridx/resources/claro/Gridx.css"> 
+<div id="units.demos.fullgrid.balance" style="width:100%; height: 100%; margin:0; padding:0;"></div>
+<script>
+  require(["dojo/store/JsonRest",
+    "gridx/Grid",
+    "gridx/modules/SingleSort",
+    "gridx/modules/extendedSelect/Row",
+    "gridx/modules/CellWidget",
+    "gridx/modules/Edit",
+    "gridx/modules/VirtualVScroller",
+    "gridx/core/model/cache/Async"], function(JsonRest, Grid, SingleSort, Row, CellWidget, Edit, VirtualVScroller, Cache) {
+
+    var grid_store = new JsonRest({
+        target: 'data/'
+    });
+  
+    var columns = [{
+        id: 'id',
+        field: 'id',
+        name: 'OHADA Number',
+    }, {
+        id: 'accountTxt',
+        field: 'accountTxt',
+        name: 'Account',
+        formatter: function(data) {
+          if (data.accountTxt) return data.accountTxt.toUpperCase();
+        }
+    }, {
+        id: 'accountType',
+        field: 'type',
+        name: 'Type',
+    }, {
+        id: 'total',
+        field: 'total',
+        name: 'Total'
+    }, {
+        id: 'balance',
+        field: 'balance',
+        name: 'Opening Balance'
+    }];
+
+    var grid_query = {
+      e: [{t: 'account', c:['id', 'accountTxt']},
+          {t: 'accounttype', c: ['type']}],
+      jc: [{ts: ['account', 'accounttype'], c: ['accountTypeId', 'id']}]
+    };
+  
+    var requetteGrid = JSON.stringify(grid_query);
+    
+    var grid = new Grid({
+        cacheClass: Cache,
+        store: grid_store,
+        query: '?'+requetteGrid,
+        structure: columns,
+        selectRowTriggerOnCell: true,
+        modules: [
+            Row
+        ]
+    }, "units.demos.fullgrid.balance");
+
+    grid.startup();
+
+    function formatDate(dateString) {
+      return new Date(dateString).toDateString();
+    }
+
+});
+</script>
