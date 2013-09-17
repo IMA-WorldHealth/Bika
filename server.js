@@ -22,7 +22,7 @@ app.configure('production', function () {
   app.use(error);
 });
 
-app.get('/data/:table', function (req, res) {
+app.get('/data/', function (req, res) {
   var cb = function (err, ans) {
     if (err) throw err;
     res.setHeader('Content-Range', '0-0/' + ans.length);

@@ -60,7 +60,7 @@
              enterpriseSelect_query.e = e;
              var requetteEntreprise = JSON.stringify(enterpriseSelect_query);
              var enterpriseSelect_store = new JsonRest({
-               target: "/data/Entreprise",
+               target: "/data/",
                getLabel: function (data) {
                  return data.name + "-" + data.region;
                }
@@ -86,7 +86,7 @@
              accountSelect_query.c = c;
              var requetteAccount = JSON.stringify(accountSelect_query);
              var accountSelection_store = new JsonRest({
-                 target: '/data/Account',
+                 target: '/data/',
                  getLabel: function (data) {
                    return (data.id + "-" + data.accountTxt);
                  }
@@ -125,7 +125,7 @@
              fiscalYearSelect_query.c = c;
              var requetteFiscalYear = JSON.stringify(fiscalYearSelect_query);
              var fiscalYearSelect_store = new JsonRest({
-                 target: '/data/fiscalyear',
+                 target: '/data/',
                  getLabel: function (data) {
                    return (data.id + "-" + data.fiscalYearTxt);
                  }
@@ -165,7 +165,7 @@
 
              //construction de store et du select
              var dateFrom_store = new JsonRest({
-               target : '/data/period',
+               target : '/data/',
                getLabel : function (data) {
                  return formatDate(data.periodStart);
                }
@@ -205,7 +205,7 @@
 
             //construction de store et du select
             var dateTo_store = new JsonRest({
-              target : '/data/period',
+              target : '/data/',
               getLabel : function (data) {
                 return formatDate(data.periodStop);
               }
@@ -237,7 +237,7 @@
 
            function initGrid(param) {
              grid_store = new JsonRest({
-                        target: 'data/transaction/',
+                        target: 'data/',
                         idProperty: "lineId"
                     });
 
