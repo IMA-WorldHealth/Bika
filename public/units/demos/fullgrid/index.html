@@ -2,60 +2,135 @@
 <div id="units.demos.fullgrid.balance" style="width:100%; height: 100%; margin:0; padding:0;"></div>
 <script>
   require(["dojo/store/JsonRest",
+    "dijit/Menu",
+    "dijit/MenuItem",
+    "dijit/Form/Select",
     "gridx/Grid",
-    "gridx/modules/SingleSort",
+    "gridx/modules/HeaderMenu",
     "gridx/modules/extendedSelect/Row",
     "gridx/modules/CellWidget",
     "gridx/modules/Edit",
     "gridx/modules/VirtualVScroller",
-    "gridx/core/model/cache/Async"], function(JsonRest, Grid, SingleSort, Row, CellWidget, Edit, VirtualVScroller, Cache) {
+    "gridx/core/model/cache/Async"], function(JsonRest, Menu, MenuItem, Select, Grid, HeaderMenu, Row, CellWidget, Edit, VirtualVScroller, Cache) {
 
     var grid_store = new JsonRest({
-        target: 'data/'
+      target: 'data/'
     });
-  
+
+    var drop_down_store = new JsonRest({
+      target: 'data/',
+    });
+
+    var hasWidget = false;
+
     var columns = [{
-        id: 'id',
-        field: 'id',
-        name: 'OHADA Number',
+      id    : 'id',
+      field : 'id',
+      name  : 'OHADA Number'
     }, {
-        id: 'accountTxt',
-        field: 'accountTxt',
-        name: 'Account',
-        formatter: function(data) {
-          if (data.accountTxt) return data.accountTxt.toUpperCase();
+      id        : 'account_txt',
+      field     : 'account_txt',
+      name      : 'Account Text',
+      formatter : function(data) {
+        if (data.account_txt) return data.account_txt.toUpperCase();
+      }
+    }, {
+      id    : 'account_type',
+      field : 'type',
+      name  : 'Type',
+      widgetsInCell: true,
+      onCellWidgetCreated: function(cellWidget, column) {
+        if (!hasWidget) {
+          var drop_down = new Select({
+            store: drop_down_store,
+            style: "width: 100%"
+          });
+        } else {
+          hasWidget = false
         }
+      }
     }, {
-        id: 'accountType',
-        field: 'type',
-        name: 'Type',
+      id    : 'total',
+      field : 'total',
+      name  : 'Total'
     }, {
-        id: 'total',
-        field: 'total',
-        name: 'Total'
+      id    : 'balance',
+      field : 'balance',
+      name  : 'Opening Balance'
     }, {
-        id: 'balance',
-        field: 'balance',
-        name: 'Opening Balance'
+      id    : 'cost_center_code_1',
+      field : 'cost_center_code_1',
+      name  : 'Cost Center Code 1'
+    }, {
+      id    : 'cost_center_code_2',
+      field : 'cost_center_code_2',
+      name  : 'Cost Center Code 2'
+    }, {
+      id    : 'cost_center_code_3',
+      field : 'cost_center_code_3',
+      name  : 'Cost Center Code 3'
+    }, {
+      id    : 'cost_center_code_4',
+      field : 'cost_center_code_4',
+      name  : 'Cost Center Code 4'
     }];
 
     var grid_query = {
-      e: [{t: 'account', c:['id', 'accountTxt']},
-          {t: 'accounttype', c: ['type']}],
-      jc: [{ts: ['account', 'accounttype'], c: ['accountTypeId', 'id']}]
+      e: [{t: 'account', c: ['id', 'account_txt']},
+          {t: 'account_type', c: ['type']}],
+      jc: [{ts: ['account', 'account_type'], c: ['account_type_id', 'id']}]
     };
+
+    for (var c in columns) { // hack b/c must bind each column.
+      // create a drop down menu for sorting the grid
+      columns[c].menu = new Menu({
+        bindGrid: function(grid, col) {
+          this.grid = grid;
+          this.colId = col.id;
+        }
+      });
+  
+      columns[c].menu.addChild(new MenuItem({
+        parentCol: columns[c],
+        parentMenu : columns[c].menu, // ARGH HACK HACK HACK
+        label: 'A-Z',
+        onClick: function() { // FIXME: Find a better way to encapsulate scope
+          grid_query.o = [{t: grid_query.e[0].t, cl: this.parentCol.field, v: '+'}];
+          this.parentMenu.grid.model.query('?' + JSON.stringify(grid_query));
+          this.parentMenu.grid.model.clearCache();
+          this.parentMenu.grid.body.refresh();
+        }
+      }));
+  
+      columns[c].menu.addChild(new MenuItem({
+        parentCol: columns[c],
+        parentMenu : columns[c].menu,
+        label: 'Z-A',
+        onClick: function() { // FIXME: Find a better way to scope this.
+          grid_query.o = [{t: grid_query.e[0].t, cl: this.parentCol.field, v: '-'}];
+          this.parentMenu.grid.model.query('?' + JSON.stringify(grid_query));
+          this.parentMenu.grid.model.clearCache();
+          this.parentMenu.grid.body.refresh();
+        }
+      }));
+    
+      columns[c].menu.startup();
+    }
   
     var requetteGrid = JSON.stringify(grid_query);
     
     var grid = new Grid({
-        cacheClass: Cache,
-        store: grid_store,
-        query: '?'+requetteGrid,
-        structure: columns,
-        selectRowTriggerOnCell: true,
-        modules: [
-            Row
-        ]
+      cacheClass: Cache,
+      store: grid_store,
+      query: '?'+requetteGrid,
+      structure: columns,
+      selectRowTriggerOnCell: true,
+      modules: [
+        VirtualVScroller,
+        HeaderMenu,
+        CellWidget,
+        Row
+      ]
     }, "units.demos.fullgrid.balance");
 
     grid.startup();
@@ -63,6 +138,5 @@
     function formatDate(dateString) {
       return new Date(dateString).toDateString();
     }
-
 });
 </script>

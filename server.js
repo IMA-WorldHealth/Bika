@@ -60,7 +60,7 @@ app.get('/tree', function(req, res) {
   var jsonQuery = {
     'entities' : [{
       t: 'user_role',
-      c: ['id', 'id_role', 'allRight']
+      c: ['id', 'id_role', 'all_right']
     },
     {
       t: 'role',
@@ -206,15 +206,15 @@ app.get('/tree', function(req, res) {
           roleuser = ansuer[bb];
           tableauAllrole[bb] = roleuser.role_head; // Dans ce tableau on sauvegarde tous le role de l'utilisateur 
           // ici on recherche les roles pour lesquels il a tous le droits
-          if(roleuser.allRight === 1) {
+          if(roleuser.all_right === 1) {
               tableaurole[nbrerole] = roleuser.id_role;
-              tableauRight[nbrerole] = roleuser.allRight;
+              tableauRight[nbrerole] = roleuser.all_right;
               tableauHead[nbrerole] = roleuser.role_head;
               nbrerole++;
           }
 
           // ici on recherche les roles pour lesquels il a des droits limités
-          if(roleuser.allRight === 0) {
+          if(roleuser.all_right === 0) {
             tableaurolelimite[nbrerolelimite] = roleuser.id_role;
             tableauHeadLimite[nbrerolelimite] = roleuser.role_head;
             nbrerolelimite++;

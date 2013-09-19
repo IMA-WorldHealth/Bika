@@ -17,7 +17,7 @@
             return this.query("?" + JSON.stringify({
               'entities' : [{
                 t : 'unit',
-                c : ['id', 'name', 'desc', 'parent', 'hasChildren', 'url']
+                c : ['id', 'name', 'desc', 'parent', 'has_children', 'url']
               }],
               'cond' : [{
                 t : 'unit',
@@ -48,7 +48,7 @@
           query: "?" + JSON.stringify({
             'entities': [{
               t: 'unit',
-              c: ['id', 'name', 'desc', 'parent', 'hasChildren', 'url']
+              c: ['id', 'name', 'desc', 'parent', 'has_children', 'url']
             }],
             'cond': [{
               t: 'unit',
@@ -58,7 +58,7 @@
             }]
           }),
           mayHaveChildren: function(obj) {
-            return obj.hasChildren;
+            return obj.has_children;
           }
         });
 
@@ -67,7 +67,7 @@
           showRoot: false,
           onOpenClick: true,
           onClick: function(item) {
-            if (item.hasChildren === 0) {
+            if (item.has_children === 0) {
               tabManager.openTab(item.name, item.url, true);
             }
           }
@@ -84,7 +84,7 @@
           label: "Open in new tab",
           onClick: function(item) {
             var itemTree = dijit.byNode(this.getParent().currentTarget);
-            if (itemTree.item.hasChildren === 0) {
+            if (itemTree.item.has_children === 0) {
               tabManager.newTab(itemTree.item.name, itemTree.item.url, true);
             }
           }
