@@ -1,1 +1,139 @@
-Permission Unit
+<html>
+    <head>
+        <title>USER PERMISSION</title>
+        
+        <link rel="stylesheet" href="./js/dojoos/dijit/themes/claro/claro.css" media="screen"/>
+        <link rel="stylesheet" href="./js/dojoos/gridx/resources/claro/Gridx.css"/> 
+        <link rel = "stylesheet" type = "text/css" href="../css/userPermission.css" media="screen" />
+        <script>
+        require(["customizedModule/SelectX",
+         	"customizedModule/CheckBoxX",
+           "dojo/store/JsonRest",
+           "dijit/form/TextBox",
+           "dijit/form/Button",
+           "dijit/form/Form",
+           "dojo/on",
+           "dojo/Deferred",
+           "dojo/promise/all",
+           "gridx/core/model/cache/Async",
+           "gridx/modules/SingleSort",
+           "gridx/modules/extendedSelect/Row",
+           "gridx/modules/CellWidget",
+           "gridx/Grid",
+           "dojo/topic",
+           "dojo/domReady!"
+           ], function (SelectX, CheckBoxX, JsonRest,TextBox, Button, Form, on, Deferred, all, Cache, SingleSort, Row, CellWidget, Grid, topic){
+           	//declarations des variables
+           	var bValider, bAnnuler, txtFirstName, txtLastName, txtEmail,
+           	 txtUserName, txtPassWord, txtConformPassWord, chkAdmin, chkAdministrator, chkFinance, chkManager, chkDocteur, roleStore,
+           	  roleGrid, roleGridQuery = {};
+
+           	  //creations champs des saisies
+           	txtFirstName = new TextBox({class:"saisie", style:"width:220px;"},"firstnameID");
+           	txtLastName = new TextBox({class:"saisie", style:"width:220px;"},"lastnameID");
+           	txtEmail = new TextBox({class:"saisie", style:"width:220px;"},"emailID");
+           	txtUserName = new TextBox({class:"saisie", style:"width:220px;"},"usernameID");
+           	txtPassWord = new TextBox({class:"saisie", type:"password", style:"width:220px;"},"passwordID");
+           	txtConformPassWord = new TextBox({class:"saisie", type:"password", style:"width:220px;"},"confirmpasswordID");
+
+           	//creation des cases a caucher
+            chkAdministrator = new CheckBoxX({value:'Administrator'},"chkadministratorID");
+           	chkAdmin = new CheckBoxX({value:'Admin'},"chkadminID");
+           	chkFinance = new CheckBoxX({value:'Finance'},"chkfinanceID");
+           	chkManager = new CheckBoxX({value:'Manager'},"chkmanagerID");
+           	chkDocteur = new CheckBoxX({value:'Docteur'},"chkdocteurID");
+
+           	//creation des boutons
+           	bValider = new Button({label:"Creer"}, "validerID");
+           	bAnnuler = new Button({label:"Annuler"},"annulerID");
+           	initGrid();
+
+
+
+           	//LES FONCTIONS
+           function	initGrid(){
+           	roleStore = new JsonRest({
+                        target: 'data/'
+                    });
+
+                    var columns = [{
+                        id: 'id',
+                        field: 'id',
+                        name: 'ID'
+                    }, {
+                        id: 'name',
+                        field: 'name',
+                        name: 'ROLE NAME'
+                    }, {
+                        id: 'description',
+                        field: 'description',
+                        name: 'ROLE DESCRIPTION'
+                    }];
+
+                    var e = [{t : 'role', c : ['id', 'name', 'description']}];                    
+                    roleGridQuery.e = e;
+                    var requetteGrid = JSON.stringify(roleGridQuery);
+
+                    roleGrid = new Grid({
+                        style: "height:100px;",
+                        cacheClass: Cache,
+                        store: roleStore,
+                        query: '?'+requetteGrid,
+                        structure: columns,
+                        selectRowTriggerOnCell: true,
+                        modules: [
+                            CellWidget,
+                            SingleSort,
+                            Row
+                            ],
+                        autoHeight: true
+                    }, "divTabRole");
+            chkAdmin.startup();
+           	chkDocteur.startup();
+           	chkFinance.startup();
+           	chkManager.startup();
+           	chkAdministrator.startup();
+            roleGrid.startup();
+           		
+
+           	}
+
+
+        });
+        </script>      
+         
+
+    </head>
+    <body class = "claro">
+     <div id="principal">
+     	<div id="divForm">
+     	    <form id="newuserformID">
+	            <div><label><b>First Name :</b></label><div class="saisie" id="firstnameID"></div></div>
+	            <br/>
+	            <div><label><b>Last Name :</b></label><div class="saisie" id="lastnameID"></div></div>
+	            <br/>
+	            <div><label><b>Email :</b></label><div class="saisie" id="emailID"></div></div>
+	            <br/>
+	            <span id="spanbademailID"><div id="bademailID"></div></span>
+	            <br/>
+	            <div><label><b>User Name :</b></label><div  class="saisie" id="usernameID"></div></div>
+	            <br/> 
+	            <div><label><b>Password :</b></label><div class="saisie" id="passwordID"></div></div>
+	            <br/>
+	            <div><label><b>Confirm Password :</b></label><div class="saisie" id="confirmpasswordID"></div></div>
+	            <br/>
+	            <div id="roleID"><div id="chkadministratorID"></div><b>Administrator </b><br/><div id="chkadminID"></div><b>Admin </b><div id="chkfinanceID"></div><b>Finance</b>
+	            <div id="chkmanagerID"></div><b>Manager </b><div id="chkdocteurID"></div><b>Docteur </b></div>
+	            <span id="spanbadpasswordID"><div id="badpasswordID"></div></span>
+	            <br/>                
+	            <div><div id="validerID"></div><div id="annulerID"></div></div>
+          </form>     		
+     	</div>
+
+     	<div id="divTabRole">
+     		
+     	</div>
+     </div>
+    </body>
+</html>   
+
