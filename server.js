@@ -1,7 +1,7 @@
 // server.js
 
 var express = require('express')
-  , dbFace = require('./lib/database/dbFace')
+  , db = require('./lib/database/db')({config: {user: 'experimental', database: 'experimental', host: 'localhost', password: 'experimental'}})
   , queryHandler = require('./lib/database/myQueryHandler')
   , url = require('url')
   , qs = require('querystring')
@@ -36,7 +36,8 @@ app.get('/data/', function (req, res) {
     jsRequest = JSON.parse(JSON.stringify(myRequest));
   }
   var Qo = queryHandler.getQueryObj(jsRequest);
-  dbFace.selectionner(Qo, cb);
+  var sql = db.select(Qo);
+  db.execute(sql, cb);
 });
 
 
@@ -87,7 +88,8 @@ app.get('/tree', function(req, res) {
   var bb = 0;
   colonne = Qo.cond[0].v;
   tables =  Qo.cond[0].cl;
-  dbFace.selectionner(jsonQuery, function (err, ans) {
+  var sql_query = db.select(jsonQuery);
+  db.execute(sql_query, function (err, ans) {
     if (err) {
       throw err;
     }
@@ -103,7 +105,7 @@ app.get('/tree', function(req, res) {
           q = {
             'entities' : [{
               t: 'unit',
-              c: ['id', 'name', 'desc', 'parent', 'hasChildren', 'url']
+              c: ['id', 'name', 'desc', 'parent', 'has_children', 'url']
             }],
             'cond' : [{
               t: 'unit',
@@ -113,7 +115,9 @@ app.get('/tree', function(req, res) {
             }]
           };
 
-          dbFace.selectionner(q, function(err, ans) {
+          var sql_q = db.select(q);
+
+          db.execute(sql_q, function(err, ans) {
             if (err) {
               throw err;
             }
@@ -133,7 +137,7 @@ app.get('/tree', function(req, res) {
             q = {
               'entities' : [{
                 t: 'unit',
-                c: ['id', 'name', 'desc', 'parent', 'hasChildren', 'url']
+                c: ['id', 'name', 'desc', 'parent', 'has_children', 'url']
               }],
               'cond' : [{
                 t: 'unit',
@@ -147,7 +151,7 @@ app.get('/tree', function(req, res) {
             q = {
               'entities' : [{
                 t: 'unit',
-                c: ['id', 'name', 'desc', 'parent', 'hasChildren', 'url']
+                c: ['id', 'name', 'desc', 'parent', 'has_children', 'url']
               }],
               'cond' : [{
                 t: 'unit',
@@ -167,7 +171,7 @@ app.get('/tree', function(req, res) {
             q = {
               'entities' : [{
                 t: 'unit',
-                c: ['id', 'name', 'desc', 'parent', 'hasChildren', 'url']
+                c: ['id', 'name', 'desc', 'parent', 'has_children', 'url']
               }],
               'cond' : [{
                 t: 'unit',
@@ -187,7 +191,9 @@ app.get('/tree', function(req, res) {
 
           valeur = "COl " + col + " TAB " +tab +" HEAD "+tabHead+ " Branche "+tabBran;
           // return valeur;
-          dbFace.selectionner(q, function(err, ans) {
+          sql_q = db.select(q);
+
+          db.execute(sql_q, function(err, ans) {
             if (err) {
               throw err;
             }
@@ -237,7 +243,8 @@ app.get('/tree', function(req, res) {
               v: "(" + tableauroleString + ")"
             }]
           };
-          dbFace.selectionner(newSql, function(err, ans) {
+          var newSql_sql = db.select(newSql);
+          db.execute(newSql_sql, function(err, ans) {
             if (err) {
               throw err;
             } else if (ans.length > 0) {
@@ -269,8 +276,9 @@ app.get('/tree', function(req, res) {
                   z: '=',
                   v: req.session.user_id
                 }]
-              };              
-              dbFace.selectionner(sqlLimite, function(err, ans) {
+              };  
+              var sqlLimite_sql = db.select(sqlLimite);
+              db.execute(sqlLimite_sql, function(err, ans) {
                 if (err) {
                   throw err;
                 } else if (ans.length > 0) {
@@ -305,7 +313,8 @@ app.get('/tree', function(req, res) {
               v: "(" + tableauroleString + ")"
             }]
           };
-          dbFace.selectionner(newSql, function(err, ans) {
+          var newSql_sql = db.select(newSql);
+          db.execute(newSql, function(err, ans) {
             if (err) {
               throw err;
             } else if (ans.length > 0) {
@@ -344,8 +353,9 @@ app.get('/tree', function(req, res) {
               v: req.session.user_id
             }]
           };
+          var sql = db.select(sqlLimite);
           //Envoi de la requete à DbFace
-          dbFace.selectionner(sqlLimite, function(err, ans) {
+          db.execute(sql, function(err, ans) {
             if (err) {
               throw err;
             } else if (ans.length > 0) {
