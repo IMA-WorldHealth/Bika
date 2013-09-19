@@ -258,6 +258,54 @@ describe("database SELECT tests", function () {
   });
 });
 
+describe("database ORDER BY tests", function() {
+  
+  order_by_simple = {
+    'entities' : [{t: 'example', c: ['id']}],
+    'orderby': [{t: 'example', c: 'id', v: '+'}]
+  };
+
+  order_by_simple_res = "SELECT `example`.`id` FROM `example` ORDER BY `example`.`id` ASC;";
+
+  it("supports single order by conditions", function () {
+    expect(db.select(order_by_simple)).toBe(order_by_simple_res);
+  });
+
+  order_by_multi = {
+    'entities' : [{t: 'example', c: ['id', 'name']}],
+    'orderby': [
+      {t: 'example', c: 'id', v: '+'},
+      {t: 'example', c: 'name', v: '-'}
+    ]
+  };
+
+  order_by_multi_res = "SELECT `example`.`id`, `example`.`name` FROM `example` ORDER BY `example`.`id` ASC, `example`.`name` DESC;";
+
+  it("supports multiple order by conditions", function() {
+    expect(db.select(order_by_multi)).toBe(order_by_multi_res);
+  });
+
+  order_by_join = {
+    'entities': [
+      {t: 'account', c: ['id', 'account_txt']},
+      {t: 'transaction', c: ['account_id', 'date']}
+    ],
+    'jcond' : [
+      {ts: ['account', 'transaction'], c: ['id', 'account_id'] }
+    ],
+    'orderby': [
+      {t: 'account', c: 'id', v:'+'},
+      {t: 'transaction', c: 'date', v: '-'}
+    ]
+  };
+
+  order_by_join_res = "SELECT `account`.`id`, `account`.`account_txt`, `transaction`.`account_id`, `transaction`.`date` FROM `account`, `transaction` WHERE `account`.`id` = `transaction`.`account_id` ORDER BY `account`.`id` ASC, `transaction`.`date` DESC;";
+
+  it("supports ordering on join conditions", function() {
+    expect(db.select(order_by_join)).toBe(order_by_join_res);
+  });
+
+});
 
 env.updateInterval = 250;
 var reporter = new jasmine.ConsoleReporter();
