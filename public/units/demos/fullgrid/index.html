@@ -1,6 +1,7 @@
 <link rel="stylesheet" href="js/dojoos/gridx/resources/claro/Gridx.css"> 
 <div id="units.demos.fullgrid.balance" style="width:100%; height: 100%; margin:0; padding:0;"></div>
 <script>
+  var external;
   require(["dojo/store/JsonRest",
     "dijit/Menu",
     "dijit/MenuItem",
@@ -19,11 +20,15 @@
     });
 
     var drop_down_store = new JsonRest({
-      target: 'data/'
+      target: 'data/',
+      idProperty: 'type',
+      getLabel: function(d) { // all selects must have a getLabel() method
+        return d.type;
+      }
     });
 
     var drop_down_query = {
-      'entities': [{t: 'account_type', c: ['id', 'type']}] // must get id for store.
+      'entities': [{t: 'account_type', c: ['type']}] // must get id for store.
     };
 
     var hasWidget = false;
@@ -59,6 +64,8 @@
       },
       setCellValue: function(gridData, storeData, cellWidget) {
         cellWidget.drop_down.set('value', gridData);
+        cellWidget.drop_down.set('label', gridData);
+        external = cellWidget.drop_down;
       }
     }, {
       id    : 'cost_center_code_1',
@@ -77,12 +84,12 @@
       field : 'cost_center_code_4',
       name  : 'Cost Center Code 4'
     }, {
-      id : 'locked', 
-      field : 'locked',
-      name  : 'Locked',
-      width: '35px',
-      widgetsInCell: true,
-      onCellWidgetCreated: function (cellWidget, column) {
+      id             : 'locked',
+      field          : 'locked',
+      name           : 'Locked',
+      width          : '35px',
+      widgetsInCell  : true,
+      onCellWidgetCreated : function (cellWidget, column) {
         if (!hasWidget) {
           hasWidget = true;
           var chkbx = new CheckBox({
@@ -146,15 +153,13 @@
     
       columns[c].menu.startup();
     }
-
-    console.log('columns', columns); // is the menu present here? // yes
   
     var requetteGrid = JSON.stringify(grid_query);
     
     var grid = new Grid({
       cacheClass: Cache,
       store: grid_store,
-      query: '?'+requetteGrid,
+      query: '?' + requetteGrid,
       structure: columns,
       selectRowTriggerOnCell: true,
       modules: [
@@ -172,7 +177,6 @@
     }
 
     function searchQueryObj(column, grid_query) {
-      console.log(column);
       var entities = grid_query.e, e_obj, table; // only have to search entities
       for (e_obj in entities) {
         if (entities[e_obj].c.some(function (i) { return i === column})) { // if column is in e_obj 
