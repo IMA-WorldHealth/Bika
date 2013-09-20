@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html >
+<html>
 <head>
   <title>Main Page</title>
   <meta charset="utf-8">
@@ -9,8 +9,8 @@
   <script>dojoConfig = {parseOnLoad: true}</script>
   <script type="text/javascript" src="js/dojoos/dojo/dojo.js"></script>
   <script>
-    require(["dijit/layout/BorderContainer", "dijit/Menu", "dijit/MenuItem", "dijit/MenuSeparator", "bika/TabManager/AddTabManager", "dijit/tree/ObjectStoreModel", "dijit/Tree", "dojo/store/JsonRest", "dojo/parser", "dijit/layout/ContentPane", "dojo/domReady!"],
-      function(BorderContainer, Menu, MenuItem, MenuSeparator, AddTabManager, ObjectStoreModel, Tree, JsonRest, parser, ContentPane, ready) {
+    require(["dijit/layout/BorderContainer", "dijit/Menu", "dijit/MenuItem", "dijit/MenuSeparator", "bika/TabManager/AddTabManager", "dijit/tree/ObjectStoreModel", "dijit/Tree", "dojo/store/JsonRest", "dijit/layout/ContentPane", "dojo/domReady!"],
+      function(BorderContainer, Menu, MenuItem, MenuSeparator, AddTabManager, ObjectStoreModel, Tree, JsonRest, ContentPane) {
         var treeStore = new JsonRest({
           target: '/tree',
           getChildren: function(object) {
