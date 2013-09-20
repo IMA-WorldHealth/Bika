@@ -1,20 +1,22 @@
 #principal {
 	position:relative;
+	height:60%;
 }
 
 #divTabRole{
  	position: absolute;
  	width:55%;
- 	top:0;
- 	right:0;
- 	background: red;
+ 	top:5px;
+ 	right:5px;
 }
 
 #divForm{
  	position: absolute;
- 	width:45%px;
- 	top:0;
- 	left:0;
+ 	top:5px;
+ 	left:5px;
+ 	border-color: red;
+ 	z-index: 3;
+
 }
 
 #newuserformID  .saisie{
@@ -29,4 +31,8 @@
  	margin-left: auto;
  	margin-right: auto;
  	text-align: center;
+}
+
+#sub{
+	height:40%;	
 }

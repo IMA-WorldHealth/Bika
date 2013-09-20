@@ -25,8 +25,9 @@
            ], function (SelectX, CheckBoxX, JsonRest,TextBox, Button, Form, on, Deferred, all, Cache, SingleSort, Row, CellWidget, Grid, topic){
            	//declarations des variables
            	var bValider, bAnnuler, txtFirstName, txtLastName, txtEmail,
-           	 txtUserName, txtPassWord, txtConformPassWord, chkAdmin, chkAdministrator, chkFinance, chkManager, chkDocteur, roleStore,
-           	  roleGrid, roleGridQuery = {};
+           	 txtUserName, txtPassWord, txtConformPassWord, chkAdmin, chkAdministrator,
+              chkFinance, chkManager, chkDocteur, roleStore, roleGrid,
+               userGrid, userStore, roleGridQuery = {}, userGridQuery = {};
 
            	  //creations champs des saisies
            	txtFirstName = new TextBox({class:"saisie", style:"width:220px;"},"firstnameID");
@@ -46,12 +47,14 @@
            	//creation des boutons
            	bValider = new Button({label:"Creer"}, "validerID");
            	bAnnuler = new Button({label:"Annuler"},"annulerID");
-           	initGrid();
+           	initUnitGrid();
+            initUserGrid();
 
 
 
            	//LES FONCTIONS
-           function	initGrid(){
+           function	initUnitGrid(){
+            var hasWidget;
            	roleStore = new JsonRest({
                         target: 'data/'
                     });
@@ -63,19 +66,45 @@
                     }, {
                         id: 'name',
                         field: 'name',
-                        name: 'ROLE NAME'
+                        name: 'UNIT NAME'
                     }, {
                         id: 'description',
                         field: 'description',
-                        name: 'ROLE DESCRIPTION'
+                        name: 'UNIT DESCRIPTION'
+                    },{
+                      id:'etat',
+                      name:'ETAT',
+                      width:'35px',
+                      widgetsInCell:true,
+                      onCellWidgetCreated: function(CellWidget, column){
+                        if(!hasWidget){
+                          hasWidget = true;
+                          var chk = new CheckBoxX();                         
+                          chk.placeAt(CellWidget.domNode);
+                         
+                          on(chkAdministrator, "change", function(item){
+                            chk.set('checked', chkAdministrator.get('checked'));
+                          }); 
+                          CellWidget.chk = chk;
+
+                        }else{
+                          hasWidget = false;                         
+                        }
+
+                      },
+                      setCellValue: function(gridData, storData, cellWidget){
+                        console.log("gridData", gridData, "storeData", storData, "cellWidget:", cellWidget)
+                        value = (gridData)?true:false;
+                        cellWidget.chk.set('checked', value);
+                      }
                     }];
 
-                    var e = [{t : 'role', c : ['id', 'name', 'description']}];                    
+                    var e = [{t : 'unit', c : ['id', 'name', 'desc']}];                    
                     roleGridQuery.e = e;
                     var requetteGrid = JSON.stringify(roleGridQuery);
 
                     roleGrid = new Grid({
-                        style: "height:100px;",
+                        style: "height:300px;",
                         cacheClass: Cache,
                         store: roleStore,
                         query: '?'+requetteGrid,
@@ -86,19 +115,52 @@
                             SingleSort,
                             Row
                             ],
-                        autoHeight: true
-                    }, "divTabRole");
-            chkAdmin.startup();
-           	chkDocteur.startup();
-           	chkFinance.startup();
-           	chkManager.startup();
-           	chkAdministrator.startup();
-            roleGrid.startup();
-           		
+                    }, "divTabRole");            
+            roleGrid.startup();	
 
            	}
 
+             function initUserGrid(){
+            userStore = new JsonRest({
+                        target: 'data/'
+                    });
 
+                    var columns = [{
+                        id: 'id',
+                        field: 'id',
+                        name: 'ID'
+                    }, {
+                        id: 'username',
+                        field: 'username',
+                        name: 'USER NAME'
+                    }, {
+                        id: 'email',
+                        field: 'email',
+                        name: 'EMAIL'
+                    }];
+
+                    var e = [{t : 'user', c : ['id', 'username', 'email']}];                    
+                    userGridQuery.e = e;
+                    var requetteGrid = JSON.stringify(userGridQuery);
+
+                    userGrid = new Grid({
+                        style: "height:240px;",
+                        cacheClass: Cache,
+                        store: userStore,
+                        query: '?'+requetteGrid,
+                        structure: columns,
+                        selectRowTriggerOnCell: true,
+                        modules: [
+                            SingleSort,
+                            ],
+                    }, "sub");
+            chkAdmin.startup();
+            chkDocteur.startup();
+            chkFinance.startup();
+            chkManager.startup();
+            chkAdministrator.startup();
+            userGrid.startup(); 
+            }
         });
         </script>      
          
@@ -122,10 +184,9 @@
 	            <br/>
 	            <div><label><b>Confirm Password :</b></label><div class="saisie" id="confirmpasswordID"></div></div>
 	            <br/>
-	            <div id="roleID"><div id="chkadministratorID"></div><b>Administrator </b><br/><div id="chkadminID"></div><b>Admin </b><div id="chkfinanceID"></div><b>Finance</b>
-	            <div id="chkmanagerID"></div><b>Manager </b><div id="chkdocteurID"></div><b>Docteur </b></div>
-	            <span id="spanbadpasswordID"><div id="badpasswordID"></div></span>
-	            <br/>                
+              <span id="spanbadpasswordID"><div id="badpasswordID"></div></span><br/>
+	            <div id="roleID"><div id="chkadministratorID"></div><b>Administrator </b>	            
+	            <br/>  </div>              
 	            <div><div id="validerID"></div><div id="annulerID"></div></div>
           </form>     		
      	</div>
@@ -133,7 +194,11 @@
      	<div id="divTabRole">
      		
      	</div>
-     </div>
-    </body>
+    </div>
+    <div id="sub">
+      
+    </div>
+    
+     </body>
 </html>   
 
