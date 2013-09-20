@@ -10,7 +10,7 @@ Bika aims to provide a FOSS Health Information Managment System (HIMS) for rural
 
 ### Why is Bika necessary?
 
-Bika grew out of an effort to port S[care2x](http://www.care2x.org "www.care2x.org") to use French as the principal language and Congolese Francs as the principal currency.  After a year of research, the project was abandoned in favor of a blank sheet rewrite with a local team of developers.  The benefits of an information system in the reference hospitals of Congo's health zones are beyond the scope of this README.
+Bika grew out of an effort to port [care2x](http://www.care2x.org "www.care2x.org") to use French as the principal language and Congolese Francs as the principal currency.  After a year of research, the project was abandoned in favor of a blank sheet rewrite with a local team of developers.  The benefits of an information system in the reference hospitals of Congo's health zones are beyond the scope of this README.
 
 ### When will Bika be released?
 
