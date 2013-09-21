@@ -14,7 +14,6 @@ describe("The database module db.js ", function() {
 
 });
 
-
 describe("Database UPDATE tests", function() {
   var single_row, multi_row, table = 'account';
 
@@ -39,7 +38,6 @@ describe("Database UPDATE tests", function() {
   it("supports single property updates (string)", function () {
     expect(db.update(table, single_row_string)).toBe(single_row_string_res);
   });
-
 
   single_row_multi = {
     rows: {id:1},
@@ -304,9 +302,77 @@ describe("database ORDER BY tests", function() {
   it("supports ordering on join conditions", function() {
     expect(db.select(order_by_join)).toBe(order_by_join_res);
   });
+});
+
+describe("database LIMIT statement tests", function() {
+
+  limit_simple =  {
+    'entities' : [{t: 'example', c: ['id']}],
+    'limit' : 7
+  };
+
+  limit_simple_res = 'SELECT `example`.`id` FROM `example` LIMIT 7;';
+
+  it("supports simple limit statements", function () {
+    expect(db.select(limit_simple)).toBe(limit_simple_res);
+  });
+
+  limit_order_by = {
+    'entities' : [{t: 'example', c: ['id']}],
+    'orderby': [{t: 'example', c: 'id', v: '+'}],
+    'limit' : 5
+  };
+
+  limit_order_by_res = "SELECT `example`.`id` FROM `example` ORDER BY `example`.`id` ASC LIMIT 5;";
+
+  it("supports order by and limit mixes", function() {
+    expect(db.select(limit_order_by)).toBe(limit_order_by_res);
+  });
+
+  limit_join_condition = {
+    entities: [
+      {t: 'account', c: ['id', 'accountTxt']},
+      {t: 'debitor', c: ['id', 'account_id']}
+    ],
+    jcond: [
+      {ts: ['account', 'debitor'], c: ['id', 'account_id']}
+    ],
+    limit: 3
+  };
+
+  limit_join_condition_res = "SELECT `account`.`id`, `account`.`accountTxt`, `debitor`.`id`, `debitor`.`account_id` FROM `account`, `debitor` WHERE `account`.`id` = `debitor`.`account_id` LIMIT 3;";
+
+  it("supports join and limit mixes", function() {
+    expect(db.select(limit_join_condition)).toBe(limit_join_condition_res);
+  });
 
 });
 
+describe("database SELECT master test", function() {
+  master_test = {
+    entities: [
+      {t: 'enterprise', c: ['id', 'name']},
+      {t: 'account', c: ['id', 'enterprise_id']}
+    ],
+    jcond: [
+      {ts: ['enterprise', 'account'], c: ['id', 'enterprise_id'], l: 'AND'}
+    ],
+    cond: [
+      {t: 'account', cl: 'id', z:'>=', v:101} 
+    ],
+    orderby: [
+      {t: 'account', c: 'id', v: '+'},
+      {t: 'enterprise', c:'name', v: '-'}
+    ],
+    limit: 25
+  };
+
+  master_test_res= "SELECT `enterprise`.`id`, `enterprise`.`name`, `account`.`id`, `account`.`enterprise_id` FROM `enterprise`, `account` WHERE `enterprise`.`id` = `account`.`enterprise_id` AND `account`.`id` >= 101 ORDER BY `account`.`id` ASC, `enterprise`.`name` DESC LIMIT 25;";
+
+  it("passes the master test (all conditions)", function() {
+    expect(db.select(master_test)).toBe(master_test_res);
+  });
+});
 env.updateInterval = 250;
 var reporter = new jasmine.ConsoleReporter();
 env.addReporter(reporter);
