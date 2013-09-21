@@ -278,24 +278,25 @@ INSERT INTO `account` (`enterpriseId`, `id`, `accountLocked`, `accountTxt`, `acc
 --
 ALTER TABLE `enterprise` ADD CONSTRAINT `enterprise_ibfk_1` FOREIGN KEY (`cashAccount`) REFERENCES `account` (`id`);
 
-
 CREATE TABLE IF NOT EXISTS `role` (
-  `id` smallint(5) unsigned NOT NULL,
+  `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(60) NOT NULL,
   `description` varchar(140) DEFAULT NULL,
+  `role_head` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=6 ;
 
 --
 -- Contenu de la table `role`
 --
 
-INSERT INTO `role` (`id`, `name`, `description`) VALUES
-(0, 'Administrator', 'To be finished'),
-(1, 'admin', 'Administrateur simple'),
-(5, 'Finance', 'The Finance'),
-(11, 'Manager', 'Hospital Manager'),
-(15, 'Doctor', 'The physicien');
+INSERT INTO `role` (`id`, `name`, `description`, `role_head`) VALUES
+(1, 'Administrator', 'To be finished', 0),
+(2, 'admin', 'Administrateur simple', 1),
+(3, 'Finance', 'The Finance', 5),
+(4, 'Manager', 'Hospital Manager', 11),
+(5, 'Doctor', 'The physicien', 15);
+
 
 -- CURRENCY is set to a TINYINT under the
 -- assumption that we will house less than
@@ -349,21 +350,6 @@ INSERT INTO `user` (`id`, `username`, `password`, `first`, `last`, `email`, `log
 (11, 'admin', 'lmt', 'Administrateur', 'Limite', 'adminlimit@his.com', 0),
 (12, 'fin', 'f', 'Financier subalterne', 'Sous Financier', 'finance@his.com', 0);
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
-
-
-CREATE TABLE IF NOT EXISTS `permission` (
-  id              MEDIUMINT UNSIGNED NOT NULL,
-  userid          SMALLINT UNSIGNED NOT NULL,
-  roleid          SMALLINT UNSIGNED NOT NULL,
-  enterpriseid    SMALLINT UNSIGNED NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `userid` (`userid`),
-  KEY `roleid` (`roleid`),
-  KEY `enterpriseid` (`enterpriseid`),
-  FOREIGN KEY (`userid`) REFERENCES `user` (`id`),
-  FOREIGN KEY (`roleid`) REFERENCES `role` (`id`),
-  FOREIGN KEY (`enterpriseid`) REFERENCES `enterprise` (`id`)
-) ENGINE=InnoDB;
 
 -- Dumping structure for table bika.fiscalyear
 CREATE TABLE IF NOT EXISTS `fiscalyear` (
@@ -477,26 +463,26 @@ INSERT INTO `transaction` (`journalId`, `lineId`, `accountId`, `credit`, `debit`
 -- NOTE:
 -- Here, unit parents can only go up to SMALLINT size
 
--- Dumping structure for table bika.unit
 CREATE TABLE IF NOT EXISTS `unit` (
-  `id` MEDIUMINT unsigned NOT NULL,
-  `name` VARCHAR(30) NOT NULL,
-  `desc` TEXT NOT NULL,
-  `parent` SMALLINT DEFAULT NULL,
-  `hasChildren` BOOL NOT NULL,
-  `url` TINYTEXT,
+  `id` mediumint(9) NOT NULL,
+  `name` varchar(30) NOT NULL,
+  `description` text NOT NULL,
+  `parent` smallint(6) DEFAULT NULL,
+  `hasChildren` tinyint(1) NOT NULL,
+  `url` tinytext,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=24 ;
 
--- Dumping data for table bika.unit: ~20 rows (environ)
-DELETE FROM `unit`;
-/*!40000 ALTER TABLE `unit` DISABLE KEYS */;
-INSERT INTO `unit` (`id`, `name`, `desc`, `parent`, `hasChildren`, `url`) VALUES
+--
+-- Contenu de la table `unit`
+--
+
+INSERT INTO `unit` (`id`, `name`, `description`, `parent`, `hasChildren`, `url`) VALUES
 (0, 'Root', 'The unseen root node', NULL, 1, ''),
 (1, 'Admin', 'The Administration Super-Category', 0, 1, ''),
 (2, 'Enterprises', 'Manage the registered enterprises from here', 1, 0, '/units/enterprise/'),
 (3, 'Form Manager', 'Manage your forms', 1, 0, '/units/formmanager/'),
-(4, 'Users & Permissions', 'Manage user privileges and permissions', 1, 0, '/units/permission/'),
+(4, 'Users & Permissions', 'Manage user privileges and permissions', 1, 0, '/units/permission/ 4'),
 (5, 'Finance', 'The Finance Super-Category', 0, 1, ''),
 (6, 'Accounts', 'The chart of accounts', 5, 0, '/units/accounts/'),
 (7, 'Charts', 'Analyze how your company is doing', 5, 0, '/units/charts/'),
@@ -514,70 +500,70 @@ INSERT INTO `unit` (`id`, `name`, `desc`, `parent`, `hasChildren`, `url`) VALUES
 (19, 'Radiology', 'X-rays, anyone?', 15, 0, '/units/radiology/'),
 (20, 'Billing', 'Test pour le sous enfant', 5, 1, NULL),
 (21, 'Billing A', 'Sous enfant de Billing', 20, 0, '/html/com'),
-(22, 'Billing B', 'Deuxieme fils de Billing', 20, 0, '/html/deux');
-/*!40000 ALTER TABLE `unit` ENABLE KEYS */;
-
--- --------------------------------------------------------
+(22, 'Billing B', 'Deuxieme fils de Billing', 20, 0, '/html/deux'),
+(23, 'Billing C', '3 Fils', 20, 0, 'Lien hypertext');
 
 --
--- Structure de la table `unit`
+-- Structure de la table `role_unit`
 --
 
 CREATE TABLE IF NOT EXISTS `role_unit` (
-  `id` smallint unsigned NOT NULL,
-  `id_role` smallint unsigned NOT NULL,
-  `id_unit` mediumint unsigned NOT NULL,
+  `id` int(5) NOT NULL AUTO_INCREMENT,
+  `id_role` smallint(5) unsigned NOT NULL,
+  `id_unit` mediumint(9) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `id_role` (`id_role`),
   KEY `id_unit` (`id_unit`),
-  CONSTRAINT `role_unit_ibfk_1` FOREIGN KEY (`id_unit`) REFERENCES `unit` (`id`),
-  CONSTRAINT `role_unit_ibfk_2` FOREIGN KEY (`id_role`) REFERENCES `role` (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
+  CONSTRAINT `role_unit_ibfk_1` FOREIGN KEY (`id_unit`) REFERENCES `unit` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `role_unit_ibfk_2` FOREIGN KEY (`id_role`) REFERENCES `role` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=21;
 
 --
 -- Contenu de la table `role_unit`
 --
 
 INSERT INTO `role_unit` (`id`, `id_role`, `id_unit`) VALUES
-(1, 0, 1),
-(2, 5, 6),
-(3, 5, 7),
-(4, 5, 8),
-(5, 5, 9),
-(6, 5, 10),
-(7, 5, 5),
-(8, 15, 15),
-(9, 15, 16),
-(10, 15, 17),
-(11, 15, 18),
-(12, 15, 19),
-(13, 11, 11),
-(14, 11, 12),
-(15, 11, 13),
-(16, 11, 14),
-(17, 1, 1),
-(18, 1, 2),
-(19, 1, 3),
-(20, 1, 4),
-(21, 5, 20),
-(22, 5, 21),
-(23, 5, 22);
+(1, 1, 0),
+(3, 2, 2),
+(4, 2, 3),
+(5, 2, 4),
+(6, 3, 6),
+(7, 3, 7),
+(8, 3, 8),
+(9, 3, 9),
+(10, 3, 10),
+(11, 3, 20),
+(12, 3, 21),
+(13, 3, 22),
+(14, 4, 12),
+(15, 4, 13),
+(16, 4, 14),
+(17, 5, 16),
+(18, 5, 17),
+(19, 5, 18),
+(20, 5, 19);
+
+
+--
+-- Structure de la table `user_role`
+--
 
 CREATE TABLE IF NOT EXISTS `user_role` (
-  `id` smallint NOT NULL AUTO_INCREMENT,
-  `id_role_unit` smallint unsigned NOT NULL,
-  `id_user` smallint unsigned NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id_role` smallint(5) unsigned NOT NULL,
+  `id_user` smallint(5) unsigned NOT NULL,
+  `allRight` tinyint(1) NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `id_role_unit` (`id_role_unit`,`id_user`),
+  KEY `id_role_unit` (`id_role`,`id_user`),
   KEY `id_user` (`id_user`),
-  CONSTRAINT `user_role_ibfk_1` FOREIGN KEY (`id_role_unit`) REFERENCES `role_unit` (`id`),
-  CONSTRAINT `user_role_ibfk_2` FOREIGN KEY (`id_user`) REFERENCES `user` (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
-
+  CONSTRAINT `user_role_ibfk_2` FOREIGN KEY (`id_user`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_role_ibfk_3` FOREIGN KEY (`id_role`) REFERENCES `role` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=13 ;
 
 --
 -- Contenu de la table `user_role`
 --
+
 
 INSERT INTO `user_role` (`id`, `id_role_unit`, `id_user`) VALUES
 (1, 1, 1),
@@ -623,3 +609,46 @@ INSERT INTO `user_role` (`id`, `id_role_unit`, `id_user`) VALUES
 (45, 22, 5),
 (46, 23, 5),
 (42, 23, 8);
+
+INSERT INTO `user_role` (`id`, `id_role`, `id_user`, `allRight`) VALUES
+(1, 1, 1, 1),
+(2, 1, 2, 1),
+(3, 1, 3, 1),
+(4, 5, 8, 1),
+(5, 3, 8, 1),
+(6, 3, 12, 0),
+(7, 5, 4, 1),
+(8, 3, 5, 1),
+(9, 4, 6, 1),
+(10, 2, 7, 1),
+(11, 4, 9, 1),
+(12, 2, 9, 0);
+
+
+--
+-- Structure de la table `user_role_description`
+--
+
+CREATE TABLE IF NOT EXISTS `user_role_description` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id_role_unit` int(5) NOT NULL,
+  `id_user` smallint(5) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `id_role_unit` (`id_role_unit`,`id_user`),
+  KEY `id_user` (`id_user`),
+  CONSTRAINT `user_role_description_ibfk_1` FOREIGN KEY (`id_role_unit`) REFERENCES `role_unit` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_role_description_ibfk_2` FOREIGN KEY (`id_user`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=8 ;
+
+--
+-- Contenu de la table `user_role_description`
+--
+
+INSERT INTO `user_role_description` (`id`, `id_role_unit`, `id_user`) VALUES
+(4, 4, 9),
+(5, 5, 9),
+(1, 8, 12),
+(2, 9, 12),
+(3, 10, 12),
+(6, 11, 12),
+(7, 13, 12);

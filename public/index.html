@@ -5,12 +5,31 @@
   <meta charset="utf-8">
   <link rel="stylesheet" href="./css/principal.css" media="screen" />
   <link rel="stylesheet" href="js/dojoos/dijit/themes/claro/claro.css"/>
-  <link rel="stylesheet" href="./css/icons/iconic_fill/iconic_fill.css"/>
-  <script>dojoConfig = {parseOnLoad: true}</script>
+  <link rel="stylesheet" href="./css/icons/iconic_fill/iconic_fill.css"/> <!-- needed for icon font -->
+  <script>dojoConfig = {parseOnLoad: true, debug: true}</script>
   <script type="text/javascript" src="js/dojoos/dojo/dojo.js"></script>
   <script>
-    require(["dijit/layout/BorderContainer", "dijit/Menu", "dijit/MenuItem", "dijit/MenuSeparator", "bika/TabManager/AddTabManager", "dijit/tree/ObjectStoreModel", "dijit/Tree", "dojo/store/JsonRest", "dijit/layout/ContentPane", "dojo/domReady!"],
-      function(BorderContainer, Menu, MenuItem, MenuSeparator, AddTabManager, ObjectStoreModel, Tree, JsonRest, ContentPane) {
+    require(["dijit/layout/BorderContainer", "dijit/Menu", "dijit/MenuItem", "dijit/MenuSeparator", "customizedModule/TabManager", "dijit/tree/ObjectStoreModel", "dijit/Tree", "dojo/store/JsonRest", "dijit/layout/ContentPane", "customizedModule/SelectX", "dojo/domReady!"],
+      function(BorderContainer, Menu, MenuItem, MenuSeparator, TabManager, ObjectStoreModel, Tree, JsonRest, ContentPane, SelectX) {
+
+        var enterpriseSelect, enterpriseSelect_query;
+
+        initEnterpriseSelect();
+
+        var bc = new BorderContainer({}, "bc");
+
+        var tabManager = new TabManager({}, "tab_container");
+        var sidebar = new ContentPane({
+          region: 'left',
+        }, "sidebar");
+
+        var center_panel = new ContentPane({
+          region: 'center',
+        }, "center_panel");
+
+        bc.addChild(center_panel);
+        bc.addChild(sidebar);
+
         var treeStore = new JsonRest({
           target: '/tree',
           getChildren: function(object) {
@@ -29,21 +48,7 @@
           }
         });
 
-        var bc = new BorderContainer({}, "bc");
-
-        var tabManager = new AddTabManager({}, "tab_container");
-        var sidebar = new ContentPane({
-          region: 'leading',
-        }, "sidebar");
-
-        var center_panel = new ContentPane({
-          region: 'center',
-        }, "center_panel");
-
-        bc.addChild(center_panel);
-        bc.addChild(sidebar);
-
-        treeModel = new ObjectStoreModel({
+        var treeModel = new ObjectStoreModel({
           store: treeStore,
           query: "?" + JSON.stringify({
             'entities': [{
@@ -68,7 +73,7 @@
           onOpenClick: true,
           onClick: function(item) {
             if (item.has_children === 0) {
-              tabManager.openTab(item.name, item.url, true);
+              tabManager.addChildren(item.name, item.url, true, true);
             }
           }
         }, "tree");
@@ -85,17 +90,35 @@
           onClick: function(item) {
             var itemTree = dijit.byNode(this.getParent().currentTarget);
             if (itemTree.item.has_children === 0) {
-              tabManager.newTab(itemTree.item.name, itemTree.item.url, true);
+              tabManager.addChildren(itemTree.item.name, itemTree.item.url, true, false);
             }
           }
         });
         
         menuContext.addChild(open);
-        
         bc.startup();
         menuContext.startup();
         unitsTree.startup();
+        tabManager.startup();
 
+        //LES FONCTIONS
+        function initEnterpriseSelect() {
+             enterpriseSelect_query = {};
+             var e = [{t : 'enterprise', c : ['id', 'region', 'country', 'city', 'name', 'phone', 'email', 'type', 'cash_account']}];
+             enterpriseSelect_query.e = e;
+             var requetteEntreprise = JSON.stringify(enterpriseSelect_query);
+             var enterpriseSelect_store = new JsonRest({
+               target: "/data/",
+               getLabel: function (data) {
+                 return data.name + "-" + data.region;
+               }
+             });
+             enterpriseSelect = new SelectX({
+               store: enterpriseSelect_store,
+               style: "width: 200px",
+               query: '?' + requetteEntreprise,
+               }, "change_enterprise");            
+           }
       });
   </script>
 </head>
@@ -110,7 +133,7 @@
         </ul>
       </div>
       <div id="tree"></div>
-      <div id="change_enterprise">
+      <div id="change_enterprise"> 
       </div>
     </div>
     <div id="center_panel">

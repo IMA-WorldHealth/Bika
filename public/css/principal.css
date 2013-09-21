@@ -1,3 +1,4 @@
+
 /* Rules for the whole app */
 
 /* fonts */
@@ -11,7 +12,7 @@
 /* Interface Styles */
 html, body {
   width   : 100%;
-  height  : 100%;
+  height  : 100%;sid
   margin  : 0;
   padding : 0;
 }
@@ -27,6 +28,7 @@ html, body {
   width   : 15%;
   padding : 0;
   margin  : 0;
+  position: relative;
 }
 
 #center_panel {
@@ -72,5 +74,21 @@ html, body {
 .dock li:hover {
   background: #f3f3f3;
 }
+
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
+#change_enterprise{
+  position:absolute;
+  left : 0px;
+  bottom: 0px;
+}
+
+
+
 
 
