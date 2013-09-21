@@ -11,4 +11,3 @@ TODO
 5. Research appropriate build system
 6. Design and impliment custom dojo store
 7. Begin development of OHADA-complient accounting module
-8. Add "LIMIT" to database support.
