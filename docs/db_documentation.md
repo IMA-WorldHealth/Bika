@@ -110,6 +110,7 @@ db.execute(sql);
 * jcond: `[{ts:[table1, table2], c:[idcol1, idcol2], l: combination }]`
 * cond: `[{t: alias, cl: alias, z: alias, v: alias, [l: alias]} [, ...] ]`
 * orderby: [{t: 'table', c: 'column', v: ['+' | '-']}]
+* limit: `5`
 
 * ts: specifies tables concerned by the join condition. `eg: jcond:[{ts:['account', 'transaction'],`
 * cl: specifies columns concerned by the join condition. `eg: cond:[{t:'account', cl:'id', z:'>', v:'2000',`
