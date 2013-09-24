@@ -9,14 +9,9 @@ define("customizedModule/TabManager",
 			    selectedTab = nval;
 			    if (this.getChildren().length == 1){
 			    	this.getChildren()[0].set('closable', false);
-			    	this.hello();
 			    }
 			    });				
 			},
-			hello: function(){
-				console.log("je viens d'etre appeler");
-			},
-
 			addChildren: function(title, href, closable, simpleOpen) {
 
 				var enfants = this.getChildren();

@@ -6,10 +6,12 @@
         <link rel="stylesheet" href="./js/dojoos/gridx/resources/claro/Gridx.css"/> 
         <link rel = "stylesheet" type = "text/css" href="../css/userPermission.css" media="screen" />
         <script>
+        var roleGrid;
         require(["customizedModule/SelectX",
          	"customizedModule/CheckBoxX",
            "dojo/store/JsonRest",
            "dijit/form/TextBox",
+           "dijit/form/CheckBox",
            "dijit/form/Button",
            "dijit/form/Form",
            "dojo/on",
@@ -22,11 +24,11 @@
            "gridx/Grid",
            "dojo/topic",
            "dojo/domReady!"
-           ], function (SelectX, CheckBoxX, JsonRest,TextBox, Button, Form, on, Deferred, all, Cache, SingleSort, Row, CellWidget, Grid, topic){
+           ], function (SelectX, CheckBoxX, JsonRest,TextBox,CheckBox, Button, Form, on, Deferred, all, Cache, SingleSort, Row, CellWidget, Grid, topic){
            	//declarations des variables
            	var bValider, bAnnuler, txtFirstName, txtLastName, txtEmail,
            	 txtUserName, txtPassWord, txtConformPassWord, chkAdmin, chkAdministrator,
-              chkFinance, chkManager, chkDocteur, roleStore, roleGrid,
+              chkFinance, chkManager, chkDocteur, roleStore,
                userGrid, userStore, roleGridQuery = {}, userGridQuery = {};
 
            	  //creations champs des saisies
@@ -38,17 +40,17 @@
            	txtConformPassWord = new TextBox({class:"saisie", type:"password", style:"width:220px;"},"confirmpasswordID");
 
            	//creation des cases a caucher
-            chkAdministrator = new CheckBoxX({value:'Administrator'},"chkadministratorID");
-           	chkAdmin = new CheckBoxX({value:'Admin'},"chkadminID");
-           	chkFinance = new CheckBoxX({value:'Finance'},"chkfinanceID");
-           	chkManager = new CheckBoxX({value:'Manager'},"chkmanagerID");
-           	chkDocteur = new CheckBoxX({value:'Docteur'},"chkdocteurID");
+            chkAdministrator = new CheckBox({value:'Administrator'},"chkadministratorID");
+           	chkAdmin = new CheckBox({value:'Admin'},"chkadminID");
+           	chkFinance = new CheckBox({value:'Finance'},"chkfinanceID");
+           	chkManager = new CheckBox({value:'Manager'},"chkmanagerID");
+           	chkDocteur = new CheckBox({value:'Docteur'},"chkdocteurID");
 
            	//creation des boutons
            	bValider = new Button({label:"Creer"}, "validerID");
            	bAnnuler = new Button({label:"Annuler"},"annulerID");
            	initUnitGrid();
-            initUserGrid();
+            //initUserGrid();
 
 
 
@@ -77,25 +79,24 @@
                       width:'35px',
                       widgetsInCell:true,
                       onCellWidgetCreated: function(CellWidget, column){
+                        console.log("le cell est ", CellWidget); 
                         if(!hasWidget){
                           hasWidget = true;
-                          var chk = new CheckBoxX();                         
-                          chk.placeAt(CellWidget.domNode);
-                         
-                          on(chkAdministrator, "change", function(item){
-                            chk.set('checked', chkAdministrator.get('checked'));
-                          }); 
+                          var chk = new CheckBox({checked:false}).placeAt(CellWidget.domNode);                         
                           CellWidget.chk = chk;
-
+                           on(chkAdministrator, "change", function(item){
+                            var value = chkAdministrator.get('checked');
+                            CellWidget.chk.set('checked', value);
+                          });
                         }else{
                           hasWidget = false;                         
                         }
 
                       },
-                      setCellValue: function(gridData, storData, cellWidget){
-                        console.log("gridData", gridData, "storeData", storData, "cellWidget:", cellWidget)
-                        value = (gridData)?true:false;
-                        cellWidget.chk.set('checked', value);
+                      setCellValue: function(gridData, storData, CellWidget){
+                        var value = (gridData)?true:false;
+                        CellWidget.chk.set('checked', value);                       
+                         
                       }
                     }];
 
@@ -114,7 +115,7 @@
                             CellWidget,
                             SingleSort,
                             Row
-                            ],
+                            ]
                     }, "divTabRole");            
             roleGrid.startup();	
 
