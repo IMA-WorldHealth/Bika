@@ -1,24 +1,22 @@
 <!DOCTYPE html>
-<html >
+<html>
 <head>
   <title>Main Page</title>
   <meta charset="utf-8">
   <link rel="stylesheet" href="./css/principal.css" media="screen" />
   <link rel="stylesheet" href="js/dojoos/dijit/themes/claro/claro.css"/>
-  <link rel="stylesheet" href="./css/icons/iconic_fill/iconic_fill.css"/>
-  <script>dojoConfig = {parseOnLoad: true}</script>
+  <link rel="stylesheet" href="./css/icons/iconic_fill/iconic_fill.css"/> <!-- needed for icon font -->
+  <script>dojoConfig = {parseOnLoad: true, debug: true}</script>
   <script type="text/javascript" src="js/dojoos/dojo/dojo.js"></script>
   <script>
-  console.log('Here I am');
-  var bc;
-    require(["dijit/layout/BorderContainer", "dijit/Menu", "dijit/MenuItem", "dijit/MenuSeparator", "customizedModule/TabManager", "dijit/tree/ObjectStoreModel", "dijit/Tree", "dojo/store/JsonRest", "dojo/parser", "dijit/layout/ContentPane", "customizedModule/SelectX", "dojo/domReady!"],
-      function(BorderContainer, Menu, MenuItem, MenuSeparator, TabManager, ObjectStoreModel, Tree, JsonRest, parser, ContentPane, SelectX) {
-
+    require(["dijit/layout/BorderContainer", "dijit/Menu", "dijit/MenuItem", "dijit/MenuSeparator", "customizedModule/TabManager", "dijit/tree/ObjectStoreModel", "dijit/Tree", "dojo/store/JsonRest", "dijit/layout/ContentPane", "customizedModule/SelectX", "dojo/domReady!"],
+      function(BorderContainer, Menu, MenuItem, MenuSeparator, TabManager, ObjectStoreModel, Tree, JsonRest, ContentPane, SelectX) {
 
         var enterpriseSelect, enterpriseSelect_query;
+
         initEnterpriseSelect();
-        bc = new BorderContainer({
-        }, "bc");
+
+        var bc = new BorderContainer({}, "bc");
 
         var tabManager = new TabManager({}, "tab_container");
         var sidebar = new ContentPane({
@@ -38,7 +36,7 @@
             return this.query("?" + JSON.stringify({
               'entities' : [{
                 t : 'unit',
-                c : ['id', 'name', 'desc', 'parent', 'hasChildren', 'url']
+                c : ['id', 'name', 'desc', 'parent', 'has_children', 'url']
               }],
               'cond' : [{
                 t : 'unit',
@@ -50,24 +48,12 @@
           }
         });
 
-       /* var tabManager = new AddTabManager({}, "tab_container");
-        var sidebar = new ContentPane({
-          region: 'leading',
-        }, "sidebar");
-
-        var center_panel = new ContentPane({
-          region: 'center',
-        }, "center_panel");
-
-        bc.addChild(center_panel);
-        bc.addChild(sidebar);*/
-
         var treeModel = new ObjectStoreModel({
           store: treeStore,
           query: "?" + JSON.stringify({
             'entities': [{
               t: 'unit',
-              c: ['id', 'name', 'desc', 'parent', 'hasChildren', 'url']
+              c: ['id', 'name', 'desc', 'parent', 'has_children', 'url']
             }],
             'cond': [{
               t: 'unit',
@@ -77,7 +63,7 @@
             }]
           }),
           mayHaveChildren: function(obj) {
-            return obj.hasChildren;
+            return obj.has_children;
           }
         });
 
@@ -86,7 +72,7 @@
           showRoot: false,
           onOpenClick: true,
           onClick: function(item) {
-            if (item.hasChildren === 0) {
+            if (item.has_children === 0) {
               tabManager.addChildren(item.name, item.url, true, true);
             }
           }
@@ -103,21 +89,22 @@
           label: "Open in new tab",
           onClick: function(item) {
             var itemTree = dijit.byNode(this.getParent().currentTarget);
-            if (itemTree.item.hasChildren === 0) {
+            if (itemTree.item.has_children === 0) {
               tabManager.addChildren(itemTree.item.name, itemTree.item.url, true, false);
             }
           }
         });
         
-        menuContext.addChild(open);        
+        menuContext.addChild(open);
         bc.startup();
         menuContext.startup();
         unitsTree.startup();
+        tabManager.startup();
 
         //LES FONCTIONS
         function initEnterpriseSelect() {
              enterpriseSelect_query = {};
-             var e = [{t : 'enterprise', c : ['id', 'region', 'country', 'city', 'name', 'phone', 'email', 'type', 'cashAccount']}];
+             var e = [{t : 'enterprise', c : ['id', 'region', 'country', 'city', 'name', 'phone', 'email', 'type', 'cash_account']}];
              enterpriseSelect_query.e = e;
              var requetteEntreprise = JSON.stringify(enterpriseSelect_query);
              var enterpriseSelect_store = new JsonRest({
@@ -132,7 +119,6 @@
                query: '?' + requetteEntreprise,
                }, "change_enterprise");            
            }
-
       });
   </script>
 </head>

@@ -18,7 +18,7 @@ The code is free to grab anytime!  Beta builds are slated for summer of 2014, th
 
 ### How can I contribute?
 
-Excellent question!  Pull request are always welcome, provided they provide appropriate tests and documentation.  Because Bika is being developed specifically for rural hosptials in the D.R. Congo, the priorities are very different from most other Open Source projects.  Feel free to drop a line to <IMAEsque@imaworldhealth.org> if you want to know more about the project and how you can help us meet our goals.
+Excellent question!  Pull request are always welcome, provided they provide appropriate tests and documentation.  We currently use Jasmine as our testing platform, and documentation is welcome in Markdown.  Because Bika is being developed specifically for rural hosptials in the D.R. Congo, the priorities are very different from most other Open Source projects.  Feel free to drop a line to <IMAEsque@imaworldhealth.org> if you want to know more about the project and how you can help us meet our goals.
 
 ### What's with all the French commits and comments?
 
@@ -39,4 +39,4 @@ Objectives
 
 ## License
 
-Bika is [beerware](http://www.wikipedia.org/beerware "www.wikipedia.org").
+Bika is [beerware](http://www.wikipedia.org/beerware "www.wikipedia.org").  Be sure to make sure any dependencies are equally liberally licensed.

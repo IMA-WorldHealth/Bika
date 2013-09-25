@@ -1,61 +1,173 @@
 <link rel="stylesheet" href="js/dojoos/gridx/resources/claro/Gridx.css"> 
 <div id="units.demos.fullgrid.balance" style="width:100%; height: 100%; margin:0; padding:0;"></div>
 <script>
+  var external;
   require(["dojo/store/JsonRest",
+    "dijit/Menu",
+    "dijit/MenuItem",
+    "dijit/form/Select",
+    "dijit/form/CheckBox",
     "gridx/Grid",
-    "gridx/modules/SingleSort",
+    "gridx/modules/HeaderMenu",
     "gridx/modules/extendedSelect/Row",
     "gridx/modules/CellWidget",
     "gridx/modules/Edit",
     "gridx/modules/VirtualVScroller",
-    "gridx/core/model/cache/Async"], function(JsonRest, Grid, SingleSort, Row, CellWidget, Edit, VirtualVScroller, Cache) {
+    "gridx/core/model/cache/Async"], function(JsonRest, Menu, MenuItem, Select, CheckBox, Grid, HeaderMenu, Row, CellWidget, Edit, VirtualVScroller, Cache) {
 
     var grid_store = new JsonRest({
-        target: 'data/'
+      target: 'data/'
     });
-  
+
+    var drop_down_store = new JsonRest({
+      target: 'data/',
+      idProperty: 'type',
+      getLabel: function(d) { // all selects must have a getLabel() method
+        return d.type;
+      }
+    });
+
+    var drop_down_query = {
+      'entities': [{t: 'account_type', c: ['type']}] // must get id for store.
+    };
+
+    var hasWidget = false;
+    var drop_down;
     var columns = [{
-        id: 'id',
-        field: 'id',
-        name: 'OHADA Number',
+      id    : 'id',
+      field : 'id',
+      name  : 'OHADA Number'
     }, {
-        id: 'accountTxt',
-        field: 'accountTxt',
-        name: 'Account',
-        formatter: function(data) {
-          if (data.accountTxt) return data.accountTxt.toUpperCase();
+      id        : 'account_txt',
+      field     : 'account_txt',
+      name      : 'Account Text',
+      formatter : function(data) {
+        if (data.account_txt) return data.account_txt.toUpperCase();
+      }
+    }, {
+      id    : 'type',
+      field : 'type',
+      name  : 'Type',
+      widgetsInCell: true,
+      onCellWidgetCreated: function(cellWidget, column) {
+        if (!hasWidget) {
+          hasWidget = true;
+          drop_down = new Select({
+            store: drop_down_store,
+            query: '?' + JSON.stringify(drop_down_query),
+            style: "width: 100%"
+          }).placeAt(cellWidget.domNode);
+          cellWidget.drop_down = drop_down;
+        } else {
+          hasWidget = false;
         }
+      },
+      setCellValue: function(gridData, storeData, cellWidget) {
+        cellWidget.drop_down.set('value', gridData);
+        cellWidget.drop_down.set('label', gridData);
+        external = cellWidget.drop_down;
+      }
     }, {
-        id: 'accountType',
-        field: 'type',
-        name: 'Type',
+      id    : 'cost_center_code_1',
+      field : 'cost_center_code_1',
+      name  : 'Cost Center Code 1'
     }, {
-        id: 'total',
-        field: 'total',
-        name: 'Total'
+      id    : 'cost_center_code_2',
+      field : 'cost_center_code_2',
+      name  : 'Cost Center Code 2'
     }, {
-        id: 'balance',
-        field: 'balance',
-        name: 'Opening Balance'
+      id    : 'cost_center_code_3',
+      field : 'cost_center_code_3',
+      name  : 'Cost Center Code 3'
+    }, {
+      id    : 'cost_center_code_4',
+      field : 'cost_center_code_4',
+      name  : 'Cost Center Code 4'
+    }, {
+      id             : 'locked',
+      field          : 'locked',
+      name           : 'Locked',
+      width          : '35px',
+      widgetsInCell  : true,
+      onCellWidgetCreated : function (cellWidget, column) {
+        if (!hasWidget) {
+          hasWidget = true;
+          var chkbx = new CheckBox({
+            checked: false
+          }).placeAt(cellWidget.domNode);
+          cellWidget.chkbx = chkbx;
+        } else {
+          hasWidget = false;
+        }
+      },
+      setCellValue: function(gridData, storeData, cellWidget) {
+        var ckd = (gridData === 0) ? false : true;
+        cellWidget.chkbx.set('checked', ckd);
+      }
     }];
 
     var grid_query = {
-      e: [{t: 'account', c:['id', 'accountTxt']},
-          {t: 'accounttype', c: ['type']}],
-      jc: [{ts: ['account', 'accounttype'], c: ['accountTypeId', 'id']}]
+      e: [{t: 'account', c: ['id', 'account_txt', 'cost_center_code_1', 'cost_center_code_2', 'cost_center_code_3', 'cost_center_code_4', 'locked']},
+          {t: 'account_type', c: ['type']}],
+      jc: [{ts: ['account', 'account_type'], c: ['account_type_id', 'id']}]
     };
+
+    // It seems the grid is fickle with loading this.  Does this
+    // stop the grid from working? Or even displaying?
+    // FIXME: somehow, browser doesn't render grid initially, though
+    // it is rendered in the DOM...  WHAT THE HECK?!?!
+    for (var c in columns) { // hack b/c must bind each column.
+      // create a drop down menu for sorting the grid
+      columns[c].menu = new Menu({
+        bindGrid: function(grid, col) {
+          this.grid = grid;
+          this.colId = col.id;
+        }
+      });
+  
+      columns[c].menu.addChild(new MenuItem({
+        parentCol: columns[c],
+        parentMenu : columns[c].menu, // ARGH HACK HACK HACK
+        label: 'A-Z',
+        onClick: function() { // FIXME: Find a better way to encapsulate scope
+          table = searchQueryObj(this.parentCol.field, grid_query);
+          grid_query.o = [{t: table, c: this.parentCol.field, v: '+'}];
+          this.parentMenu.grid.model.query('?' + JSON.stringify(grid_query));
+          this.parentMenu.grid.model.clearCache();
+          this.parentMenu.grid.body.refresh();
+        }
+      }));
+  
+      columns[c].menu.addChild(new MenuItem({
+        parentCol: columns[c],
+        parentMenu : columns[c].menu,
+        label: 'Z-A',
+        onClick: function() { // FIXME: Find a better way to scope this.
+          table = searchQueryObj(this.parentCol.field, grid_query);
+          grid_query.o = [{t: table, c: this.parentCol.field, v: '-'}];
+          this.parentMenu.grid.model.query('?' + JSON.stringify(grid_query));
+          this.parentMenu.grid.model.clearCache();
+          this.parentMenu.grid.body.refresh();
+        }
+      }));
+    
+      columns[c].menu.startup();
+    }
   
     var requetteGrid = JSON.stringify(grid_query);
     
     var grid = new Grid({
-        cacheClass: Cache,
-        store: grid_store,
-        query: '?'+requetteGrid,
-        structure: columns,
-        selectRowTriggerOnCell: true,
-        modules: [
-            Row
-        ]
+      cacheClass: Cache,
+      store: grid_store,
+      query: '?' + requetteGrid,
+      structure: columns,
+      selectRowTriggerOnCell: true,
+      modules: [
+        VirtualVScroller,
+        HeaderMenu,
+        CellWidget,
+        Row
+      ]
     }, "units.demos.fullgrid.balance");
 
     grid.startup();
@@ -64,5 +176,13 @@
       return new Date(dateString).toDateString();
     }
 
+    function searchQueryObj(column, grid_query) {
+      var entities = grid_query.e, e_obj, table; // only have to search entities
+      for (e_obj in entities) {
+        if (entities[e_obj].c.some(function (i) { return i === column})) { // if column is in e_obj 
+          return entities[e_obj].t;
+        }
+      }
+    }
 });
 </script>
