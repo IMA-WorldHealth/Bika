@@ -305,7 +305,7 @@ define([
 		},
 
 		//Public-----------------------------------------------------------------
-		backupCount: 1,
+		backupCount: 20,
 
 		setCellDecorator: function(rowId, colId, decorator, setCellValue){
 			var rowDecs = this._decorators[rowId];

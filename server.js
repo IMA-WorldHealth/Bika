@@ -35,11 +35,21 @@ app.get('/data/', function (req, res) {
     jsRequest = JSON.parse(myRequest);
   }catch(e){
     jsRequest = JSON.parse(JSON.stringify(myRequest));
-  }
+  }  
   var Qo = queryHandler.getQueryObj(jsRequest);
   dbFace.selectionner(Qo, cb);
 });
 
+
+app.post('/data/', function (req, res) {
+  var cb = function (err, ans) {
+    if (err) throw err;
+    console.log("succes!");
+    res.send("succes!;")
+  };
+  console.log(req.body);
+  dbFace.inserer(req.body.t, req.body.data, cb);  
+});
 
 
 app.get('/tree', function(req, res) {

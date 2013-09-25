@@ -6,9 +6,9 @@
         <link rel="stylesheet" href="./js/dojoos/gridx/resources/claro/Gridx.css"/> 
         <link rel = "stylesheet" type = "text/css" href="../css/userPermission.css" media="screen" />
         <script>
-        var roleGrid;
+        var roleGrid; 
         require(["customizedModule/SelectX",
-         	"customizedModule/CheckBoxX",
+         	"customizedModule/FormChooser",
            "dojo/store/JsonRest",
            "dijit/form/TextBox",
            "dijit/form/CheckBox",
@@ -22,14 +22,17 @@
            "gridx/modules/extendedSelect/Row",
            "gridx/modules/CellWidget",
            "gridx/Grid",
+           "dojox/grid/DataGrid",
            "dojo/topic",
+           "dijit/Dialog",
+           "dojo/dom-construct",
            "dojo/domReady!"
-           ], function (SelectX, CheckBoxX, JsonRest,TextBox,CheckBox, Button, Form, on, Deferred, all, Cache, SingleSort, Row, CellWidget, Grid, topic){
+           ], function (SelectX, FormChooser, JsonRest,TextBox,CheckBox, Button, Form, on, Deferred, all, Cache, SingleSort, Row, CellWidget, Grid, DataGrid, topic, Dialog, domCons){
            	//declarations des variables
            	var bValider, bAnnuler, txtFirstName, txtLastName, txtEmail,
-           	 txtUserName, txtPassWord, txtConformPassWord, chkAdmin, chkAdministrator,
-              chkFinance, chkManager, chkDocteur, roleStore,
-               userGrid, userStore, roleGridQuery = {}, userGridQuery = {};
+           	 txtUserName, txtPassWord, txtConformPassWord, chkAdministrator,
+              chkFinance, chkManager, chkDocteur, chkAdmin, roleStore,
+               userGrid, userStore, roleGridQuery = {}, userGridQuery = {}, crudStore;
 
            	  //creations champs des saisies
            	txtFirstName = new TextBox({class:"saisie", style:"width:220px;"},"firstnameID");
@@ -41,24 +44,151 @@
 
            	//creation des cases a caucher
             chkAdministrator = new CheckBox({value:'Administrator'},"chkadministratorID");
-           	chkAdmin = new CheckBox({value:'Admin'},"chkadminID");
+           	chkAdmin = new CheckBox({value:'admin'},"chkadminID");
            	chkFinance = new CheckBox({value:'Finance'},"chkfinanceID");
            	chkManager = new CheckBox({value:'Manager'},"chkmanagerID");
            	chkDocteur = new CheckBox({value:'Docteur'},"chkdocteurID");
 
            	//creation des boutons
-           	bValider = new Button({label:"Creer"}, "validerID");
+           	bValider = new Button({label:"Creer", onClick:valider}, "validerID");
            	bAnnuler = new Button({label:"Annuler"},"annulerID");
+
+            //stores
+            crudStore = new JsonRest({target:'/data/'});
+             var fcAdmin, fcFinance;
+
+             (function(){
+              fcAdmin = new FormChooser({name:"admin"},"adminroleformID");
+              var tabUnitsID = fcAdmin.getUnitsID();
+              tabUnitsID.then(function(value){
+                var node;
+                for(var i = 0; i< value.length; i++) {
+                      node = domCons.toDom("<div id=\""+value[i]+'ID'+"\"></div><span>"+value[i]+"</span><br/>"); 
+                      domCons.place(node,"adminroleformID");
+                      }
+                      node = domCons.toDom("<div id=\""+"adminroleformIDAll"+"\"></div><span>"+"Tous"+"</span><br/>"); 
+                      domCons.place(node,"adminroleformID");
+                      node = domCons.toDom("<div id=\""+"adminroleformIDOK"+"\"></div>"); 
+                      domCons.place(node,"adminroleformID");
+                      fcAdmin.placeControls(value); 
+                      fcAdmin.addLastCheck("adminroleformIDAll");
+              new Button({label:'Ok', onClick:sauver}).placeAt(fcAdmin.domNode);
+              fcAdmin.startup();
+
+              });
+            })();
+
+            //surveillance
+            on(chkAdmin, 'change', function(value){
+              if(chkAdmin.get('checked')){
+                showChoix(chkAdmin.value, "adminroleformID");
+              }
+            });
            	initUnitGrid();
-            //initUserGrid();
+            initUserGrid();
 
 
 
-           	//LES FONCTIONS
+
+           	//LES FONCTIONS         
+
+            function showChoix(label, idDom){              
+              var dialog = new Dialog({style : "width:250px", content:fcAdmin});
+              dialog.show();
+                          }
+
+            function valider(){
+              var sql1 = {t:'user', data:[{id:'', username: txtUserName.value, password: txtPassWord.value, first: txtFirstName.value, last:txtLastName.value, email:txtEmail.value, loggedIn:0}]};
+              crudStore.put(sql1);
+              var sql ={} ;               
+              if(chkAdministrator.checked === true){
+                sql.e = [{t : 'role', c : ['id']}];
+                sql.cond = [{t:'role', cl:'name', v:chkAdministrator.value, z:'='}];
+                crudStore.query(sql).then(function(item){
+                  var id_role = item[0].id;
+                  sql.e=[{t:'user', c:['id']}];
+                  sql.cond = [{t:'user', cl:'username', v:txtUserName.value, z:'=', l:'AND'}, {t:'user', cl:'password', v:txtPassWord.value, z:'='}];
+                  crudStore.query(sql).then(function(item){
+                    var id_user = item[0].id;
+                    var sql2 = {t:'user_role', data:[{id:'', id_role:id_role, id_user:id_user, allRight:1}]};
+                    crudStore.put(sql2);                    
+                  });
+
+                });
+              }else{
+                if(chkAdmin.checked === true){
+                  sql.e = [{t : 'role', c : ['id']}];
+                sql.cond = [{t:'role', cl:'name', v:chkAdmin.value, z:'='}];
+                crudStore.query(sql).then(function(item){
+                  var id_role = item[0].id;
+                  sql.e=[{t:'user', c:['id']}];
+                  sql.cond = [{t:'user', cl:'username', v:txtUserName.value, z:'=', l:'AND'}, {t:'user', cl:'password', v:txtPassWord.value, z:'='}];
+                  crudStore.query(sql).then(function(item){
+                    var id_user = item[0].id;
+                    var sql2 = {t:'user_role', data:[{id:'', id_role:id_role, id_user:id_user, allRight:1}]};
+                    crudStore.put(sql2);                    
+                  });
+
+                });
+                }
+
+                if(chkFinance.checked === true){
+                  sql.e = [{t : 'role', c : ['id']}];
+                sql.cond = [{t:'role', cl:'name', v:chkAdmin.value, z:'='}];
+                crudStore.query(sql).then(function(item){
+                  var id_role = item[0].id;
+                  sql.e=[{t:'user', c:['id']}];
+                  sql.cond = [{t:'user', cl:'username', v:txtUserName.value, z:'=', l:'AND'}, {t:'user', cl:'password', v:txtPassWord.value, z:'='}];
+                  crudStore.query(sql).then(function(item){
+                    var id_user = item[0].id;
+                    var sql2 = {t:'user_role', data:[{id:'', id_role:id_role, id_user:id_user, allRight:1}]};
+                    crudStore.put(sql2);                    
+                  });
+
+                });
+                }
+                if(chkManager.checked === true){
+                  sql.e = [{t : 'role', c : ['id']}];
+                sql.cond = [{t:'role', cl:'name', v:chkAdmin.value, z:'='}];
+                crudStore.query(sql).then(function(item){
+                  var id_role = item[0].id;
+                  sql.e=[{t:'user', c:['id']}];
+                  sql.cond = [{t:'user', cl:'username', v:txtUserName.value, z:'=', l:'AND'}, {t:'user', cl:'password', v:txtPassWord.value, z:'='}];
+                  crudStore.query(sql).then(function(item){
+                    var id_user = item[0].id;
+                    var sql2 = {t:'user_role', data:[{id:'', id_role:id_role, id_user:id_user, allRight:1}]};
+                    crudStore.put(sql2);                    
+                  });
+
+                });
+                }
+
+                if(chkDocteur.checked === true){
+                  sql.e = [{t : 'role', c : ['id']}];
+                sql.cond = [{t:'role', cl:'name', v:chkAdmin.value, z:'='}];
+                crudStore.query(sql).then(function(item){
+                  var id_role = item[0].id;
+                  sql.e=[{t:'user', c:['id']}];
+                  sql.cond = [{t:'user', cl:'username', v:txtUserName.value, z:'=', l:'AND'}, {t:'user', cl:'password', v:txtPassWord.value, z:'='}];
+                  crudStore.query(sql).then(function(item){
+                    var id_user = item[0].id;
+                    var sql2 = {t:'user_role', data:[{id:'', id_role:id_role, id_user:id_user, allRight:1}]};
+                    crudStore.put(sql2);                    
+                  });
+                });
+                }
+
+              }
+
+
+
+
+            }
            function	initUnitGrid(){
+            console.log(CellWidget.backupCount);
             var hasWidget;
            	roleStore = new JsonRest({
-                        target: 'data/'
+                        target: '/data/'
                     });
 
                     var columns = [{
@@ -70,34 +200,9 @@
                         field: 'name',
                         name: 'UNIT NAME'
                     }, {
-                        id: 'description',
-                        field: 'description',
+                        id: 'desc',
+                        field: 'desc',
                         name: 'UNIT DESCRIPTION'
-                    },{
-                      id:'etat',
-                      name:'ETAT',
-                      width:'35px',
-                      widgetsInCell:true,
-                      onCellWidgetCreated: function(CellWidget, column){
-                        console.log("le cell est ", CellWidget); 
-                        if(!hasWidget){
-                          hasWidget = true;
-                          var chk = new CheckBox({checked:false}).placeAt(CellWidget.domNode);                         
-                          CellWidget.chk = chk;
-                           on(chkAdministrator, "change", function(item){
-                            var value = chkAdministrator.get('checked');
-                            CellWidget.chk.set('checked', value);
-                          });
-                        }else{
-                          hasWidget = false;                         
-                        }
-
-                      },
-                      setCellValue: function(gridData, storData, CellWidget){
-                        var value = (gridData)?true:false;
-                        CellWidget.chk.set('checked', value);                       
-                         
-                      }
                     }];
 
                     var e = [{t : 'unit', c : ['id', 'name', 'desc']}];                    
@@ -123,7 +228,7 @@
 
              function initUserGrid(){
             userStore = new JsonRest({
-                        target: 'data/'
+                        target: '/data/'
                     });
 
                     var columns = [{
@@ -162,6 +267,13 @@
             chkAdministrator.startup();
             userGrid.startup(); 
             }
+
+            function sauver(){
+              for(var i=0; i<fcAdmin.checks.length; i++){
+                console.log(fcAdmin.checks);
+              }
+
+            }
         });
         </script>      
          
@@ -186,20 +298,25 @@
 	            <div><label><b>Confirm Password :</b></label><div class="saisie" id="confirmpasswordID"></div></div>
 	            <br/>
               <span id="spanbadpasswordID"><div id="badpasswordID"></div></span><br/>
-	            <div id="roleID"><div id="chkadministratorID"></div><b>Administrator </b>	            
+
+	            <div id="roleID"><div id="chkadministratorID"></div><b>Administrator </b>
+              <div id="chkadminID"></div><b>Admin </b>
+              <div id="chkfinanceID"></div><b>Finance </b>
+              <div id="chkmanagerID"></div><b>Manager </b>
+              <div id="chkdoctorID"></div><b>Doctor</b>	            
 	            <br/>  </div>              
 	            <div><div id="validerID"></div><div id="annulerID"></div></div>
           </form>     		
      	</div>
-
-     	<div id="divTabRole">
+      
+      <div id="divTabRole">
      		
      	</div>
     </div>
     <div id="sub">
       
     </div>
-    
+    <div id="financeroleformID"></div><div id="adminroleformID"></div><div id="managerroleformID"></div><div id="doctorroleformID"></div>    
      </body>
 </html>   
 
