@@ -56,7 +56,7 @@
          //LES FONCTIONS
          function initEnterpriseSelect() {
 
-           var e = [{t : 'enterprise', c : ['id', 'region', 'country', 'city', 'name', 'phone', 'email', 'type', 'cashAccount']}];
+           var e = [{t : 'enterprise', c : ['id', 'region', 'country', 'city', 'name', 'phone', 'email', 'type', 'cash_account']}];
            enterpriseSelect_query.e = e;
            var requetteEntreprise = JSON.stringify(enterpriseSelect_query);
            var enterpriseSelect_store = new JsonRest({
@@ -80,15 +80,15 @@
 
          function initAccountSelect(IDEntreprise) {
            //preparation requette
-           var e = [{t : 'account', c : ['id', 'accountLocked', 'accountTxt', 'accountTypeId', 'accountCategory']}];
-           var c = [{t : 'account', cl : 'enterpriseId', v : IDEntreprise, z : '='}];
+           var e = [{t : 'account', c : ['id', 'locked', 'account_txt', 'account_type_id', 'account_category']}];
+           var c = [{t : 'account', cl : 'enterprise_id', v : IDEntreprise, z : '='}];
            accountSelect_query.e = e;
            accountSelect_query.c = c;
            var requetteAccount = JSON.stringify(accountSelect_query);
            var accountSelection_store = new JsonRest({
                target: '/data/',
                getLabel: function (data) {
-                 return (data.id + "-" + data.accountTxt);
+                 return (data.id + "-" + data.account_txt);
                }
              });
            accountSelect = new SelectX({
@@ -119,8 +119,8 @@
          function initFiscalYearSelect(IDEntreprise) {
 
            //preparation requette
-           var e = [{t : 'fiscalyear', c : ['id', 'numberOfMonths', 'fiscalYearTxt', 'transactionStartNumber', 'transactionStopNumber', 'fiscalYearNumber']}];
-           var c = [{t : 'fiscalyear', cl : 'enterpriseId', v : IDEntreprise, z : '='}];
+           var e = [{t : 'fiscal_year', c : ['id', 'number_of_months', 'fiscal_year_txt', 'transaction_start_number', 'transaction_stop_number', 'fiscal_year_number']}];
+           var c = [{t : 'fiscal_year', cl : 'enterprise_id', v : IDEntreprise, z : '='}];
            fiscalYearSelect_query.e = e;
            fiscalYearSelect_query.c = c;
            var requetteFiscalYear = JSON.stringify(fiscalYearSelect_query);
@@ -157,8 +157,8 @@
          function getDateFrom(IDFY) {
 
           //preparation requette
-           var e = [{t : 'period', c: ['fiscalYearId', 'id', 'periodStart', 'periodStop', 'order']}];
-           var c = [{t : 'period', cl : 'fiscalYearId', v : IDFY, z : '='}];
+           var e = [{t : 'period', c: ['fiscal_year_id', 'id', 'period_start', 'period_stop', 'order']}];
+           var c = [{t : 'period', cl : 'fiscal_year_id', v : IDFY, z : '='}];
            dateFrom_query.e = e;
            dateFrom_query.c = c;
            var requetteDateFrom = JSON.stringify(dateFrom_query);
@@ -167,7 +167,7 @@
            var dateFrom_store = new JsonRest({
              target : '/data/',
              getLabel : function (data) {
-               return formatDate(data.periodStart);
+               return formatDate(data.period_start);
              }
            });
            dateFromSelect = new SelectX({
@@ -195,9 +195,9 @@
 
          function getDateTo(IDFY) {
            //preparation requette
-           var e = [{t : 'period', c: ['fiscalYearId', 'id', 'periodStart', 'periodStop', 'order']}];
+           var e = [{t : 'period', c: ['fiscal_year_id', 'id', 'period_start', 'period_stop', 'order']}];
 
-           var c = [{t : 'period', cl : 'fiscalYearId', v : IDFY, z : '='}];
+           var c = [{t : 'period', cl : 'fiscal_year_id', v : IDFY, z : '='}];
            dateTo_query.e = e;
            dateTo_query.c = c;
            var requetteDateTo = JSON.stringify(dateTo_query);
@@ -206,7 +206,7 @@
            var dateTo_store = new JsonRest({
              target : '/data/',
              getLabel : function (data) {
-               return formatDate(data.periodStop);
+               return formatDate(data.period_stop);
              }
            });
 
@@ -240,13 +240,13 @@
        function initGrid(param) {
          grid_store = new JsonRest({
            target     : 'data/',
-           idProperty : "lineId"
+           idProperty : "line_id"
          });
 
           var columns = [{
-            id       : 'LineId',
-            field    : 'lineId',
-            name     : 'LineId',
+            id       : 'line_id',
+            field    : 'line_id',
+            name     : 'line_id',
             editable : true
           }, {
             id       : 'AccountId',
@@ -263,39 +263,39 @@
             field : 'debit',
             name  : 'Debit'
           }, {
-            id    : 'docId',
-            field : 'docId',
+            id    : 'doc_id',
+            field : 'doc_id',
             name  : 'DocId'
           }, {
-            id    : 'transNumber',
-            field : 'transNumber',
+            id    : 'trans_number',
+            field : 'trans_number',
             name  : 'Transaction Number'
           }, {
-            id        : 'transDate',
-            field     : 'transDate',
+            id        : 'trans_date',
+            field     : 'trans_date',
             name      : 'Transaction Date',
-            formatter : function(data) { return formatDate(data.transDate); }
+            formatter : function(data) { return formatDate(data.trans_date); }
           }];
 
           var e = [{
             t : 'transaction',
-            c : ['lineId', 'accountId', 'credit', 'debit', 'docId', 'description', 'transNumber', 'transDate', 'sysCurrency', 'transCurrency', 'exchangeRate']
+            c : ['line_id', 'account_id', 'credit', 'debit', 'doc_id', 'description', 'trans_number', 'trans_date', 'sys_currency', 'trans_currency', 'exchange_rate']
           }];
 
           var c = [{
             t : 'transaction',
-            cl: 'accountId',
+            cl: 'account_id',
             v : param.IDAccount,
             z : '=', l : 'AND'
           }, { 
             t : 'transaction',
-            cl : 'transDate',
+            cl : 'trans_date',
             v : convertToMysqlDate(param.dateFrom),
             z : '>=',
             l : 'AND'
           },{
             t : 'transaction',
-            cl : 'transDate',
+            cl : 'trans_date',
             v : convertToMysqlDate(param.dateTo),
             z : '<='
           }];
@@ -317,7 +317,6 @@
                   SingleSort, // FIXME: Add VirtualVScroller?
                   Row
               ],
-              autoHeight: true //FIXME: Why autoheight?  Won't this disappear after an amazing amount of records?
           }, "units.transaction.masterGrid");
 
           masterGrid.startup();
@@ -422,4 +421,4 @@
        </div>
       </div>
     </body>
-</html>   
+</html>
