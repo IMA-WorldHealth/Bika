@@ -44,46 +44,156 @@
 			//Stores
 			"dojo/store/Memory",
 			"dojo/store/Cache",
-			"dojo/store/JsonRest"
-			], function(dom, domConstruct, Memory, Cache, JsonRest){ 
+			"dojo/store/JsonRest",
+			"dojo/store/Observable"
+			//MVC
+			], function(dom, domConstruct, Memory, Cache, JsonRest, Observable){ 
 
 		///////
-		// modle : budgeting
+		// module : budgeting
+		// 
+		// TODO: 
+		// 	-[Discuss] Functions inside functions created every time a function is called? Place common functions at top level?
 		///////
 		
 		console.log("JsonRest stores not implemented.");
-		
-		//Model
-		var previous_interface = new JsonRest({ 
-		});
-		var previous_model = new Memory({});
-		var previous_cache = new Cache(previous_interface, previous_model);
 
-		var current_interface = new JsonRest({
+		//label months provided by Date object (given 0 - 11)
+		var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+		//@sfount - this data should be imported from the application structure 
+		var enterprise_id = 101;
+		var fiscal_year_id = 2013001;
+
+		//@sfount - set with Selection at top of page
+		var account_id = 100000;
+
+		//Model
+		var previous_interface = new JsonRest({
 		});
-		var current_model = new Memory({});
-		var current_cache = new Cache(current_interface, current_cache);
+		var previous_model = new Observable(Memory({}));
+		var previous_cache;
+
+		var current_interface;
+		var current_model = new Observable(Memory({}));
+		var current_cache;
 
 		var next_interface = new JsonRest({ 
 		});
-		var next_model = new Memory({});
-		var next_cache = new Cache(next_interface, next_cache);
+		var next_model = new Observable(Memory({}));
+		var next_cache;
 		
 		//Populate models with original querry
-		previous_cache.query();
+		/*previous_cache.query();
 		current_cache.query();
-		next_cache.query();
+		next_cache.query();*/
 
-		var previous_results = previous_model.query();
-		var current_results = current_model.query();
-		var next_results = next_model.query();
+		//bindBudgetTable("units-budgeting-current", current_results);
+
+		requestBudget(fiscal_year_id, account_id, current_interface, current_model, current_cache);
+
+		//@sfount - make interface, model and cache more generic?
+		function requestBudget(fiscalyearid, account, interface, model, cache) { 
+			var budget_query = {
+				'e' : [{
+				  t : 'period',
+				  c : ['period_start', 'period_stop'] 
+				}, {
+				  t : 'budget',
+				  c : ['enterprise_id', 'account_id', 'period_id', 'budget']
+				}],
+				'jc': [{
+				  ts: ['period', 'budget'],
+				  c: ['id', 'period_id'],
+				  l: 'AND'
+				}],
+				'c': [{
+				  t: 'budget',
+				  cl: 'account_id',
+				  z: '=', 
+				  v: account, 
+				  l: 'AND' 
+				}, 
+				{
+				  t: 'period',
+				  cl: 'fiscal_year_id', 
+				  z: '=',
+				  v: fiscalyearid
+			}]};
+
+			interface = new JsonRest({ 
+				target : '/data/?' + JSON.stringify(budget_query)
+			});
+			cache = new Cache(interface, model);
+			cache.query();
+
+			var budget_result = model.query();
+			bindBudgetTable("units-budgeting-current", budget_result);
+		}
 
 		//View 
 		function bindBudgetTable(tableid, results) { 
+			//summary: Bind the model for a given budget year to a budget table
 
 			var budget_table = dom.byId(tableid);
 			var table_rows = [];
+
+			//Apply insertRow() function to all elements currently in results
+			//results.forEach(insertRow);
+
+			padTable();
+
+			results.observe(function(item, removedIndex, insertedIndex) { 
+				console.log("Updated with ", item);
+				if(removedIndex > -1) { 
+					//removeRow(removedIndex);
+				}
+				if(insertedIndex > -1) { 
+					//insertRow(item, insertedIndex);
+				}
+			}, true);
+
+			//@sfount - this should be more generic
+			function updateRow(item, index) { 
+				
+
+		        table_rows.splice(i, 0, budget_table.insertBefore(tr, table_rows[i] || null));
+			}
+
+			function removeRow(index) { 
+				//Remove an item from the budget table
+			}
 			
+			function createRow(row_index) { 
+				var tr = domConstruct.create("tr", { 
+					id : tableid + '-' + row_index
+				});
+		        var td_id = domConstruct.create("td", {
+		        	id : tableid + '-' + row_index + 'period'
+		        }, tr);
+		        //@sfount - Research Actual vs. Budget and implement correctly
+		        var td_text = domConstruct.create("td", { 
+		        	id : tableid + '-' + row_index + 'actual'
+		        }, tr);
+		        var td_category = domConstruct.create("td", { 
+		        	id : tableid + '-' + row_index + 'budget'
+		        }, tr);
+
+		        return tr;
+			}
+
+			function padTable() { 
+				//Populate the budget table with blank rows, account for fiscal years starting in any month
+				for(var i=0; i<months.length; i++) { 
+					budget_table.insertBefore(createRow(i), null);
+				}
+			}
+		}
+
+		//Utility functions
+		function formatDate(datestring) { 
+			var date = new Date(dateString);
+      		return months[date.getMonth()] + ' ' + date.getFullYear(); 
 		}
 
 
