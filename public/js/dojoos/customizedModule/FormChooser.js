@@ -1,42 +1,13 @@
 define("customizedModule/FormChooser", 
-	["dijit/form/Form", "dojo/store/JsonRest","dijit/form/CheckBox","dojo/_base/declare", "dojo/Deferred"], 
-	function(Form, JsonRest, CheckBox, declare, Deferred){
+	["dijit/form/Form", "dojo/store/JsonRest","dijit/form/CheckBox","dojo/_base/declare", "dojo/Deferred", "dojo/on"], 
+	function(Form, JsonRest, CheckBox, declare, Deferred, on){
 		return declare("customizedModule.FormChooser",Form,{
-			ids:null,
-			args:null,
 			checks:null,
-			constructor: function(args){
-				declare.safeMixin(this, args);
-				this.args = args;
-				this.ids = [];
-				this.checks = [];
-				
+			constructor: function(){
+				this.checks = [];				
 			},
 			postCreate: function(){
 				this.inherited(arguments);
-				//this.getUnitsID();
-			}, 
-			getUnitsID: function(){
-				var deferred = new Deferred();
-				var store = new JsonRest({target:'/data/'});
-				var that = this;
-				sql={};
-				sql.e = [{t : 'role', c : ['role_head']}];
-                sql.cond = [{t:'role', cl:'name', v:this.args.name, z:'='}];				
-				if(that.args){
-					store.query(sql).then(function(item){
-						var id = item[0].role_head;
-						sql.e = [{t:'unit', c:['name']}];
-						sql.cond = [{t:'unit', cl:'parent', v:id, z:'='}];
-						store.query(sql).then(function(items){
-						 for(var i=0; i<items.length; i++){
-							that.ids.push(items[i].name);			  	            
-			             }				             
-			             deferred.resolve(that.ids);
-			         });
-					});		             
-				}
-				return deferred.promise; 
 			},
 			placeControls: function(values){
 				//creation des checks
@@ -47,9 +18,41 @@ define("customizedModule/FormChooser",
 			},
 			addLastCheck: function(id){
 				var control = new CheckBox({value:"Tous"},id);
-				this.checks.push(control);
+				var that = this;
+				on(control, 'change', function(value){
+					if(value){
+						for(var i=0; i<that.checks.length; i++){
+							that.checks[i].set('checked', true);
 
+						}
+					}else{
+						for(var i=0; i<that.checks.length; i++){
+							that.checks[i].set('checked', false);
+						}
+					}
+				});
+				console.log("on a fini!");
+				this.checks.push(control);
+			},
+			getCheckSelectedCount: function(){
+				var count=0;
+				for(var i=0; i<this.checks.length; i++){
+
+					if(this.checks[i].get('checked') === true){
+						count++;
+					}
 			}
+			console.log(this);
+			return count;
+
+			},
+			uncheckedAll: function(){
+				for(var i=0; i<this.checks.length; i++){
+					this.checks[i].set('checked', false);
+				}
+			}
+
+
 		});
 	}
 	);
