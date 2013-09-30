@@ -17,19 +17,12 @@ fieldset {
 	vertical-align: middle;
 }
 
-/*.table-striped > tbody > tr:nth-child(odd) > td,
-.table-striped > tbody > tr:nth-child(odd) > th {
-  background-color: #D5D5D5;
-}*/
-
-
-
 .budget-table
 {
-	font-family: "Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
+	font-family: "Lucida Sans Unicode", Sans-Serif;
 	font-size: 12px;
 	text-align: left;
-	width: 410px;
+	width: 380px;
 	border-collapse: collapse;
 }
 .budget-table th
@@ -47,10 +40,16 @@ fieldset {
 	background: #e8edff; 
 	border-bottom: 1px solid #fff;
 	color: #669;
+	height: 20px;
 	border-top: 1px solid transparent;
 }
 .budget-table tr:hover td
 {
 	background: #d0dafd;
 	color: #339;
+}
+
+.budget-table input { 
+	width: 100%;
+	height: 100%;
 }

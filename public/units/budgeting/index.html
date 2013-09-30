@@ -41,25 +41,33 @@
 			//DOM manipulation
 			"dojo/dom", 
 			"dojo/dom-construct", 
+			"dojo/query",
+			"dojo/dom-attr", 
 			//Stores
 			"dojo/store/Memory",
 			"dojo/store/Cache",
 			"dojo/store/JsonRest",
-			"dojo/store/Observable"
+			"dojo/store/Observable",
 			//MVC
-			], function(dom, domConstruct, Memory, Cache, JsonRest, Observable){ 
+			//AJAX
+			"dojo/request"
+			], function(dom, domConstruct, query, domAttr, Memory, Cache, JsonRest, Observable, request){ 
 
 		///////
 		// module : budgeting
 		// 
 		// TODO: 
 		// 	-[Discuss] Functions inside functions created every time a function is called? Place common functions at top level?
+		// 	-[Discuss] Should this just be done with D-Grid to provide uniform table structure
 		///////
 		
 		console.log("JsonRest stores not implemented.");
 
 		//label months provided by Date object (given 0 - 11)
 		var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+		//@sfount - I justified this at some point
+		
 
 		//@sfount - this data should be imported from the application structure 
 		var enterprise_id = 101;
@@ -82,18 +90,63 @@
 		});
 		var next_model = new Observable(Memory({}));
 		var next_cache;
-		
-		//Populate models with original querry
-		/*previous_cache.query();
-		current_cache.query();
-		next_cache.query();*/
 
-		//bindBudgetTable("units-budgeting-current", current_results);
+		function initUI() { 
+			//Populate the budget table with blank rows, account for fiscal years starting in any month
+			for(var i=0; i<months.length; i++) { 
+				budget_table.insertBefore(createRow(i), null);
+			}
 
-		requestBudget(fiscal_year_id, account_id, current_interface, current_model, current_cache);
+			//@sfount - is this a fly thing to do ?
+			function createRow(row_index) { 
+				var tr = domConstruct.create("tr", { 
+					id : tableid + '-' + row_index
+				});
+		        var td_period = domConstruct.create("td", {
+		        	id : tableid + '-' + row_index + '-period'
+		        }, tr);
+		        //@sfount - Research Actual vs. Budget and implement correctly
+		        var td_actual = domConstruct.create("td", { 
+		        	id : tableid + '-' + row_index + '-actual'
+		        }, tr);
+		        var td_budget = domConstruct.create("td", { 
+		        	id : tableid + '-' + row_index + '-budget'
+		        }, tr);
+
+		        return tr;
+			}
+		}
+
+		settupBudget(fiscal_year_id, account_id);
+
+		function settupBudget(fiscalyearid, accountid) { 
+
+			//request information about current fiscal year
+			var fyear = {};
+		    var fe = [{t : 'fiscal_year', c : ['id', 'number_of_months', 'start_month', 'start_year', 'previous_fiscal_year', 'next_fiscal_year']}];
+		    var fc = [{t : 'fiscal_year', cl : 'id', v : fiscalyearid, z : '='}];
+
+		    fyear.e = fe;
+		    fyear.c = fc;
+
+		    request.get('data/?' + JSON.stringify(fyear)).then(function(data) { 
+		        var fiscal_data = JSON.parse(data)[0];
+		  		
+		  		//@sfount - This is why combining models/interface/id/cache in an array is a good thing - UPDATE
+		  		//request budgets
+		  		if(fiscal_data.previous_fiscal_year) { 
+		  			requestBudget("previous", fiscal_data.previous_fiscal_year, accountid, previous_interface, previous_model, previous_cache);
+		  		}
+		  		if(fiscal_data.next_fiscal_year) { 
+		  			requestBudget("next", fiscal_data.next_fiscal_year, accountid, next_interface, next_model, next_cache);
+		  		}
+		  		requestBudget("current", fiscalyearid, accountid, current_interface, current_model, current_cache);
+			});
+		}
 
 		//@sfount - make interface, model and cache more generic?
-		function requestBudget(fiscalyearid, account, interface, model, cache) { 
+		//		  - this is shit
+		function requestBudget(id, fiscalyearid, accountid, interface, model, cache) { 
 			var budget_query = {
 				'e' : [{
 				  t : 'period',
@@ -111,7 +164,7 @@
 				  t: 'budget',
 				  cl: 'account_id',
 				  z: '=', 
-				  v: account, 
+				  v: accountid, 
 				  l: 'AND' 
 				}, 
 				{
@@ -128,15 +181,17 @@
 			cache.query();
 
 			var budget_result = model.query();
-			bindBudgetTable("units-budgeting-current", budget_result);
+			bindBudgetTable("units-budgeting-" + id, budget_result);
 		}
 
 		//View 
 		function bindBudgetTable(tableid, results) { 
 			//summary: Bind the model for a given budget year to a budget table
+			//TODO:
+			//	-store row information in bindBudgetTable local variables - these should be used to access row elemnts, vs. queryying the DOM a second time
 
 			var budget_table = dom.byId(tableid);
-			var table_rows = [];
+			//var table_rows = [];
 
 			//Apply insertRow() function to all elements currently in results
 			//results.forEach(insertRow);
@@ -149,50 +204,42 @@
 					//removeRow(removedIndex);
 				}
 				if(insertedIndex > -1) { 
-					//insertRow(item, insertedIndex);
+					updateRow(item, insertedIndex);
 				}
 			}, true);
 
-			//@sfount - this should be more generic
+			//@sfount - this is probably shit
 			function updateRow(item, index) { 
 				
+				console.log("Updating ", item, " at ", index);
+				//@sfount - assuming all fiscal years start in January - this number should be transformed respectively
+				var month = new Date(item.period_start).getMonth();
+				var row_id = tableid + "-" + month;
 
-		        table_rows.splice(i, 0, budget_table.insertBefore(tr, table_rows[i] || null));
+				//@sfount - 3 DOM querries, shouldn't happen
+				domAttr.set(row_id + "-period", "innerHTML", formatDate(item.period_start));
+				domAttr.set(row_id + "-actual", "innerHTML", '0.00');
+				
+				////Create input widget
+				var td_budget_input = domConstruct.create("input", { 
+		        	value : item.budget
+		        }, dom.byId(row_id + "-budget"));
+
+		        //table_rows.splice(i, 0, budget_table.insertBefore(tr, table_rows[i] || null));
 			}
 
 			function removeRow(index) { 
 				//Remove an item from the budget table
 			}
-			
-			function createRow(row_index) { 
-				var tr = domConstruct.create("tr", { 
-					id : tableid + '-' + row_index
-				});
-		        var td_id = domConstruct.create("td", {
-		        	id : tableid + '-' + row_index + 'period'
-		        }, tr);
-		        //@sfount - Research Actual vs. Budget and implement correctly
-		        var td_text = domConstruct.create("td", { 
-		        	id : tableid + '-' + row_index + 'actual'
-		        }, tr);
-		        var td_category = domConstruct.create("td", { 
-		        	id : tableid + '-' + row_index + 'budget'
-		        }, tr);
-
-		        return tr;
-			}
 
 			function padTable() { 
-				//Populate the budget table with blank rows, account for fiscal years starting in any month
-				for(var i=0; i<months.length; i++) { 
-					budget_table.insertBefore(createRow(i), null);
-				}
+
 			}
 		}
 
 		//Utility functions
 		function formatDate(datestring) { 
-			var date = new Date(dateString);
+			var date = new Date(datestring);
       		return months[date.getMonth()] + ' ' + date.getFullYear(); 
 		}
 
