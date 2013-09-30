@@ -1,56 +1,89 @@
-<link href="./budget.css" rel="stylesheet"> <!-- link is only supposed to go in head .. http://www.w3schools.com/tags/tag_link.asp -->
-<div id="units.budgeting.selectbox"><p>Select an account:</p><div id="units.budgeting.accountselect"></div></div>
-<!-- form template -->
-<div id="units.budgeting.formdisplay">
-  <form id="units.budgeting.budgetform">
-    <fieldset id="prev-fin-year-budget">
-      <legend>Last Financial Year</legend> <!-- In future additions, Jed this stuff -->
-      <legend>Year Ended - <span id="prev-year-ending"></span></legend>
-        <table> <!-- table for period, actuals, budgets -->
-          <thead>
-            <th>Period</th>
-            <th>Actual</th>
-            <th>Budget</th>
-          </thead>
-          <tbody><!-- this must be filled out by dojo toolkit --></tbody>
-        </table>
-    </fieldset> 
-    <fieldset id="current-fin-year-budget"></fieldset>
-    <fieldset id="next-fin-year-budget"></fieldset>
-  </form>
+<link href="../css/budget.css" rel="stylesheet">
+
+<div id="units-budgeting-budgetDisplay">
+	<fieldset>
+		<legend>Previous Fiscal Year</legend>
+		<table class="budget-table">
+			<thead>
+				<tr><th>Period</th><th>Actual</th><th>Budget</th></tr>
+			</thead>
+			<tbody id="units-budgeting-previous">
+				<!--Generated with dojo-->
+			</tbody>
+		</table>
+	</fieldset>
+	<fieldset>
+		<legend>Current Fiscal Year</legend>
+		<table class="budget-table">
+			<thead>
+				<tr><th>Period</th><th>Actual</th><th>Budget</th></tr>
+			</thead>
+			<tbody id="units-budgeting-current">
+				<!--Generated with dojo-->
+			</tbody>
+		</table>
+	</fieldset>
+	<fieldset>
+		<legend>Next Fiscal Year</legend>
+		<table class="budget-table">
+			<thead>
+				<tr><th>Period</th><th>Actual</th><th>Budget</th></tr>
+			</thead>
+			<tbody id="units-budgeting-next">
+				<!--Generated with dojo-->
+			</tbody>
+		</table>
+	</fieldset>
 </div>
 
 <script>
-require(["dojo/request", "dojo/dom-construct", "dojo/store/JsonRest", "dijit/forms/Select", "dojo/domReady!"], 
-  function(request, domConstruct, JsonRest, Select) {
-  
-  var account_select_store = new JsonRest({
-    target: 'data/',
-    getLabel: function(data) {
-      return data.accountTxt + data.id; // coding against the old trackerv6.sql db
-    }
-  });
+	require([
+			//DOM manipulation
+			"dojo/dom", 
+			"dojo/dom-construct", 
+			//Stores
+			"dojo/store/Memory",
+			"dojo/store/Cache",
+			"dojo/store/JsonRest"
+			], function(dom, domConstruct, Memory, Cache, JsonRest){ 
 
-  var account_select = new Select({
-    store: account_select_store
-  }, "units.budgeting.accountselect");
+		///////
+		// modle : budgeting
+		///////
+		
+		//Model
+		var previous_interface = new JsonRest({ 
+		});
+		var previous_model = new Memory({});
+		var previous_cache = new Cache(previous_interface, previous_model);
 
-  
-  var headers = '<thead><th>Period</th><th>Actual</th><th>Budget</th></thead>';
-  var domhead = domConstruct.toDom(headers);
+		var current_interface = new JsonRest({
+		});
+		var current_model = new Memory({});
+		var current_cache = new Cache(current_interface, current_cache);
 
-  // only do this after account_select has loaded (API docs)
-  var query = {
-    'entities' : [
-      {t: 'account', c: ['id', 'accountTxt']},
-      {t: 'budget', c: ['id', 'period', 'fiscalyear', 'etc..']},
-    ]
-  };
-  request.get('data/'+JSON.stringify(query)).then(function(results) {
-    // treat results appropriately and build table in DOM
-  });
+		var next_interface = new JsonRest({ 
+		});
+		var next_model = new Memory({});
+		var next_cache = new Cache(next_interface, next_cache);
+		
+		//Populate models with original querry
+		previous_cache.query();
+		current_cache.query();
+		next_cache.query();
 
-  //fin
+		var previous_results = previous_model.query();
+		var current_results = current_model.query();
+		var next_results = next_model.query();
 
-});
+		//View 
+		function bindBudgetTable(tableid, results) { 
 
+			var budget_table = dom.byId(tableid);
+			var table_rows = [];
+			
+		}
+
+
+	});
+</script>
