@@ -75,6 +75,7 @@
              var IDEntreprise = this.get('value');
              deferred.resolve(IDEntreprise);
            });
+             
            return deferred.promise;
          }
 
@@ -157,7 +158,7 @@
          function getDateFrom(IDFY) {
 
           //preparation requette
-           var e = [{t : 'period', c: ['fiscal_year_id', 'id', 'period_start', 'period_stop', 'order']}];
+           var e = [{t : 'period', c: ['fiscal_year_id', 'period_id', 'period_start', 'period_stop', 'order']}];
            var c = [{t : 'period', cl : 'fiscal_year_id', v : IDFY, z : '='}];
            dateFrom_query.e = e;
            dateFrom_query.c = c;
@@ -195,7 +196,7 @@
 
          function getDateTo(IDFY) {
            //preparation requette
-           var e = [{t : 'period', c: ['fiscal_year_id', 'id', 'period_start', 'period_stop', 'order']}];
+           var e = [{t : 'period', c: ['fiscal_year_id', 'period_id', 'period_start', 'period_stop', 'order']}];
 
            var c = [{t : 'period', cl : 'fiscal_year_id', v : IDFY, z : '='}];
            dateTo_query.e = e;

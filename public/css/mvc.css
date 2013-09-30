@@ -1,0 +1,29 @@
+.budget-table
+{
+	font-family: "Lucida Sans Unicode";
+	font-size: 12px;
+	text-align: left;
+	border-collapse: collapse;
+}
+.budget-table th
+{
+	font-size: 13px;
+	font-weight: normal;
+	padding: 8px;
+	background: #b9c9fe;
+	border-bottom: 1px solid #fff;
+	color: #039;
+}
+.budget-table td
+{
+	padding: 6px;
+	background: #e8edff; 
+	border-bottom: 1px solid #fff;
+	color: #669;
+	border-top: 1px solid transparent;
+}
+.budget-table tr:hover td
+{
+	background: #d0dafd;
+	color: #339;
+}

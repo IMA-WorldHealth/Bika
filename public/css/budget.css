@@ -1,0 +1,56 @@
+#units-budgeting-budgetDisplay {
+	position: relative;
+	text-align: center;
+	padding-top: 30px;
+}
+
+fieldset { 
+
+	margin: 0;
+	padding: 5;
+	
+
+}
+
+fieldset { 
+	display: inline-block;
+	vertical-align: middle;
+}
+
+/*.table-striped > tbody > tr:nth-child(odd) > td,
+.table-striped > tbody > tr:nth-child(odd) > th {
+  background-color: #D5D5D5;
+}*/
+
+
+
+.budget-table
+{
+	font-family: "Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
+	font-size: 12px;
+	text-align: left;
+	width: 410px;
+	border-collapse: collapse;
+}
+.budget-table th
+{
+	font-size: 13px;
+	font-weight: normal;
+	padding: 8px;
+	background: #b9c9fe;
+	border-bottom: 1px solid #fff;
+	color: #039;
+}
+.budget-table td
+{
+	padding: 6px;
+	background: #e8edff; 
+	border-bottom: 1px solid #fff;
+	color: #669;
+	border-top: 1px solid transparent;
+}
+.budget-table tr:hover td
+{
+	background: #d0dafd;
+	color: #339;
+}

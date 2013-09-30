@@ -27,6 +27,7 @@ app.get('/data/', function (req, res) {
     if (err) throw err;
     res.setHeader('Content-Range', '0-0/' + ans.length);
     res.json(ans);
+    console.log("res - ans");
   };
   var myRequest = decodeURIComponent(url.parse(req.url).query);
   var jsRequest;  
@@ -36,8 +37,11 @@ app.get('/data/', function (req, res) {
     jsRequest = JSON.parse(JSON.stringify(myRequest));
   }
   var Qo = queryHandler.getQueryObj(jsRequest);
+  console.log("QUERRY OBJECT YO: ", Qo);
   var sql = db.select(Qo);
+  console.log("BEFORE: " + sql);
   db.execute(sql, cb);
+  console.log("AFTER: " + sql);
 });
 
 
