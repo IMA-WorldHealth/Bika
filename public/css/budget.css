@@ -19,7 +19,7 @@ fieldset {
 
 .budget-table
 {
-	font-family: "Lucida Sans Unicode", Sans-Serif;
+	font-family: "Courier";
 	font-size: 12px;
 	text-align: left;
 	width: 380px;
@@ -30,9 +30,10 @@ fieldset {
 	font-size: 13px;
 	font-weight: normal;
 	padding: 8px;
-	background: #b9c9fe;
+	background: #222;
 	border-bottom: 1px solid #fff;
-	color: #039;
+	color: white;
+	border-top:3px solid #666;
 }
 .budget-table td
 {
@@ -40,13 +41,17 @@ fieldset {
 	background: #e8edff; 
 	border-bottom: 1px solid #fff;
 	color: #669;
-	height: 20px;
+	height: 25px;
 	border-top: 1px solid transparent;
 }
-.budget-table tr:hover td
+.budget-table tr:hover:not(.empty) td 
 {
 	background: #d0dafd;
 	color: #339;
+}
+
+.budget-table .empty td { 
+	background: #FAFAFA;
 }
 
 .budget-table input { 

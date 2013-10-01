@@ -37,6 +37,7 @@
 </div>
 
 <script>
+var current_model;
 	require([
 			//DOM manipulation
 			"dojo/dom", 
@@ -59,6 +60,7 @@
 		// TODO: 
 		// 	-[Discuss] Functions inside functions created every time a function is called? Place common functions at top level?
 		// 	-[Discuss] Should this just be done with D-Grid to provide uniform table structure
+		// 	-[Discuss] I read somewhere that var newFunc = function() { } is better practice than function() { }, is that true?
 		///////
 		
 		console.log("JsonRest stores not implemented.");
@@ -67,7 +69,7 @@
 		var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 		//@sfount - I justified this at some point
-		
+		var fiscal_array = [{id : "previous"}, {id : "current"}, {id : "next"}];
 
 		//@sfount - this data should be imported from the application structure 
 		var enterprise_id = 101;
@@ -83,7 +85,7 @@
 		var previous_cache;
 
 		var current_interface;
-		var current_model = new Observable(Memory({}));
+		current_model = new Observable(Memory({}));
 		var current_cache;
 
 		var next_interface = new JsonRest({ 
@@ -91,29 +93,43 @@
 		var next_model = new Observable(Memory({}));
 		var next_cache;
 
+		initUI();
+
 		function initUI() { 
-			//Populate the budget table with blank rows, account for fiscal years starting in any month
-			for(var i=0; i<months.length; i++) { 
-				budget_table.insertBefore(createRow(i), null);
-			}
 
-			//@sfount - is this a fly thing to do ?
-			function createRow(row_index) { 
-				var tr = domConstruct.create("tr", { 
-					id : tableid + '-' + row_index
-				});
-		        var td_period = domConstruct.create("td", {
-		        	id : tableid + '-' + row_index + '-period'
-		        }, tr);
-		        //@sfount - Research Actual vs. Budget and implement correctly
-		        var td_actual = domConstruct.create("td", { 
-		        	id : tableid + '-' + row_index + '-actual'
-		        }, tr);
-		        var td_budget = domConstruct.create("td", { 
-		        	id : tableid + '-' + row_index + '-budget'
-		        }, tr);
+			padTables();
 
-		        return tr;
+			function padTables() { 
+				//Populate the budget table with blank rows, account for fiscal years starting in any month
+				for(var i=0; i<fiscal_array.length; i++) { 
+					var tableid = "units-budgeting-" + fiscal_array[i].id;
+					var budget_table = dom.byId(tableid);
+
+					for(var j=0; j<months.length; j++) { 
+						budget_table.insertBefore(createRow(j), null);
+					}
+
+					//@sfount - is this a fly thing to do ?
+					function createRow(row_index) { 
+						var tr = domConstruct.create("tr", { 
+							id : tableid + '-' + row_index,
+							class : "empty"
+						});
+				        var td_period = domConstruct.create("td", {
+				        	id : tableid + '-' + row_index + '-period'
+				        }, tr);
+				        //@sfount - Research Actual vs. Budget and implement correctly
+				        var td_actual = domConstruct.create("td", { 
+				        	id : tableid + '-' + row_index + '-actual'
+				        }, tr);
+				        var td_budget = domConstruct.create("td", { 
+				        	//@sfount - update this to give uniform naming convention 
+				        	id : tableid + '-' + row_index + '-budgetRow'
+				        }, tr);
+
+				        return tr;
+					}
+				}
 			}
 		}
 
@@ -196,8 +212,6 @@
 			//Apply insertRow() function to all elements currently in results
 			//results.forEach(insertRow);
 
-			padTable();
-
 			results.observe(function(item, removedIndex, insertedIndex) { 
 				console.log("Updated with ", item);
 				if(removedIndex > -1) { 
@@ -216,24 +230,29 @@
 				var month = new Date(item.period_start).getMonth();
 				var row_id = tableid + "-" + month;
 
+				console.log(domAttr.get(row_id, "class"));
+				domAttr.set(row_id, "class", '');
 				//@sfount - 3 DOM querries, shouldn't happen
 				domAttr.set(row_id + "-period", "innerHTML", formatDate(item.period_start));
 				domAttr.set(row_id + "-actual", "innerHTML", '0.00');
 				
-				////Create input widget
-				var td_budget_input = domConstruct.create("input", { 
-		        	value : item.budget
-		        }, dom.byId(row_id + "-budget"));
+				if(dom.byId(row_id + "-budget") != null) { 
+					//reference input widget
+					domAttr.set(row_id + "-budget", "value", item.budget);
+				} else { 
+					//create input widget 
+					var td_budget_input = domConstruct.create("input", { 
+			        	value : item.budget,
+			        	id : row_id + "-budget"
+			        }, dom.byId(row_id + "-budgetRow"));
+
+				}
 
 		        //table_rows.splice(i, 0, budget_table.insertBefore(tr, table_rows[i] || null));
 			}
 
 			function removeRow(index) { 
 				//Remove an item from the budget table
-			}
-
-			function padTable() { 
-
 			}
 		}
 
