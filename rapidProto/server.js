@@ -1,7 +1,7 @@
 // server.js
 
 var express = require('express')
-  , db = require('./lib/database/db')({config: {user: 'bika', database: 'bika', host: 'localhost', password: 'HISCongo2013'}})
+  , db = require('./lib/database/db')({config: {user: 'bika', database: 'bikaDedrick', host: 'localhost', password: 'HISCongo2013'}})
   , queryHandler = require('./lib/database/myQueryHandler')
   , url = require('url')
   , qs = require('querystring')
@@ -28,7 +28,7 @@ app.get('/data/', function (req, res) {
     if (err) throw err;
     res.setHeader('Content-Range', '0-0/' + ans.length);
     res.json(ans);
-    console.log("res - ans");
+    //console.log("res - ans");
   };
   var myRequest = decodeURIComponent(url.parse(req.url).query);
   var jsRequest;  
@@ -38,11 +38,11 @@ app.get('/data/', function (req, res) {
     jsRequest = JSON.parse(JSON.stringify(myRequest));
   }  
   var Qo = queryHandler.getQueryObj(jsRequest);
-  console.log("QUERRY OBJECT YO: ", Qo);
+ // console.log("QUERRY OBJECT YO: ", Qo);
   var sql = db.select(Qo);
-  console.log("BEFORE: " + sql);
+  //console.log("BEFORE: " + sql);
   db.execute(sql, cb);
-  console.log("AFTER: " + sql);
+  //console.log("AFTER: " + sql);
 });
 
 

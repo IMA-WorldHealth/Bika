@@ -30,7 +30,7 @@
         bc.addChild(center_panel);
         bc.addChild(sidebar);
 
-        var treeStore = new JsonRest({
+        /*var treeStore = new JsonRest({
           target: '/tree',
           getChildren: function(object) {
             return this.query("?" + JSON.stringify({
@@ -46,9 +46,9 @@
               }]
             }));
           }
-        });
+        });*/
 
-        var treeModel = new ObjectStoreModel({
+       /* var treeModel = new ObjectStoreModel({
           store: treeStore,
           query: "?" + JSON.stringify({
             'entities': [{
@@ -65,9 +65,9 @@
           mayHaveChildren: function(obj) {
             return obj.has_children;
           }
-        });
+        });*/
 
-        var unitsTree = new Tree({
+      /*  var unitsTree = new Tree({
           model: treeModel,
           showRoot: false,
           onOpenClick: true,
@@ -76,16 +76,16 @@
               tabManager.addChildren(item.name, item.url, true, true);
             }
           }
-        }, "tree");
+        }, "tree");*/
 
-        var menuContext = new Menu({
+      /*  var menuContext = new Menu({
           targetNodeIds: ["tree"],
           selector: ".dijitTreeNodeContainer > .dijitTreeNode > .dijitTreeNodeContainer > .dijitTreeNode", // FIXME: find a better selector
           id: "menuContext",
           style: "display: none;"
-        });
+        });*/
         
-        var open = new MenuItem({
+      /*  var open = new MenuItem({
           label: "Open in new tab",
           onClick: function(item) {
             var itemTree = dijit.byNode(this.getParent().currentTarget);
@@ -93,12 +93,12 @@
               tabManager.addChildren(itemTree.item.name, itemTree.item.url, true, false);
             }
           }
-        });
+        });*/
         
-        menuContext.addChild(open);
+       // menuContext.addChild(open);
         bc.startup();
-        menuContext.startup();
-        unitsTree.startup();
+       // menuContext.startup();
+       // unitsTree.startup();
         tabManager.startup();
 
         //LES FONCTIONS

@@ -3,8 +3,8 @@
 // 401 HTTP code is unauthorised.
 // See: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 // TODO: impliment more informative error codes
-
-var db = require('./database/db')({config: {user: 'bika', database: 'bika', host: 'localhost', password: 'HISCongo2013'}});
+var url = require('url'),
+    db = require('./database/db')({config: {user: 'bika', database: 'bikaDedrick', host: 'localhost', password: 'HISCongo2013'}});
 
 var users = {};
 
@@ -18,11 +18,39 @@ function logUserIn(id, username, password, req, res, next) {
 
   db.execute(composed_query, function (err, results) {
     if (err) { next(err); }
+    req.session.chemins = new Array();
     req.session.logged_in = true;  // maybe this is too asynchronous
     req.session.user_id = id;
-    users[req.session.id] = [id, username, password];
-    res.redirect('/');
+    users[req.session.id] = [id, username, password];    
+    //augmentation auth.js
+    var rigth_request = {'entities':[
+                                      {t:'unit', c:['url']},
+                                      {t:'permission', c:['id']},
+                                      {t:'user', c:['id']}
+                                    ], 
+                         'jcond':[
+                                   {ts:['permission', 'user'], c:['id_user', 'id'], l:'AND'},
+                                   {ts:['permission','unit'], c:['id_unit', 'id'], l:'AND'}
+                                 ],
+                         'cond':[       
+                                   {t:'user', cl:'id', z:'=', v:req.session.user_id}
+                                ]
+                        };    
+    var composed_query = db.select(rigth_request);
+    db.execute(composed_query, function(err, results){
+      if(err){
+        next(err);
+      }
+      var taille = results.length;
+      if(taille>0){
+        for(var i = 0; i<taille; i++){
+          req.session.chemins.push(results[i].url);
+        }
+        res.redirect('/');
     return;
+      }
+    });
+    
   });
 }
 
@@ -32,15 +60,18 @@ var auth = function (req, res, next) {
     if (req.url === '/login.html' || req.url === '/login') {
       res.redirect('/');
       return;
+    }else{
+      checkPermission(req, res, next);
+
     }
-    next();
+   
   }
 
   if (req.url === "/login") {
     var u = req.body.username;
     var p = req.body.password;
     var dbquery = {
-      'entities': [{t: 'user', c: ['id', 'logged_in']}],
+      'entities': [{t: 'user', c: ['id', 'logged_in']}],      
       'cond': [
         {t: 'user', cl: 'username', 'z': '=', v: u, l: 'AND'},
         {t: 'user', cl: 'password', 'z': '=', v: p}
@@ -83,6 +114,29 @@ var auth = function (req, res, next) {
       return;
     });
   }
+
+  //augmentation de auth.js
+ /* if(req.session.logged_in && req.url !== '/login' && req.url !== "/login.html" && req.url !== "/logout"){
+    //console.log(req.session);
+    //console.log('contenue dans la session, le tab est : ', req.session);
+    
+  }*/
 };
+
+var checkPermission = function (req,res,next){
+  var chemin = url.parse(req.url).path;
+  //test sur le chemin predefini
+  if(chemin.match(new RegExp("/js/dojoos/"))){
+    console.log("bonjour!");
+
+    }
+  for(var i=0; i<req.session.chemins.length; i++){
+    //var chaine = new RegExp("[cor]","g");
+    var chaine = new RegExp(req.session.chemins[i],"g");
+    
+    
+  }
+   next();
+}
 
 module.exports = auth;
