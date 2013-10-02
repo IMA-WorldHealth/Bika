@@ -51,8 +51,10 @@ var current_model;
 			"dojo/store/Observable",
 			//MVC
 			//AJAX
-			"dojo/request"
-			], function(dom, domConstruct, query, domAttr, Memory, Cache, JsonRest, Observable, request){ 
+			"dojo/request",
+			//Events?
+			"dojo/on"
+			], function(dom, domConstruct, query, domAttr, Memory, Cache, JsonRest, Observable, request, on){ 
 
 		///////
 		// module : budgeting
@@ -61,6 +63,9 @@ var current_model;
 		// 	-[Discuss] Functions inside functions created every time a function is called? Place common functions at top level?
 		// 	-[Discuss] Should this just be done with D-Grid to provide uniform table structure
 		// 	-[Discuss] I read somewhere that var newFunc = function() { } is better practice than function() { }, is that true?
+		// 	-Update comments - a lot of issues have been resolved etc.
+		// 	-Unique ID for budget table (ref: store rant in code)
+		// 	-Highlighting for errors on incorrect inputs for budgeting etc (Red box around invalid input)
 		///////
 		
 		console.log("JsonRest stores not implemented.");
@@ -213,7 +218,7 @@ var current_model;
 			cache.query();
 
 			var budget_result = model.query();
-			bindBudgetTable("units-budgeting-" + id, budget_result);
+			bindBudgetTable("units-budgeting-" + id, budget_result, model);
 			bindTotal("units-budgeting-" + id, budget_result);
 		}
 
@@ -233,19 +238,18 @@ var current_model;
 			results.observe(function(item, removedIndex, insertedIndex) { 
 				console.log("[Model - TotalView Bind] Updated; removed: ", removedIndex, " inserted: ", insertedIndex);
 
+				var budget = Number(item.budget);
 				//Use standard removed/insertedIndex method once Store IDs have been resolved
 				if(!cache_period[item.period_id]) { 
 					cache_period[item.period_id] = item.budget;
-					cache_total += item.budget;
+					cache_total += budget;
 				} else { 
 					cache_total -= cache_period[item.period_id];
-					cache_total += item.budget;
-					cache_period[item.period_id] = item.budget;
+					cache_total += budget;
+					cache_period[item.period_id] = budget;
 				}
-
 				refreshView(cache_total);
 
-				
 			}, true);
 
 			//This function should be improved and used once Store IDs have been resolved (oh lawd)
@@ -270,7 +274,7 @@ var current_model;
 		}
 
 		//View 
-		function bindBudgetTable(tableid, results) { 
+		function bindBudgetTable(tableid, results, model_ref) { 
 			//summary: Bind the model for a given budget year to a budget table
 			//TODO:
 			//	-store row information in bindBudgetTable local variables - these should be used to access row elemnts, vs. queryying the DOM a second time
@@ -317,6 +321,14 @@ var current_model;
 			        	id : row_id + "-budget"
 			        }, dom.byId(row_id + "-budgetRow"));
 
+				   	on(td_budget_input, "keyup", function(e) { 
+						///////////
+				   		//	Currently calling put method on store on every update, there may be a better way to this by updating the item (stored in the most recent query on the model) and obsering that individually 
+						///////////
+				   		var newVal = td_budget_input.value;
+				   		item.budget = newVal;
+				   		model_ref.put(item);
+				   	});		
 				}
 
 		        //table_rows.splice(i, 0, budget_table.insertBefore(tr, table_rows[i] || null));
