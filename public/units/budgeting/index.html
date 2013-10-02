@@ -109,6 +109,21 @@ var current_model;
 						budget_table.insertBefore(createRow(j), null);
 					}
 
+					var total_row = domConstruct.create("tr", {
+						id : tableid + "-totalRow"
+					}, budget_table);
+
+					var total_label = domConstruct.create("td", { 
+						colSpan : 2, 
+						innerHTML : "Total"
+					}, total_row);
+
+					var budget_total = domConstruct.create("td", { 
+						colSpan : 1,
+						id : tableid + "-budgetTotal",
+						
+					}, total_row);
+
 					//@sfount - is this a fly thing to do ?
 					function createRow(row_index) { 
 						var tr = domConstruct.create("tr", { 
@@ -129,6 +144,7 @@ var current_model;
 
 				        return tr;
 					}
+
 				}
 			}
 		}
@@ -198,6 +214,11 @@ var current_model;
 
 			var budget_result = model.query();
 			bindBudgetTable("units-budgeting-" + id, budget_result);
+			bindTotal("units-budgeting-" + id);
+		}
+
+		function bindTotal(tableid, results) { 
+
 		}
 
 		//View 
@@ -221,6 +242,8 @@ var current_model;
 					updateRow(item, insertedIndex);
 				}
 			}, true);
+
+            	
 
 			//@sfount - this is probably shit
 			function updateRow(item, index) { 
