@@ -1,1 +1,85 @@
-Accounts Unit
+<div id='units.accounts.chartofaccounts'></div>
+<script>
+var dd_store;
+require(["dojo/_base/declare", "dojo/store/JsonRest", "dojo/store/Memory", "dojo/store/Cache", "dijit/form/CheckBox", "dijit/form/Select", "dgrid/OnDemandGrid", "dgrid/extensions/ColumnResizer", "dgrid/editor", "dgrid/extensions/DijitRegistry", "dgrid/Selection", "dojo/domReady!"],
+function(declare, JsonRest, Memory, Cache, CheckBox, Select, OnDemandGrid, ColumnResizer, editor, DijitRegistry, Selection) {
+
+  var store = new JsonRest({
+    target: "data/",
+  });
+
+  dd_store = new JsonRest({ // drop down store
+      target: 'data/',
+      idProperty: 'id',
+      getLabel: function(d) { // all selects must have a getLabel() method
+        return d.type;
+      }
+  });
+
+  var dd_memorycache= new Memory();
+
+  var dd_cache = new Cache(dd_store, dd_memorycache);
+
+  var dd_query = {
+    e: [{t: 'account_type', c: ['id', 'type']}]
+  };
+  
+  var columns = [
+    {id: "id", field: "id", label: "ID"},
+    {id: "account_txt", field: "account_txt", label: "Account Text"},
+    editor({
+      id    : "type",
+      field : "account_type_id",
+      label : "Type",
+      renderCell: function(object, value, node, options) {
+        node.innerHTML = dd_cache.get(value).type;
+      },
+      editorArgs: {
+        store: dd_cache,
+        style: "width:100%",
+        query: "?" + JSON.stringify(dd_query),
+      }
+    }, Select, "dblclick"),
+    {id: "cost_center_code_1", field: "cost_center_code_1", label: "cost_center_code_1"},
+    {id: "cost_center_code_2", field: "cost_center_code_2", label: "cost_center_code_2"},
+    {id: "cost_center_code_3", field: "cost_center_code_3", label: "cost_center_code_3"},
+    {id: "cost_center_code_4", field: "cost_center_code_4", label: "cost_center_code_4"},
+    editor({
+      id: "locked",
+      field: "locked",
+      label: "Locked",
+    }, CheckBox)
+  ];
+
+  var grid_query = {
+    e: [
+      {t: "account", c: ["id", "account_txt", "account_type_id", "cost_center_code_1", "cost_center_code_2", "cost_center_code_3", "cost_center_code_4", "locked"]},
+    ],
+  };
+
+  var string_query = "?" + JSON.stringify(grid_query);
+
+  var grid = new (declare([OnDemandGrid, ColumnResizer, DijitRegistry, Selection]))({
+    store: store,
+    query: string_query,
+    columns: columns
+  }, "units.accounts.chartofaccounts");
+
+  grid.startup();
+
+  grid.on("dgrid-datachange", function(evt) {
+    // takes the table (string), row data (object), pk (store's unique id)
+    // FIXME: find a better way to do this.  ARGH @getraped
+    var data = evt.cell.row.data;
+    switch (evt.cell.column.id) {
+      case 'type':
+        data.account_type_id = evt.value;
+        break;
+      case 'locked':
+        data.locked = (evt.value === false) ? 0 : 1;
+        break; 
+    }
+    grid.store.put({table: 'account', data: [data], pk: [store.idProperty]});
+  });
+});
+</script>

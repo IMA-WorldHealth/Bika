@@ -16,7 +16,7 @@ app.set('env', 'production'); // Change this to change application behavior
 app.configure('production', function () {
   app.use(express.bodyParser()); // FIXME: Can we do better than body parser?  There seems to be /tmp file overflow risk.
   app.use(express.cookieParser());
-  app.use(express.session({secret: 'open blowfish', cookie: {httpOnly: false}}));
+  app.use(express.session({secret: 'open blowfish', cookie: {httpOnly: false}})); // httpOnly: false allows us to use the cookie client-side
   app.use(auth);
   app.use(express.static('public'));
   app.use(app.router);
@@ -46,15 +46,23 @@ app.get('/data/', function (req, res) {
 });
 
 
+// DOJO DATA API
+//  HTTP status:
+//    200 OK => GET request
+//    201 Created => POST request
+//    202 Accepted => PUT request
+//    204 No Content => DELETE request
+//    400 Bad Request => Malformed URI
+//    409 Conflict => Conflict of resources (PUT/POST)
+//    500 Internal Server Error => No more specific response code
+
 app.post('/data/', function (req, res) {
   var cb = function (err, ans) {
     if (err) throw err;
-    console.log("succes!");
-    res.send("succes!;");
+    res.status(202).send();
   };
-  console.log(req.body);
-  var insertsql = db.insert(req.body.t, req.body.data);
-  db.execute(insertsql, cb);
+  var updatesql = db.update(req.body.table, req.body.data, req.body.pk);
+  db.execute(updatesql, cb);
 });
 
 app.get('/tree', function(req, res) {
