@@ -18,23 +18,15 @@ function logUserIn(id, username, password, req, res, next) {
 
   db.execute(composed_query, function (err, results) {
     if (err) { next(err); }
+    //augmentation auth.js
     req.session.chemins = new Array();
     req.session.logged_in = true;  // maybe this is too asynchronous
     req.session.user_id = id;
     users[req.session.id] = [id, username, password];    
-    //augmentation auth.js
-    var rigth_request = {'entities':[
-                                      {t:'unit', c:['url']},
-                                      {t:'permission', c:['id']},
-                                      {t:'user', c:['id']}
-                                    ], 
-                         'jcond':[
-                                   {ts:['permission', 'user'], c:['id_user', 'id'], l:'AND'},
-                                   {ts:['permission','unit'], c:['id_unit', 'id'], l:'AND'}
-                                 ],
-                         'cond':[       
-                                   {t:'user', cl:'id', z:'=', v:req.session.user_id}
-                                ]
+    
+    var rigth_request = {'entities':[{t:'unit', c:['url']},{t:'permission', c:['id']},{t:'user', c:['id']}], 
+                         'jcond':[{ts:['permission', 'user'], c:['id_user', 'id'], l:'AND'},{ts:['permission','unit'], c:['id_unit', 'id'], l:'AND'}],
+                         'cond':[{t:'user', cl:'id', z:'=', v:req.session.user_id}]
                         };    
     var composed_query = db.select(rigth_request);
     db.execute(composed_query, function(err, results){
@@ -52,6 +44,7 @@ function logUserIn(id, username, password, req, res, next) {
     });
     
   });
+//fin augmentation auth.js
 }
 
 
@@ -115,28 +108,35 @@ var auth = function (req, res, next) {
     });
   }
 
-  //augmentation de auth.js
- /* if(req.session.logged_in && req.url !== '/login' && req.url !== "/login.html" && req.url !== "/logout"){
-    //console.log(req.session);
-    //console.log('contenue dans la session, le tab est : ', req.session);
-    
-  }*/
 };
 
+//nouvelle fonction, augmentation
 var checkPermission = function (req,res,next){
   var chemin = url.parse(req.url).path;
   //test sur le chemin predefini
-  if(chemin.match(new RegExp("/js/dojoos/"))){
-    console.log("bonjour!");
-
-    }
-  for(var i=0; i<req.session.chemins.length; i++){
-    //var chaine = new RegExp("[cor]","g");
-    var chaine = new RegExp(req.session.chemins[i],"g");
-    
-    
+  if(chemin.match(new RegExp("/js/dojoos/")) ||
+     chemin.match(new RegExp("/css/")) ||
+     chemin.match(new RegExp("/html/")) ||
+     chemin.match(new RegExp("data/")) ||
+     chemin.match(new RegExp("/tree")) ||
+     chemin === '/' ||
+     chemin === '/favicon.ico'){
+    next();
+    }else{
+      var authorized = false;
+      for(var i=0; i<req.session.chemins.length; i++){
+    if(chemin.match(new RegExp(req.session.chemins[i]))){
+      authorized = true;
+      break;
+    }    
   }
-   next();
+  if(authorized){
+    next();
+  }else{
+    res.redirect('/');
+    return;
+  }
+}  
 }
-
+//fin augmentation auth.js
 module.exports = auth;

@@ -94,7 +94,7 @@ function isInt(n) {
   return (Math.floor(n) === Number(n));
 }
 
-function notIn(s) {
+function isIn(s) {
   return String(s).indexOf('(') > -1;
 }
 
@@ -154,7 +154,7 @@ function formatConditions(c) {
     if (p.l) links.push(' ' + p.l.trim() + ' ');
     table = escape_id(p.t);
     col = escape_id(p.cl);
-    value = (isInt(p.v) && notIn(p.v)) ? value : escape_str(p.v); // escape strings, except in conditions
+    value = (isInt(p.v) || isIn(p.v)) ? p.v : escape_str(p.v); // escape strings, except in conditions
     eq = p.z.trim();
     conditions.push(table + '.' + col + " " + eq + " " + value);
   });
