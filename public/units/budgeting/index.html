@@ -121,7 +121,7 @@ var current_model;
 					var budget_total = domConstruct.create("td", { 
 						colSpan : 1,
 						id : tableid + "-budgetTotal",
-						
+
 					}, total_row);
 
 					//@sfount - is this a fly thing to do ?
@@ -214,11 +214,59 @@ var current_model;
 
 			var budget_result = model.query();
 			bindBudgetTable("units-budgeting-" + id, budget_result);
-			bindTotal("units-budgeting-" + id);
+			bindTotal("units-budgeting-" + id, budget_result);
 		}
 
 		function bindTotal(tableid, results) { 
+			var total_view = dom.byId(tableid + "-budgetTotal");
+			var cache_total = 0;
 
+			////////
+			// This is a fix (read: hack) for keeping track of ID's 
+			// -Items in dojos Stores must be UNIQUELY identifiable with a single column (ID). The budget table currently has a primary key consisting of multiple columns. Dojo kindly generates a random ID to satisfy its needs - unusable in this case.
+			// 	(1) Add a single column PK to every table in the bika database 
+			// 	(2) Alter dojo's Memory store to cater for the current `bika`.`budget` primary key`
+			// 	-TODO: This should be resolved to adhere to the concept of having memory only in one place
+			////////
+			var cache_period = {};
+
+			results.observe(function(item, removedIndex, insertedIndex) { 
+				console.log("[Model - TotalView Bind] Updated; removed: ", removedIndex, " inserted: ", insertedIndex);
+
+				//Use standard removed/insertedIndex method once Store IDs have been resolved
+				if(!cache_period[item.period_id]) { 
+					cache_period[item.period_id] = item.budget;
+					cache_total += item.budget;
+				} else { 
+					cache_total -= cache_period[item.period_id];
+					cache_total += item.budget;
+					cache_period[item.period_id] = item.budget;
+				}
+
+				refreshView(cache_total);
+
+				
+			}, true);
+
+			//This function should be improved and used once Store IDs have been resolved (oh lawd)
+			function updateTotal(item, addition) { 
+				var budget = Number(item.budget);
+
+				//Verify budget is a legal Number 
+				
+				//This is pretty gross
+				if(addition) { 
+					cache_total += item.budget;
+				} else { 
+					cache_total -= item.budget;
+				}
+				
+				refreshView(cache_total); 
+			}
+
+			function refreshView(value) { 
+				domAttr.set(total_view, "innerHTML", value);
+			}
 		}
 
 		//View 
