@@ -1,6 +1,6 @@
-define("customizedModule/FormChooser", 
-	["dijit/form/Form", "dojo/store/JsonRest","dijit/form/CheckBox","dojo/_base/declare", "dojo/Deferred", "dojo/on"], 
-	function(Form, JsonRest, CheckBox, declare, Deferred, on){
+define("customizedModule/UnitsForm", 
+	["dijit/form/Form","dijit/form/CheckBox","dojo/_base/declare", "dojo/on"], 
+	function(Form, CheckBox, declare, on){
 		return declare("customizedModule.FormChooser",Form,{
 			checks:null,
 			constructor: function(){
@@ -31,7 +31,6 @@ define("customizedModule/FormChooser",
 						}
 					}
 				});
-				console.log("on a fini!");
 				this.checks.push(control);
 			},
 			getCheckSelectedCount: function(){

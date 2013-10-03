@@ -17,7 +17,22 @@ exports.manageUser = function(req, res){
 
 var getItems = function(id_user, field, value, client_request, req, res){
   if(value === 0){
-    //on demande les fils de la racine
+    processMetadata(id_user, field, value, client_request, res);
+    
+  }
+  //la requette ne concerne pas la racine
+  else{
+   processData(id_user, value, res);
+  }
+}
+var containes = function(value, tableau){
+  return tableau.some(function(v){
+    return v == value;
+  });
+}
+
+var processMetadata = function(id_user, field, value, client_request, res){
+  //on demande les fils de la racine
     if(field == 'parent'){
        //checking permission dans la base des donnees
       var permission_req = {'entities':[{t:'unit', c:['parent']},{t:'permission', c:['id']},{t:'user', c:['id']}],
@@ -63,11 +78,10 @@ var getItems = function(id_user, field, value, client_request, req, res){
         res.json(results);
       });
     }
-    
-  }
-  //la requette ne concerne pas la racine
-  else{
-    //checking permission
+}
+
+var processData = function(id_user, value, res){
+   //checking permission
     var permission_req = {'entities':[{t:'permission', c:['id_unit']},{t:'user', c:['id']},{t:'unit', c:['id']}],
                           'jcond':[{ts:['permission', 'user'], c:['id_user', 'id'], l:'AND'},{ts:['permission','unit'], c:['id_unit', 'id'], l:'AND'}],
                           'cond':[{t:'user', cl:'id', z:'=', v:id_user, l:'AND'},{t:'unit', cl:'parent', z:'=', v:value}]
@@ -96,10 +110,4 @@ var getItems = function(id_user, field, value, client_request, req, res){
         });
       }
     });
-  }
-}
-var containes = function(value, tableau){
-  return tableau.some(function(v){
-    return v == value;
-  });
 }

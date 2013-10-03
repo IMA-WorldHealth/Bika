@@ -6,29 +6,21 @@
         <link rel="stylesheet" href="./js/dojoos/gridx/resources/claro/Gridx.css"/> 
         <link rel = "stylesheet" type = "text/css" href="../css/userPermission.css" media="screen" />
         <script>
-        require(["customizedModule/SelectX",
-         	"customizedModule/FormChooser",
+        require([
+         	"customizedModule/UnitsForm",
            "dojo/store/JsonRest",
            "dijit/form/TextBox",
            "dijit/form/CheckBox",
            "dijit/form/Button",
-           "dijit/form/Form",
            "dojo/on",
            "dojo/Deferred",
-           "dojo/promise/all",
-           "gridx/core/model/cache/Async",
-           "gridx/modules/SingleSort",
-           "gridx/modules/extendedSelect/Row",
-           "gridx/modules/CellWidget",
-           "gridx/Grid",
-           "dojox/grid/DataGrid",
            "dojo/topic",
            "dijit/Dialog",
            "dojo/dom-construct",
            "dojo/domReady!"
-           ], function (SelectX, FormChooser, JsonRest,TextBox,CheckBox, Button, Form, on, Deferred, all, Cache, SingleSort, Row, CellWidget, Grid, DataGrid, topic, Dialog, domCons){
+           ], function (UnitsForm, JsonRest,TextBox,CheckBox, Button, on, Deferred, topic, Dialog, domCons){
            	//declarations des variables
-           	var bValider, bAnnuler, txtFirstName, txtLastName, txtEmail,
+           	var bCreer, bAnnuler,bModifier,bSupprimer, txtFirstName, txtLastName, txtEmail,
            	 txtUserName, txtPassWord, txtConformPassWord, chkAdministrator,
               chkFinance, chkManager, chkDocteur, chkAdmin, roleStore,
                userGrid, userStore, roleGridQuery = {}, userGridQuery = {}, 
@@ -42,22 +34,26 @@
            	txtPassWord = new TextBox({class:"saisie", type:"password", style:"width:220px;"},"passwordID");
            	txtConformPassWord = new TextBox({class:"saisie", type:"password", style:"width:220px;"},"confirmpasswordID");
 
+            //creation des boutons
+            bCreer = new Button({label:"Creer", onClick:creer}, "creerID");
+            bModifier = new Button({label:"Modifier", onClick:modifier}, "modifierID");
+            bSupprimer = new Button({label:"Supprimer", onClick:supprimer}, "supprimerID");
+            bAnnuler = new Button({label:"Annuler"},"annulerID");
+
            	//creation des cases a caucher
-            chkAdministrator = new CheckBox({value:'Administrator'},"chkadministratorID");
+            /*chkAdministrator = new CheckBox({value:'Administrator'},"chkadministratorID");
            	chkAdmin = new CheckBox({value:'admin'},"chkadminID");
            	chkFinance = new CheckBox({value:'Finance'},"chkfinanceID");
            	chkManager = new CheckBox({value:'Manager'},"chkmanagerID");
-           	chkDocteur = new CheckBox({value:'Docteur'},"chkdocteurID");
+           	chkDocteur = new CheckBox({value:'Docteur'},"chkdocteurID");*/
 
-           	//creation des boutons
-           	bValider = new Button({label:"Creer", onClick:valider}, "validerID");
-           	bAnnuler = new Button({label:"Annuler"},"annulerID");
+           	
 
             //stores
-            crudStore = new JsonRest({target:'/data/'});
+            //crudStore = new JsonRest({target:'/data/'});
              
 
-             (function(){
+            /* (function(){
               //formulaire pour admin role
               fcAdmin = new FormChooser({},"adminroleformID");
               var tabUnits = getUnits("admin");
@@ -76,211 +72,15 @@
               new Button({label:'Ok', onClick:sauverAdmin}).placeAt(fcAdmin.domNode);
               fcAdmin.startup();
               });
+            })();*/
 
-              //formulaire pour finance role
-
-              fcFinance = new FormChooser({},"financeroleformID");
-              var tabUnits = getUnits("Finance");
-              tabUnits.then(function(values){
-                var node;
-                for(var i = 0; i< values.length; i++) {
-                      node = domCons.toDom("<div id=\""+values[i]+'ID'+"\"></div><span>"+values[i]+"</span><br/>"); 
-                      domCons.place(node,"financeroleformID");
-                      }
-                      node = domCons.toDom("<div id=\""+"financeroleformIDAll"+"\"></div><span>"+"Tous"+"</span><br/>"); 
-                      domCons.place(node,"financeroleformID");
-                      node = domCons.toDom("<div id=\""+"financeroleformIDOK"+"\"></div>"); 
-                      domCons.place(node,"financeroleformID");
-                      fcFinance.placeControls(values); 
-                      fcFinance.addLastCheck("financeroleformIDAll");
-              new Button({label:'Ok', onClick:sauverFinance}).placeAt(fcFinance.domNode);
-              fcFinance.startup();
-              }); 
-
-              //formulaire pour manager
-
-              fcManager = new FormChooser({},"managerroleformID");
-              var tabUnits = getUnits("Manager");
-              tabUnits.then(function(values){
-                var node;
-                for(var i = 0; i< values.length; i++) {
-                      node = domCons.toDom("<div id=\""+values[i]+'ID'+"\"></div><span>"+values[i]+"</span><br/>"); 
-                      domCons.place(node,"managerroleformID");
-                      }
-                      node = domCons.toDom("<div id=\""+"managerroleformIDAll"+"\"></div><span>"+"Tous"+"</span><br/>"); 
-                      domCons.place(node,"managerroleformID");
-                      node = domCons.toDom("<div id=\""+"managerroleformIDOK"+"\"></div>"); 
-                      domCons.place(node,"managerroleformID");
-                      fcManager.placeControls(values); 
-                      fcManager.addLastCheck("managerroleformIDAll");
-              new Button({label:'Ok', onClick:sauverManager}).placeAt(fcManager.domNode);
-              fcManager.startup();
-              });
-
-              //formulaire pour doctor
-
-              fcDoctor = new FormChooser({},"doctorroleformID");
-              var tabUnits = getUnits("Doctor");
-              tabUnits.then(function(values){
-                var node;
-                for(var i = 0; i< values.length; i++) {
-                      node = domCons.toDom("<div id=\""+values[i]+'ID'+"\"></div><span>"+values[i]+"</span><br/>"); 
-                      domCons.place(node,"doctorroleformID");
-                      }
-                      node = domCons.toDom("<div id=\""+"doctorroleformIDAll"+"\"></div><span>"+"Tous"+"</span><br/>"); 
-                      domCons.place(node,"doctorroleformID");
-                      node = domCons.toDom("<div id=\""+"doctorroleformIDOK"+"\"></div>"); 
-                      domCons.place(node,"doctorroleformID");
-                      fcDoctor.placeControls(values); 
-                      fcDoctor.addLastCheck("doctorroleformIDAll");
-              new Button({label:'Ok', onClick:sauverDoctor}).placeAt(fcDoctor.domNode);
-              fcDoctor.startup();
-              });
-
-              //cacher les div des choix pour ne pas abimer l'interface
-              document.getElementById("adminroleformID").style.display="none";
-              document.getElementById("financeroleformID").style.display="none";
-              document.getElementById("managerroleformID").style.display="none";
-              document.getElementById("doctorroleformID").style.display="none";
-
-            })();
-
-            //surveillance
-            on(chkAdmin, 'change', function(value){
-              if(chkAdmin.get('checked')){
-                document.getElementById("adminroleformID").style.display="";
-                showChoix(chkAdmin.value, "adminroleformID");
-              }
-            });
-
-            on(chkFinance, 'change', function(value){
-              if(chkFinance.get('checked')){
-                document.getElementById("financeroleformID").style.display="";
-                showChoix(chkFinance.value, "financeroleformID");
-              }
-            });
-
-            on(chkManager, 'change', function(value){
-              if(chkManager.get('checked')){
-                document.getElementById("managerroleformID").style.display="";
-                showChoix(chkManager.value, "managerroleformID");
-              }
-            });
-
-            on(chkDocteur, 'change', function(value){
-              if(chkDocteur.get('checked')){
-                document.getElementById("doctorroleformID").style.display="";
-                showChoix(chkDocteur.value, "doctorroleformID");
-              }
-            });
-
-            on(chkAdministrator, 'change', function(value){
-              if(chkAdministrator.get('checked')){                
-                document.getElementById("subrole").style.visibility="hidden";
-              }else{
-                 document.getElementById("subrole").style.visibility="visible";
-              }
-
-            });
-           	initUnitGrid();
-            initUserGrid();
-
-           	//LES FONCTIONS         
-
-            function showChoix(label, idDom){    
-            if(label==="admin")          
-              dialog = new Dialog({style : "width:200px", content:fcAdmin});
-            if(label==="Finance")          
-              dialog = new Dialog({style : "width:200px", content:fcFinance});
-            if(label==="Manager")          
-              dialog = new Dialog({style : "width:200px", content:fcManager});
-            if(label==="Docteur")          
-              dialog = new Dialog({style : "width:200px", content:fcDoctor});
-            dialog.show();
-            }
-
-            function valider(){
-             var sql1 = {t:'user', data:[{id:'', username: txtUserName.value, password: txtPassWord.value, first: txtFirstName.value, last:txtLastName.value, email:txtEmail.value, loggedIn:0}]};
-              crudStore.put(sql1);
-              var sql={};
-              sql.e=[{t:'user', c:['id']}];
-              sql.cond = [{t:'user', cl:'username', v:txtUserName.value, z:'=', l:'AND'}, {t:'user', cl:'password', v:txtPassWord.value, z:'='}];
-              crudStore.query(sql).then(function(item){
-                if(chkAdministrator.checked){
-                  var result = getRoleID(chkAdministrator.value);
-                  result.then(function(value){
-                    var dataAdministrator={};
-                    dataAdministrator.id_role=value.id;
-                   insereUser1(item[0].id, dataAdministrator);
-
-                  });
+           
+           //	initUnitGrid();
+           // initUserGrid();
 
 
-                }else{
-                  if(chkAdmin.checked){
-                    if(dataAdmin[0].tous == 1){
-                      for(var i=0; i<dataAdmin.length; i++){
-                        insereUser1(item[0].id, dataAdmin[i]);
-                      }
-                    }else{
-                      insereUser1(item[0].id, dataAdmin[0]);
-                       for(var i=0; i<dataAdmin.length; i++){
-                        insereUser2(item[0].id, dataAdmin[i]);
-                      }
-                    }                 
-                }
-                if(chkFinance.checked){
-                  if(dataFinance[0].tous == 1){
-                      for(var i=0; i<dataFinance.length; i++){
-                        insereUser1(item[0].id, dataFinance[i]);
-                      }
-                    }else{
-                      insereUser1(item[0].id, dataFinance[0]);
-                       for(var i=0; i<dataFinance.length; i++){
-                        insereUser2(item[0].id, dataFinance[i]);
-                      }
-                    }                 
-                }
-
-                if(chkManager.checked){
-                  if(dataManager[0].tous == 1){
-                      for(var i=0; i<dataManager.length; i++){
-                        insereUser1(item[0].id, dataManager[i]);
-                      }
-                    }else{
-                      insereUser1(item[0].id, dataManager[0]);
-                       for(var i=0; i<dataManager.length; i++){
-                        insereUser2(item[0].id, dataManager[i]);
-                      }
-                    }                  
-                }
-
-                if(chkDocteur.checked){
-                  if(dataDoctor[0].tous == 1){
-                      for(var i=0; i<dataDoctor.length; i++){
-                        insereUser1(item[0].id, dataDoctor[i]);
-                      }
-                    }else{
-                      insereUser1(item[0].id, dataDoctor[0]);
-                       for(var i=0; i<dataDoctor.length; i++){
-                        insereUser2(item[0].id, dataDoctor[i]);
-                      }
-                    }
-                }
-                }
-                reinit();
-              });
-            }
-            function insereUser1(id_user, data){
-              sql= {t:'user_role', data:[{id:'', id_role: data.id_role, id_user: id_user, allRight:data.tous}]};
-              crudStore.put(sql);
-            }
-
-            function insereUser2(id_user, data){
-               var sql= {t:'user_role_description', data:[{id:'', id_role_unit: data.id_role_unit, id_user: id_user}]};
-              crudStore.put(sql);
-            }
-           function	initUnitGrid(){
+           
+         /*  function	initUnitGrid(){
             var hasWidget;
            	roleStore = new JsonRest({
                         target: '/data/'
@@ -319,9 +119,9 @@
                     }, "divTabRole");            
             roleGrid.startup();	
 
-           	}
+           	}*/
 
-             function initUserGrid(){
+           /*  function initUserGrid(){
             userStore = new JsonRest({
                         target: '/data/'
                     });
@@ -361,243 +161,26 @@
             chkManager.startup();
             chkAdministrator.startup();
             userGrid.startup(); 
+            }*/
+
+            //********************************************************
+            //*******************LES FONCTIONS************************
+            //********************************************************
+            var creer = function(){
+
             }
-
-            function getUnitID(unit){
-              var deferred = new Deferred();
-              var sql = {};
-              sql.e = [{t : 'unit', c : ['id']}];
-              sql.cond = [{t:'unit', cl:'name', v:unit, z:'='}];             
-              crudStore.query(sql).then(function(item){
-                deferred.resolve(item[0].id);
-              });
-              return deferred.promise;
-              }
-
-            function sauverAdmin(){ 
-            dialog.hide();
-            document.getElementById("adminroleformID").style.display="none";
-              //tout est coche?
-              var cocher = true;              
-              var nbcaseCoche = fcAdmin.getCheckSelectedCount();
-              for(var i=0; i<fcAdmin.checks.length; i++){
-                if(fcAdmin.checks[i].get('checked')===false){
-                   cocher=false;
-                   break;
-                }               
-              }
-              if(cocher){
-                //si tout est coche
-                dataAdmin = new Array(1); 
-                dataAdmin[0]={};               
-                var result=getRoleID("admin");
-                result.then(function(val){
-                  dataAdmin[0].id_role = val.id;
-                  dataAdmin[0].tous = 1; //si vraie la donnee sera inseree dans user_role
-                });                           
- 
-              }else{
-                //si certain sont cocher
-                dataAdmin = new Array(nbcaseCoche); 
-                var indice = 0; 
-                 var result=getRoleID("admin");
-                result.then(function(val){
-                   for(var i=0; i<fcAdmin.checks.length; i++){
-                if(fcAdmin.checks[i].get('checked')===true){                  
-                   var result = getUnitID(fcAdmin.checks[i].value);
-                   result.then(function(value){
-                    dataAdmin[indice]={};
-                    dataAdmin[indice].id_role = val.id;
-                    dataAdmin[indice].id_role_unit = value;
-                    dataAdmin[indice].tous = 0;
-                    indice++;
-                   });
-                }                
-              }
-            });                
-                 
-
+            var modifier = function(){
               
-              }
+            }
+            var supprimer = function(){
+              
+            }
+            var annuler = function(){
+              
             }
 
-function sauverFinance(){
-      dialog.hide();
-      document.getElementById("financeroleformID").style.display="none";
-              //tout est coche?
-              var cocher = true;              
-              var nbcaseCoche = fcFinance.getCheckSelectedCount();
-              for(var i=0; i<fcFinance.checks.length; i++){
-                if(fcFinance.checks[i].get('checked')===false){
-                   cocher=false;
-                   break;
-                }               
-              }
-              if(cocher){
-                //si tout est coche
-                dataFinance = new Array(1); 
-                dataFinance[0]={};               
-                var result=getRoleID("Finance");
-                result.then(function(val){
-                  dataFinance[0].id_role = val.id;
-                  dataFinance[0].tous = 1; //si vraie la donnee sera inseree dans user_role
-                });                           
- 
-              }else{
-               //si certain sont cocher
-                dataFinance = new Array(nbcaseCoche); 
-                var indice = 0; 
-                 var result=getRoleID("Finance");
-                result.then(function(val){
-                   for(var i=0; i<fcFinance.checks.length; i++){
-                if(fcFinance.checks[i].get('checked')===true){                  
-                   var result = getUnitID(fcFinance.checks[i].value);
-                   result.then(function(value){
-                    dataFinance[indice]={};
-                    dataFinance[indice].id_role = val.id;
-                    dataFinance[indice].id_role_unit = value;
-                    dataFinance[indice].tous = 0;
-                    indice++;
-                   });
-                }                
-              }
-            });               
-            }
-
-}
-
-function sauverManager(){ 
-            dialog.hide();
-            document.getElementById("managerroleformID").style.display="none";
-              //tout est coche?
-              var cocher = true;              
-              var nbcaseCoche = fcManager.getCheckSelectedCount();
-              console.log('Manager les cases cochee sont :',nbcaseCoche);
-              for(var i=0; i<fcManager.checks.length; i++){
-                if(fcManager.checks[i].get('checked')===false){
-                   cocher=false;
-                   break;
-                }               
-              }
-              if(cocher){
-                //si tout est coche
-                dataManager = new Array(1); 
-                dataManager[0]={};               
-                var result=getRoleID("Manager");
-                result.then(function(val){
-                  dataManager[0].id_role = val.id;
-                  dataManager[0].tous = 1; //si vraie la donnee sera inseree dans user_role
-                });                           
- 
-              }else{
-                  //si certain sont cocher
-                dataManager = new Array(nbcaseCoche); 
-                var indice = 0; 
-                 var result=getRoleID("Manager");
-                result.then(function(val){
-                   for(var i=0; i<fcManager.checks.length; i++){
-                if(fcManager.checks[i].get('checked')===true){                  
-                   var result = getUnitID(fcManager.checks[i].value);
-                   result.then(function(value){
-                    dataManager[indice]={};
-                    dataManager[indice].id_role = val.id;
-                    dataManager[indice].id_role_unit = value;
-                    dataManager[indice].tous = 0;
-                    indice++;
-                   });
-                }                
-              }
-            });             
-              }
-            }
-
-function sauverDoctor(){ 
-            dialog.hide();
-            document.getElementById("doctorroleformID").style.display="none";
-              //tout est coche?
-              var cocher = true;              
-              var nbcaseCoche = fcDoctor.getCheckSelectedCount();
-              console.log('Doctor les cases cochee sont :',nbcaseCoche);
-              for(var i=0; i<fcDoctor.checks.length; i++){
-                if(fcDoctor.checks[i].get('checked')===false){
-                  console.log("tokotieeee");
-                   cocher=false;
-                   break;
-                }               
-              }
-              if(cocher){
-                //si tout est coche
-                dataDoctor = new Array(1); 
-                dataDoctor[0]={};               
-                var result=getRoleID("Doctor");
-                result.then(function(val){
-                  dataDoctor[0].id_role = val.id;
-                  dataDoctor[0].tous = 1; //si vraie la donnee sera inseree dans user_role
-                });
-              }else{
-                //si certain sont cocher
-                dataDoctor = new Array(nbcaseCoche); 
-                var indice = 0; 
-                 var result=getRoleID("Doctor");
-                result.then(function(val){
-                   for(var i=0; i<fcDoctor.checks.length; i++){
-                if(fcDoctor.checks[i].get('checked')===true){                  
-                   var result = getUnitID(fcDoctor.checks[i].value);
-                   result.then(function(value){
-                    dataDoctor[indice]={};
-                    dataDoctor[indice].id_role = val.id;
-                    dataDoctor[indice].id_role_unit = value;
-                    dataDoctor[indice].tous = 0;
-                    indice++;
-                   });
-                }                
-              }
-            });              
-              }
-            }
-
-      function getUnits(name){
-        var deferred = new Deferred();
-        var units=[];
-        sql={};               
-        if(name){
-          var result = getRoleID(name);
-          result.then(function(val){            
-            sql.e = [{t:'unit', c:['name']}];
-            sql.cond = [{t:'unit', cl:'parent', v:val.role_head, z:'='}];
-            crudStore.query(sql).then(function(items){
-             for(var i=0; i<items.length; i++){
-              units.push(items[i].name);                     
-                   }                     
-                   deferred.resolve(units);
-               });
-            });                   
-        }
-        return deferred.promise; 
-      }
-
-      function getRoleID(name){
-        var deferred = new Deferred();
-        sql={};
-        sql.e = [{t : 'role', c : ['id','role_head']}];
-        sql.cond = [{t:'role', cl:'name', v:name, z:'='}];        
-        if(name){
-          crudStore.query(sql).then(function(item){
-            deferred.resolve(item[0]);
-          });                
-        }
-        return deferred.promise; 
-      }
-      function reinit(){
-  dataAdmin=dataDoctor=dataManager=dataFinance=[];
-  fcDoctor.uncheckedAll();
-  fcFinance.uncheckedAll();
-  fcManager.uncheckedAll();
-  fcAdmin.uncheckedAll();
-}
+            
         });
-
-
         </script>      
          
 
@@ -621,27 +204,31 @@ function sauverDoctor(){
 	            <div><label><b>Confirm Password :</b></label><div class="saisie" id="confirmpasswordID"></div></div>
 	            <br/>
               <span id="spanbadpasswordID"><div id="badpasswordID"></div></span><br/>
-
-	            <div id="roleID"><div id="chkadministratorID"></div><b>Administrator </b><br/>
-              <div id="subrole">
-              <div id="chkadminID"></div><b>Admin </b>
-              <div id="chkfinanceID"></div><b>Finance </b>
-              <div id="chkmanagerID"></div><b>Manager </b>
-              <div id="chkdocteurID"></div><b>Doctor</b>
-            </div>	            
-	            <br/> </div>              
-	            <div><div id="validerID"></div><div id="annulerID"></div></div>
           </form>     		
+     	</div> 
+      <!--cette div contient des bouttons-->     
+      <div id="divAction">
+        <fieldset >
+          <legend>Actions</legend>
+          <div id="creerID"></div>
+          <div id="modifierID"></div><br/>
+          <div id="supprimerID"></div>
+          <div id="annulerID"></div><br/>
+        </fieldset>             		
      	</div>
-      
-      <div id="divTabRole">
-     		
-     	</div>
+      <!--cette div contient les checks box-->
+      <div id="divformdroit">
+        <form id="droitformID">
+          <table>
+            <tr id="ligneID">
+            </tr>
+          </table>
+        </form>
+      </div>      
     </div>
-    <div id="sub">
-      
+    <!-- cette div contient un grid listant les utilisateurs-->
+    <div id="sub">      
     </div>
-    <div id="financeroleformID"></div><div id="adminroleformID"></div><div id="managerroleformID"></div><div id="doctorroleformID"></div> 
-     </body>
+    </body>
 </html>   
 
