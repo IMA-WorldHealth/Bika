@@ -297,6 +297,11 @@ CREATE TABLE IF NOT EXISTS `fiscal_year` (
   `transaction_start_number` int(10) unsigned NOT NULL,
   `transaction_stop_number` int(10) unsigned NOT NULL,
   `fiscal_year_number` mediumint(9) NOT NULL,
+  `start_month` int(10) unsigned NOT NULL,
+  `start_year` int(10) unsigned NOT NULL,
+  --making baby databases cry - TODO: improve this in the future (columns from S. Tracker)
+  `previous_fiscal_year` mediumint(8) unsigned,
+  `next_fiscal_year` mediumint(8) unsigned,
   PRIMARY KEY (`id`),
   KEY `enterprise_id` (`enterprise_id`),
   CONSTRAINT `fiscal_year_ibfk_1` FOREIGN KEY (`enterprise_id`) REFERENCES `enterprise` (`id`)
@@ -305,10 +310,10 @@ CREATE TABLE IF NOT EXISTS `fiscal_year` (
 -- Dumping data for table bika.fiscal_year: ~2 rows (environ)
 /*!40000 ALTER TABLE `fiscal_year` DISABLE KEYS */;
 INSERT INTO `fiscal_year` (`enterprise_id`, `id`, `number_of_months`, `fiscal_year_txt`, `transaction_start_number`, `transaction_stop_number`, `fiscal_year_number`) VALUES
-    (101, 2013001, 12, 'The First Fiscal Year of Company 101', 0, 100, 1),
-    (102, 2013011, 12, 'The First Fiscal Year of Company 102', 1000, 1100, 1),
-    (101, 2014001, 12, 'The Second Fiscal Year of Company 101', 1200, 5000, 1),
-    (102, 2014011, 12, 'The Second Fiscal Year of Company 102', 1200, 5000, 1);
+    (101, 2013001, 5, 'The First Fiscal Year of Company 101', 0, 100, 1, 7, 2013, NULL, 2014001),
+    (102, 2013011, 5, 'The First Fiscal Year of Company 102', 1000, 1100, 1, 7, 2013, NULL, 2014011),
+    (101, 2014001, 3, 'The Second Fiscal Year of Company 101', 1200, 5000, 1, 10, 2014, NULL),
+    (102, 2014011, 12, 'The Second Fiscal Year of Company 102', 1200, 5000, 1, 1, 2014, NULL);
 /*!40000 ALTER TABLE `fiscal_year` ENABLE KEYS */;
 
 -- Dumping structure for table bika.user

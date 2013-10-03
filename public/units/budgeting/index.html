@@ -79,7 +79,7 @@
 
 		//@sfount - this data should be imported from the application structure 
 		var enterprise_id = 101;
-		var fiscal_year_id = 2014001;
+		var fiscal_year_id = 2013001;
 
 		//Value set with account-select
 		var account_id;
@@ -164,8 +164,6 @@
 		    request.get('data/?' + JSON.stringify(fyear)).then(function(data) { 
 		        var fiscal_data = JSON.parse(data)[0];
 		  		
-		  		//@sfount - This is why combining models/interface/id/cache in an array is a good thing - UPDATE
-		  		//request budgets
 		  		if(fiscal_data.previous_fiscal_year) { 
 		  			requestBudget("previous", fiscal_data.previous_fiscal_year, accountid);
 		  		}
@@ -213,8 +211,8 @@
 
 			var budget_result = model.query();
 			//@sfount - the methods returned here should be passed to whoever needs them, not stored at the top
-			tablebind[id] = bindBudgetTable("units-budgeting-" + id, budget_result, model));
-			tablebind[id] = bindTotal("units-budgeting-" + id, budget_result));
+			tablebind[id] = bindBudgetTable("units-budgeting-" + id, budget_result, model);
+			tablebind[id] = bindTotal("units-budgeting-" + id, budget_result);
 
 		}	
 
@@ -262,7 +260,6 @@
 			}
 		}
 
-		//View 
 		function bindBudgetTable(tableid, results, model_ref) { 
 			//summary: Bind the model for a given budget year to a budget table
 			//TODO:
@@ -351,13 +348,14 @@
 				bindHandle.cancel();
 				for (index in inputbind) {
 					inputbind[index].remove();
-				};
+				}
 			}
 
 			return { 
 				unbind: unbind
 			}
 		}
+
 
 		function initAccountSelect(enterprise_id) { 
 			var deferred = new Deferred();
@@ -409,5 +407,6 @@
 			var date = new Date(datestring);
       		return months[date.getMonth()] + ' ' + date.getFullYear(); 
 		}
+
 	});
 </script>
