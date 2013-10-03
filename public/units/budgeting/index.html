@@ -73,8 +73,6 @@ var current_model;
 		// 	-Unique ID for budget table (ref: store rant in code)
 		// 	-Highlighting for errors on incorrect inputs for budgeting etc (Red box around invalid input)
 		///////
-		
-		console.log("JsonRest stores not implemented.");
 
 		//label months provided by Date object (given 0 - 11)
 		var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -103,6 +101,9 @@ var current_model;
 		});
 		var next_model = new Observable(Memory({}));
 		var next_cache;
+
+		//@sfount - re-write this to inject these value all the way through, stupid to have them accesible to everyone
+		var bindlink_array = [];
 
 		initUI();
 
@@ -231,14 +232,17 @@ var current_model;
 			cache.query();
 
 			var budget_result = model.query();
-			bindBudgetTable("units-budgeting-" + id, budget_result, model);
-			bindTotal("units-budgeting-" + id, budget_result);
-		}
+			//@sfount - the methods returned here should be passed to whoever needs them, not stored at the top
+			bindlink_array.push(bindBudgetTable("units-budgeting-" + id, budget_result, model));
+			bindlink_array.push(bindTotal("units-budgeting-" + id, budget_result));
+
+		}	
 
 		function bindTotal(tableid, results) { 
 			var total_view = dom.byId(tableid + "-budgetTotal");
+			var bindNumber = Math.round(Math.random() * 100);
 			var cache_total = 0;
-
+			console.log("bindTotal called - bindNumber: " + bindNumber);
 			////////
 			// This is a fix (read: hack) for keeping track of ID's 
 			// -Items in dojos Stores must be UNIQUELY identifiable with a single column (ID). The budget table currently has a primary key consisting of multiple columns. Dojo kindly generates a random ID to satisfy its needs - unusable in this case.
@@ -250,8 +254,10 @@ var current_model;
 			////////
 			var cache_period = {};
 
-			results.observe(function(item, removedIndex, insertedIndex) { 
-				console.log("[Model - TotalView Bind] Updated; removed: ", removedIndex, " inserted: ", insertedIndex);
+			var bindHandle = results.observe(function(item, removedIndex, insertedIndex) { 
+				//console.log("[Model - TotalView Bind] Updated; removed: ", removedIndex, " inserted: ", insertedIndex);
+
+				console.log(bindNumber, " observing update");
 
 				var budget = Number(item.budget);
 				//Use standard removed/insertedIndex method once Store IDs have been resolved
@@ -270,6 +276,14 @@ var current_model;
 			function refreshView(value) { 
 				domAttr.set(total_view, "innerHTML", value);
 			}
+
+			function unbind() { 
+				bindHandle.cancel();
+			}
+
+			return { 
+				unbind: unbind
+			}
 		}
 
 		//View 
@@ -279,13 +293,14 @@ var current_model;
 			//	-store row information in bindBudgetTable local variables - these should be used to access row elemnts, vs. queryying the DOM a second time
 
 			var budget_table = dom.byId(tableid);
+			var inputbind_array = new Array();
 			//var table_rows = [];
 
 			//Apply insertRow() function to all elements currently in results
 			//results.forEach(insertRow);
 
-			results.observe(function(item, removedIndex, insertedIndex) { 
-				console.log("Updated with ", item);
+			var bindHandle = results.observe(function(item, removedIndex, insertedIndex) { 
+
 				if(removedIndex > -1) { 
 					//removeRow(removedIndex);
 				}
@@ -299,12 +314,11 @@ var current_model;
 			//@sfount - this is probably shit
 			function updateRow(item, index) { 
 				
-				console.log("Updating ", item, " at ", index);
 				//@sfount - assuming all fiscal years start in January - this number should be transformed respectively
 				var month = new Date(item.period_start).getMonth();
 				var row_id = tableid + "-" + month;
 
-				console.log(domAttr.get(row_id, "class"));
+			
 				domAttr.set(row_id, "class", '');
 				//@sfount - 3 DOM querries, shouldn't happen
 				domAttr.set(row_id + "-period", "innerHTML", formatDate(item.period_start));
@@ -318,11 +332,14 @@ var current_model;
 					//create input widget 
 					var td_budget_input = domConstruct.create("input", { 
 			        	value : item.budget,
-			        	id : row_id + "-budget"
+			        	id : row_id + "-budget", 
+			        	pattern: "/^\d+(\.\d{1,2})?$/",
+			        	required : 'required'
 			        }, dom.byId(row_id + "-budgetRow"));
 			        var input_error = false;
 
-				   	on(td_budget_input, "keyup", function(e) { 
+			        //@sfount - again, undo these binds with dependencies vs. tracking them with an array
+				   	inputbind_array.push(on(td_budget_input, "keyup", function(e) { 
 						///////////
 				   		//	Currently calling put method on store on every update, there may be a better way to this by updating the item (stored in the most recent query on the model) and obsering that individually 
 						///////////
@@ -334,7 +351,7 @@ var current_model;
 				   			item.budget = Number(newVal);
 				   			model_ref.put(item);
 						}
-				   	});		
+				   	}));		
 				}
 
 		        //table_rows.splice(i, 0, budget_table.insertBefore(tr, table_rows[i] || null));
@@ -342,6 +359,19 @@ var current_model;
 
 			function removeRow(index) { 
 				//Remove an item from the budget table
+			}
+
+			function unbind() { 
+				bindHandle.cancel();
+
+				for (var i = inputbind_array.length - 1; i >= 0; i--) {
+					inputbind_array[i].remove();
+				};
+				console.log("Unbind called");
+			}
+
+			return { 
+				unbind: unbind
 			}
 		}
 
@@ -376,6 +406,13 @@ var current_model;
 		    account_select.on("change", function(value) {
 		      //account = value; 
 		      //paintBudget(fiscal_year, account);
+
+	      	  for (var i = bindlink_array.length - 1; i >= 0; i--) {
+	      	  	bindlink_array[i].unbind();
+	      	  };
+	      	  //Clear array
+		      bindlink_array = new Array();
+
 		      account_id = value;
 		      settupBudget(fiscal_year_id, account_id);
 		    });
