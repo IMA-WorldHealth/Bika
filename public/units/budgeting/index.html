@@ -72,7 +72,7 @@
 		// 	-Unique ID for budget table (ref: Store rant in code)
 		// 	-Highlighting for errors on incorrect inputs for budgeting etc (Red box around invalid input)
 		// 	-If changes to budget are made, user should not be able to change accounts until discarded (reset) or updated
-		// 	-Highlight Start of fiscal year (row outline) ?End of fiscaly year
+		// 	-Highlight Start of fiscal year (row outline) ?End of fiscal year
 		///////
 
 		//label months provided by Date object (given 0 - 11)
@@ -321,9 +321,7 @@
 					//create input widget 
 					var td_budget_input = domConstruct.create("input", { 
 			        	value : item.budget,
-			        	id : row_id + "-budget", 
-			        	pattern: "/^\d+(\.\d{1,2})?$/",
-			        	required : 'required'
+			        	id : row_id + "-budget"
 			        }, dom.byId(row_id + "-budgetRow"));
 			        var input_error = false;
 
