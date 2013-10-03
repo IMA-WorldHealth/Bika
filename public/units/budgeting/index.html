@@ -293,7 +293,7 @@ var current_model;
 			//	-store row information in bindBudgetTable local variables - these should be used to access row elemnts, vs. queryying the DOM a second time
 
 			var budget_table = dom.byId(tableid);
-			var inputbind_array = new Array();
+			var inputbind = {};
 			//var table_rows = [];
 
 			//Apply insertRow() function to all elements currently in results
@@ -327,6 +327,25 @@ var current_model;
 				if(dom.byId(row_id + "-budget") != null) { 
 					//reference input widget
 					domAttr.set(row_id + "-budget", "value", item.budget);
+
+					//If this is a new input
+					//@sfount - this should be resolved (and not nescisary) by removing inputs on changing accounts/fiscal years
+					if(!inputbind[item.id]) { 
+						var td_budget_input = dom.byId(row_id + "-budget");
+						inputbind[item.id] = on(td_budget_input, "keyup", function(e) { 
+							///////////
+					   		//	Currently calling put method on store on every update, there may be a better way to this by updating the item (stored in the most recent query on the model) and obsering that individually 
+							///////////
+					   		var newVal = td_budget_input.value;
+					   		var validBudget = /^\d+(\.\d{1,2})?$/;
+
+					   		//Check format of input
+					   		if(validBudget.test(newVal)) { 
+					   			item.budget = Number(newVal);
+					   			model_ref.put(item);
+							}
+					   	});
+					}
 				} else { 
 
 					//create input widget 
@@ -339,7 +358,7 @@ var current_model;
 			        var input_error = false;
 
 			        //@sfount - again, undo these binds with dependencies vs. tracking them with an array
-				   	inputbind_array.push(on(td_budget_input, "keyup", function(e) { 
+				   	inputbind[item.id] = on(td_budget_input, "keyup", function(e) { 
 						///////////
 				   		//	Currently calling put method on store on every update, there may be a better way to this by updating the item (stored in the most recent query on the model) and obsering that individually 
 						///////////
@@ -351,7 +370,7 @@ var current_model;
 				   			item.budget = Number(newVal);
 				   			model_ref.put(item);
 						}
-				   	}));		
+				   	});		
 				}
 
 		        //table_rows.splice(i, 0, budget_table.insertBefore(tr, table_rows[i] || null));
@@ -364,8 +383,8 @@ var current_model;
 			function unbind() { 
 				bindHandle.cancel();
 
-				for (var i = inputbind_array.length - 1; i >= 0; i--) {
-					inputbind_array[i].remove();
+				for (index in inputbind) {
+					inputbind[index].remove();
 				};
 				console.log("Unbind called");
 			}
