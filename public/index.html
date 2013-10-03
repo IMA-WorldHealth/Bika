@@ -103,22 +103,27 @@
 
         //LES FONCTIONS
         function initEnterpriseSelect() {
-             enterpriseSelect_query = {};
-             var e = [{t : 'enterprise', c : ['id', 'region', 'country', 'city', 'name', 'phone', 'email', 'type', 'cash_account']}];
-             enterpriseSelect_query.e = e;
-             var requetteEntreprise = JSON.stringify(enterpriseSelect_query);
-             var enterpriseSelect_store = new JsonRest({
-               target: "/data/",
-               getLabel: function (data) {
-                 return data.name + "-" + data.region;
-               }
-             });
-             enterpriseSelect = new SelectX({
-               store: enterpriseSelect_store,
-               style: "width: 200px",
-               query: '?' + requetteEntreprise,
-               }, "change_enterprise");            
-           }
+          enterpriseSelect_query = {};
+          var e = [{t : 'enterprise', c : ['id', 'region', 'country', 'city', 'name', 'phone', 'email', 'type', 'cash_account']}];
+          enterpriseSelect_query.e = e;
+          var requetteEntreprise = JSON.stringify(enterpriseSelect_query);
+          var enterpriseSelect_store = new JsonRest({
+            target: "/data/",
+              getLabel: function (data) {
+              return data.name + "-" + data.region;
+            }
+          });
+          enterpriseSelect = new SelectX({
+            store: enterpriseSelect_store,
+            query: '?' + requetteEntreprise,
+          }, "enterprise-select");            
+        }
+
+        function initFiscalSelect(enterprise_id) { 
+          var fiscal_query = {};
+          var e = [{t : 'fiscal_year', c : ['id', 'fiscal_year_text']}];
+          fiscal_query.e = e;
+        }
       });
   </script>
 </head>
@@ -133,7 +138,9 @@
         </ul>
       </div>
       <div id="tree"></div>
-      <div id="change_enterprise"> 
+      <div id="application-select">
+        <div id="enterprise-select"></div>
+        <div id="fiscal-select"></div>
       </div>
     </div>
     <div id="center_panel">

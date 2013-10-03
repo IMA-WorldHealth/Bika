@@ -82,12 +82,13 @@ html, body {
   height: 100%;
   width: 100%;
 }
-#change_enterprise{
-  position:absolute;
+
+#enterprise-select  { 
+  position: absolute;
   left : 0px;
   bottom: 0px;
+  width : 100%;
 }
-
 
 
 
