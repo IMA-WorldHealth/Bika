@@ -488,7 +488,6 @@ INSERT INTO `permission` (`id`, `id_unit`, `id_user`) VALUES
     (12, 7, 1),
     (13, 26, 1);
     
-
 -- Dumping structure for table bika.role
 DROP TABLE IF EXISTS `role`;
 CREATE TABLE IF NOT EXISTS `role` (
@@ -5793,7 +5792,7 @@ CREATE TABLE `debitor` (
   `contact`        text,
   `dun`            varchar(3) DEFAULT NULL,
   `email`          text,
-  `group_id`       mediumint(11) DEFAULT NULL,
+  `group_id`       mediumint DEFAULT NULL,
   `interest`       varchar(3) DEFAULT NULL,
   `locked`         tinyint NOT NULL DEFAULT '0',
   `max_credit`     varchar(45) DEFAULT NULL,
