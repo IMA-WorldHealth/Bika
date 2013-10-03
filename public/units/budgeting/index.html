@@ -1,5 +1,8 @@
 <link href="../css/budget.css" rel="stylesheet">
-
+<div id="units-budgeting-selection">
+	<!--Placeholder for Account Select-->
+	<div id="units-budgeting-account"></div>
+</div>
 <div id="units-budgeting-budgetDisplay">
 	<fieldset>
 		<legend>Previous Fiscal Year</legend>
@@ -53,8 +56,11 @@ var current_model;
 			//AJAX
 			"dojo/request",
 			//Events?
-			"dojo/on"
-			], function(dom, domConstruct, query, domAttr, Memory, Cache, JsonRest, Observable, request, on){ 
+			"dojo/on",
+			"dojo/Deferred",
+			//Components
+			"dijit/form/Select"
+			], function(dom, domConstruct, query, domAttr, Memory, Cache, JsonRest, Observable, request, on, Deferred, Select){ 
 
 		///////
 		// module : budgeting
@@ -81,7 +87,7 @@ var current_model;
 		var fiscal_year_id = 2013001;
 
 		//@sfount - set with Selection at top of page
-		var account_id = 100000;
+		var account_id;
 
 		//Model
 		var previous_interface = new JsonRest({
@@ -102,9 +108,16 @@ var current_model;
 
 		function initUI() { 
 
-			padTables();
+			renderTables();
 
-			function padTables() { 
+			var settupAccount = initAccountSelect(enterprise_id);
+
+			settupAccount.then(function(value) { 
+				account_id = value;
+				settupBudget(fiscal_year_id, account_id);
+			})
+
+			function renderTables() { 
 				//Populate the budget table with blank rows, account for fiscal years starting in any month
 				for(var i=0; i<fiscal_array.length; i++) { 
 					var tableid = "units-budgeting-" + fiscal_array[i].id;
@@ -154,8 +167,7 @@ var current_model;
 			}
 		}
 
-		settupBudget(fiscal_year_id, account_id);
-
+		
 		function settupBudget(fiscalyearid, accountid) { 
 
 			//request information about current fiscal year
@@ -211,6 +223,7 @@ var current_model;
 				  v: fiscalyearid
 			}]};
 
+			model = new Observable(Memory({}));
 			interface = new JsonRest({ 
 				target : '/data/?' + JSON.stringify(budget_query)
 			});
@@ -231,7 +244,9 @@ var current_model;
 			// -Items in dojos Stores must be UNIQUELY identifiable with a single column (ID). The budget table currently has a primary key consisting of multiple columns. Dojo kindly generates a random ID to satisfy its needs - unusable in this case.
 			// 	(1) Add a single column PK to every table in the bika database 
 			// 	(2) Alter dojo's Memory store to cater for the current `bika`.`budget` primary key`
-			// 	-TODO: This should be resolved to adhere to the concept of having memory only in one place
+			// 	TODO: 
+			// 	-This should be resolved to adhere to the concept of having memory only in one place
+			// 	-Store original and new budgets to commit to server when needed
 			////////
 			var cache_period = {};
 
@@ -251,22 +266,6 @@ var current_model;
 				refreshView(cache_total);
 
 			}, true);
-
-			//This function should be improved and used once Store IDs have been resolved (oh lawd)
-			function updateTotal(item, addition) { 
-				var budget = Number(item.budget);
-
-				//Verify budget is a legal Number 
-				
-				//This is pretty gross
-				if(addition) { 
-					cache_total += item.budget;
-				} else { 
-					cache_total -= item.budget;
-				}
-				
-				refreshView(cache_total); 
-			}
 
 			function refreshView(value) { 
 				domAttr.set(total_view, "innerHTML", value);
@@ -315,19 +314,26 @@ var current_model;
 					//reference input widget
 					domAttr.set(row_id + "-budget", "value", item.budget);
 				} else { 
+
 					//create input widget 
 					var td_budget_input = domConstruct.create("input", { 
 			        	value : item.budget,
 			        	id : row_id + "-budget"
 			        }, dom.byId(row_id + "-budgetRow"));
+			        var input_error = false;
 
 				   	on(td_budget_input, "keyup", function(e) { 
 						///////////
 				   		//	Currently calling put method on store on every update, there may be a better way to this by updating the item (stored in the most recent query on the model) and obsering that individually 
 						///////////
 				   		var newVal = td_budget_input.value;
-				   		item.budget = newVal;
-				   		model_ref.put(item);
+				   		var validBudget = /^\d+(\.\d{1,2})?$/;
+
+				   		//Check format of input
+				   		if(validBudget.test(newVal)) { 
+				   			item.budget = Number(newVal);
+				   			model_ref.put(item);
+						}
 				   	});		
 				}
 
@@ -337,6 +343,44 @@ var current_model;
 			function removeRow(index) { 
 				//Remove an item from the budget table
 			}
+		}
+
+		function initAccountSelect(enterprise_id) { 
+			var deferred = new Deferred();
+
+		    var account_select_store = new JsonRest({
+		      target: '/data/',
+		      getLabel: function(data) {
+		        return data.id + " - " + data.account_txt; // coding against the old trackerv6.sql db
+		      }
+		    });
+
+		    var account_query = {};
+		    var e = [{t : 'account', c : ['id', 'locked', 'account_txt', 'account_type_id', 'account_category']}];
+		    var c = [{t : 'account', cl : 'enterprise_id', v : enterprise_id, z : '='}];
+
+		    account_query.e = e;
+		    account_query.c = c;
+		   
+		    var format_account_query = '?' + JSON.stringify(account_query);
+
+		    var account_select = new Select({
+		      store: account_select_store, 
+		      query: format_account_query
+		    }, "units-budgeting-account");
+
+		    account_select.on("setStore", function() { 
+		      deferred.resolve(this.get('value'));
+		    });
+
+		    account_select.on("change", function(value) {
+		      //account = value; 
+		      //paintBudget(fiscal_year, account);
+		      account_id = value;
+		      settupBudget(fiscal_year_id, account_id);
+		    });
+
+		    return deferred.promise;
 		}
 
 		//Utility functions
