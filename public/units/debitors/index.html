@@ -9,19 +9,18 @@
 </div>	
 <script>
   require([
+    "dojo/_base/declare",
     "dojo/store/Memory",
-    "gridx/modules/CellWidget",
     "dojo/store/JsonRest",
+    "dojo/store/Cache",
     "dijit/layout/TabContainer",
-    "dojox/layout/ContentPane",
-    "gridx/Grid",
-    "gridx/core/model/cache/Async",
-    "gridx/modules/select/Row",
-    "customizedModule/SelectX",
     "dijit/form/Select",
+    "dojox/layout/ContentPane",
+    "dgrid/OnDemandGrid",
+    "dgrid/extensions/Selection",
     "dojo/domReady!"],
-    function (Memory, CellWidget, JsonRest, TabContainer, ContentPane,
-              Grid, Cache, Row, SelectX, Select) {
+    function (declare, Memory, JsonRest, Cache, TabContainer,
+      Select, ContentPane, OnDemandGrid, Selection) {
 
     var grid_store = new JsonRest({
       target : '/data/',
@@ -167,7 +166,7 @@
       var countrySelect;
       if (!country_occupied) {
         country_occupied = true;
-        countrySelect = new SelectX({
+        countrySelect = new Select({
             store : country_store,
             query : '?' + JSON.stringify(country_query),
             style : "width: 100%;"
@@ -187,7 +186,7 @@
       var citySelect;
       if (!city_occupied) {
         city_occupied = true;
-        citySelect = new SelectX({
+        citySelect = new Select({
           store       : city_store,
           query: '?' + JSON.stringify(city_query),
           style: "width: 100%;"
