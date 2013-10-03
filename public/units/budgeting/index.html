@@ -1,6 +1,7 @@
 <link href="../css/budget.css" rel="stylesheet">
 <div id="units-budgeting-selection">
 	<!--Placeholder for Account Select-->
+	<label>Select Account: </label>
 	<div id="units-budgeting-account"></div>
 </div>
 <div id="units-budgeting-budgetDisplay">
@@ -40,7 +41,6 @@
 </div>
 
 <script>
-var current_model;
 	require([
 			//DOM manipulation
 			"dojo/dom", 
@@ -52,10 +52,9 @@ var current_model;
 			"dojo/store/Cache",
 			"dojo/store/JsonRest",
 			"dojo/store/Observable",
-			//MVC
 			//AJAX
 			"dojo/request",
-			//Events?
+			//Async
 			"dojo/on",
 			"dojo/Deferred",
 			//Components
@@ -69,46 +68,31 @@ var current_model;
 		// 	-[Discuss] Functions inside functions created every time a function is called? Place common functions at top level?
 		// 	-[Discuss] Should this just be done with D-Grid to provide uniform table structure
 		// 	-[Discuss] I read somewhere that var newFunc = function() { } is better practice than function() { }, is that true?
-		// 	-Update comments - a lot of issues have been resolved etc.
-		// 	-Unique ID for budget table (ref: store rant in code)
+		// 	-Unique ID for budget table (ref: Store rant in code)
 		// 	-Highlighting for errors on incorrect inputs for budgeting etc (Red box around invalid input)
+		// 	-If changes to budget are made, user should not be able to change accounts until discarded (reset) or updated
+		// 	-Highlight Start of fiscal year (row outline) ?End of fiscaly year
 		///////
 
 		//label months provided by Date object (given 0 - 11)
 		var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-		//@sfount - I justified this at some point
-		var fiscal_array = [{id : "previous"}, {id : "current"}, {id : "next"}];
-
 		//@sfount - this data should be imported from the application structure 
 		var enterprise_id = 101;
-		var fiscal_year_id = 2013001;
+		var fiscal_year_id = 2014001;
 
-		//@sfount - set with Selection at top of page
+		//Value set with account-select
 		var account_id;
 
-		//Model
-		var previous_interface = new JsonRest({
-		});
-		var previous_model = new Observable(Memory({}));
-		var previous_cache;
-
-		var current_interface;
-		current_model = new Observable(Memory({}));
-		var current_cache;
-
-		var next_interface = new JsonRest({ 
-		});
-		var next_model = new Observable(Memory({}));
-		var next_cache;
-
 		//@sfount - re-write this to inject these value all the way through, stupid to have them accesible to everyone
-		var bindlink_array = [];
+		var tablebind = {};
+		var fiscal_array = [{id : "previous"}, {id : "current"}, {id : "next"}];
 
 		initUI();
 
 		function initUI() { 
 
+			//Split into seperate functions to allow multiple components to be rendered in order
 			renderTables();
 
 			var settupAccount = initAccountSelect(enterprise_id);
@@ -143,7 +127,6 @@ var current_model;
 
 					}, total_row);
 
-					//@sfount - is this a fly thing to do ?
 					function createRow(row_index) { 
 						var tr = domConstruct.create("tr", { 
 							id : tableid + '-' + row_index,
@@ -167,7 +150,6 @@ var current_model;
 				}
 			}
 		}
-
 		
 		function settupBudget(fiscalyearid, accountid) { 
 
@@ -185,18 +167,16 @@ var current_model;
 		  		//@sfount - This is why combining models/interface/id/cache in an array is a good thing - UPDATE
 		  		//request budgets
 		  		if(fiscal_data.previous_fiscal_year) { 
-		  			requestBudget("previous", fiscal_data.previous_fiscal_year, accountid, previous_interface, previous_model, previous_cache);
+		  			requestBudget("previous", fiscal_data.previous_fiscal_year, accountid);
 		  		}
 		  		if(fiscal_data.next_fiscal_year) { 
-		  			requestBudget("next", fiscal_data.next_fiscal_year, accountid, next_interface, next_model, next_cache);
+		  			requestBudget("next", fiscal_data.next_fiscal_year, accountid);
 		  		}
-		  		requestBudget("current", fiscalyearid, accountid, current_interface, current_model, current_cache);
+		  		requestBudget("current", fiscalyearid, accountid);
 			});
 		}
 
-		//@sfount - make interface, model and cache more generic?
-		//		  - this is shit
-		function requestBudget(id, fiscalyearid, accountid, interface, model, cache) { 
+		function requestBudget(id, fiscalyearid, accountid) { 
 			var budget_query = {
 				'e' : [{
 				  t : 'period',
@@ -224,25 +204,24 @@ var current_model;
 				  v: fiscalyearid
 			}]};
 
-			model = new Observable(Memory({}));
-			interface = new JsonRest({ 
+			var model = new Observable(Memory({}));
+			var interface = new JsonRest({ 
 				target : '/data/?' + JSON.stringify(budget_query)
 			});
-			cache = new Cache(interface, model);
+			var cache = new Cache(interface, model);
 			cache.query();
 
 			var budget_result = model.query();
 			//@sfount - the methods returned here should be passed to whoever needs them, not stored at the top
-			bindlink_array.push(bindBudgetTable("units-budgeting-" + id, budget_result, model));
-			bindlink_array.push(bindTotal("units-budgeting-" + id, budget_result));
+			tablebind[id] = bindBudgetTable("units-budgeting-" + id, budget_result, model));
+			tablebind[id] = bindTotal("units-budgeting-" + id, budget_result));
 
 		}	
 
 		function bindTotal(tableid, results) { 
+
 			var total_view = dom.byId(tableid + "-budgetTotal");
-			var bindNumber = Math.round(Math.random() * 100);
 			var cache_total = 0;
-			console.log("bindTotal called - bindNumber: " + bindNumber);
 			////////
 			// This is a fix (read: hack) for keeping track of ID's 
 			// -Items in dojos Stores must be UNIQUELY identifiable with a single column (ID). The budget table currently has a primary key consisting of multiple columns. Dojo kindly generates a random ID to satisfy its needs - unusable in this case.
@@ -255,9 +234,6 @@ var current_model;
 			var cache_period = {};
 
 			var bindHandle = results.observe(function(item, removedIndex, insertedIndex) { 
-				//console.log("[Model - TotalView Bind] Updated; removed: ", removedIndex, " inserted: ", insertedIndex);
-
-				console.log(bindNumber, " observing update");
 
 				var budget = Number(item.budget);
 				//Use standard removed/insertedIndex method once Store IDs have been resolved
@@ -294,10 +270,6 @@ var current_model;
 
 			var budget_table = dom.byId(tableid);
 			var inputbind = {};
-			//var table_rows = [];
-
-			//Apply insertRow() function to all elements currently in results
-			//results.forEach(insertRow);
 
 			var bindHandle = results.observe(function(item, removedIndex, insertedIndex) { 
 
@@ -359,9 +331,6 @@ var current_model;
 
 			        //@sfount - again, undo these binds with dependencies vs. tracking them with an array
 				   	inputbind[item.id] = on(td_budget_input, "keyup", function(e) { 
-						///////////
-				   		//	Currently calling put method on store on every update, there may be a better way to this by updating the item (stored in the most recent query on the model) and obsering that individually 
-						///////////
 				   		var newVal = td_budget_input.value;
 				   		var validBudget = /^\d+(\.\d{1,2})?$/;
 
@@ -372,8 +341,6 @@ var current_model;
 						}
 				   	});		
 				}
-
-		        //table_rows.splice(i, 0, budget_table.insertBefore(tr, table_rows[i] || null));
 			}
 
 			function removeRow(index) { 
@@ -382,11 +349,9 @@ var current_model;
 
 			function unbind() { 
 				bindHandle.cancel();
-
 				for (index in inputbind) {
 					inputbind[index].remove();
 				};
-				console.log("Unbind called");
 			}
 
 			return { 
@@ -397,10 +362,11 @@ var current_model;
 		function initAccountSelect(enterprise_id) { 
 			var deferred = new Deferred();
 
+			//Using a store to utilise the getLabel method - there may be a better way to do this with dojo/request?
 		    var account_select_store = new JsonRest({
 		      target: '/data/',
 		      getLabel: function(data) {
-		        return data.id + " - " + data.account_txt; // coding against the old trackerv6.sql db
+		        return data.id + " - " + data.account_txt; //ref: bika.sql
 		      }
 		    });
 
@@ -423,28 +389,25 @@ var current_model;
 		    });
 
 		    account_select.on("change", function(value) {
-		      //account = value; 
-		      //paintBudget(fiscal_year, account);
+			  
+			  account_id = value;
+	      	  for(index in tablebind) { 
+	      	  	tablebind[index].unbind();
+	      	  }
+	      	  tablebind = {};
 
-	      	  for (var i = bindlink_array.length - 1; i >= 0; i--) {
-	      	  	bindlink_array[i].unbind();
-	      	  };
-	      	  //Clear array
-		      bindlink_array = new Array();
-
-		      account_id = value;
 		      settupBudget(fiscal_year_id, account_id);
 		    });
 
 		    return deferred.promise;
 		}
 
-		//Utility functions
+		///////
+		// Utility Functions
+		///////
 		function formatDate(datestring) { 
 			var date = new Date(datestring);
       		return months[date.getMonth()] + ' ' + date.getFullYear(); 
 		}
-
-
 	});
 </script>
