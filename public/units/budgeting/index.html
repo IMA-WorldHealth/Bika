@@ -58,8 +58,10 @@
       "dojo/on",
       "dojo/Deferred",
       //Components
-      "dijit/form/Select"
-      ], function(dom, domConstruct, query, domAttr, Memory, Cache, JsonRest, Observable, request, on, Deferred, Select){ 
+      "dijit/form/Select",
+      //ApplicationState [TEST]
+      "customizedModule/ApplicationState"
+      ], function(dom, domConstruct, query, domAttr, Memory, Cache, JsonRest, Observable, request, on, Deferred, Select, ApplicationState){ 
 
     ///////
     // module : budgeting
@@ -75,6 +77,7 @@
     //  -Highlight Start of fiscal year (row outline) ?End of fiscal year
     ///////
 
+    var app_state = new ApplicationState();
     //label months provided by Date object (given 0 - 11)
     var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
@@ -89,6 +92,13 @@
     var tablebind = {};
     var fiscal_array = [{id : "previous"}, {id : "current"}, {id : "next"}];
 
+    //access to any application level componenet changes
+    app_state.register("units-budgeting", "enterprise-select", function(value) { 
+      console.log("units-budgeting responding to: ", value);
+    });
+
+    //i_handle.remove();
+    
     initUI();
 
     function initUI() { 

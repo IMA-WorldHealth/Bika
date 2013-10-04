@@ -83,12 +83,20 @@ html, body {
   width: 100%;
 }
 
-#enterprise-select  { 
+/*Gross CSS - element styles need aligning*/
+#application-select { 
   position: absolute;
   left : 0px;
   bottom: 0px;
-  width : 100%;
+  width: 100%;
 }
+
+#application-select .dijitSelect { 
+  width: 100%
+}
+
+
+
 
 
 
