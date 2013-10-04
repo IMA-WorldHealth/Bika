@@ -82,8 +82,8 @@
     var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
     //@sfount - this data should be imported from the application structure 
-    var enterprise_id = 101;
-    var fiscal_year_id = 2013001;
+    var enterprise_id = app_state.getValue("enterprise-select");
+    var fiscal_year_id = app_state.getValue("fiscal-select");
 
     //Value set with account-select
     var account_id;

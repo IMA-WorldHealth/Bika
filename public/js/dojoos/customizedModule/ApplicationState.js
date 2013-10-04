@@ -18,7 +18,7 @@ define([
   var component = {};
   var listener = {};
 
-  //Allows capplication track and remove event handles to respond to errors etc. not used otherwise
+  //Allows application track and remove event handles to respond to errors etc. not used otherwise
   var handle = {};
 
   var setComponent = function(component_id, reference) { 
@@ -31,7 +31,10 @@ define([
     return component[component_id];
   }
 
-  //return true on success, false on failure - don't have to do this
+  var getValue = function(component_id) { 
+    return component[component_id].get('value');
+  }
+
   var register = function(caller_id, component_id, callback) { 
     var r = listener[component_id][caller_id];
     if(!r) { 
@@ -53,6 +56,7 @@ define([
     //should expose read-only access to values
     getComponent : getComponent,
     setComponent : setComponent,
+    getValue : getValue,
     register : register
   });
 });
