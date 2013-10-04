@@ -156,10 +156,6 @@ function formatConditions(c) {
     if (p.l) links.push(' ' + p.l.trim() + ' ');
     table = escape_id(p.t);
     col = escape_id(p.cl);
-<<<<<<< HEAD:rapidProto/lib/database/db.js
-=======
-    // FIXME: write unit test for IN condition
->>>>>>> 57e456c198aca7e2fdeebadb0a1e7907fd26edb7:lib/database/db.js
     value = (isInt(p.v) || isIn(p.v)) ? p.v : escape_str(p.v); // escape strings, except in conditions
     eq = p.z.trim();
     conditions.push(table + '.' + col + " " + eq + " " + value);
