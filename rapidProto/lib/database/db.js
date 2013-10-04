@@ -146,6 +146,8 @@ function formatJoins(j) {
   return str; 
 }
 
+//var x = { entities:[ {t: 'account', c: ["id"]}], cond: [{t: 'account', cl: 'id', z: 'IN', v: '(1,2)'}]};
+
 function formatConditions(c) {
   var conditions = [], links = [], table, col,
       value, eq, i = 0, str = '';
@@ -154,6 +156,10 @@ function formatConditions(c) {
     if (p.l) links.push(' ' + p.l.trim() + ' ');
     table = escape_id(p.t);
     col = escape_id(p.cl);
+<<<<<<< HEAD:rapidProto/lib/database/db.js
+=======
+    // FIXME: write unit test for IN condition
+>>>>>>> 57e456c198aca7e2fdeebadb0a1e7907fd26edb7:lib/database/db.js
     value = (isInt(p.v) || isIn(p.v)) ? p.v : escape_str(p.v); // escape strings, except in conditions
     eq = p.z.trim();
     conditions.push(table + '.' + col + " " + eq + " " + value);
@@ -220,31 +226,42 @@ function db(options) {
       return Object.keys(supported_databases);
     },
 
-
-    update: function(table, data) {
-      var statement = 'UPDATE ', colAndVal = '', separateur = ', ', 
-           prop, propValue, affectation = '=', row_id, keyInfo,
-           value, requette;
+    // update: function
+    //    Updates a single row in the database.
+    // NOTE: pk MUST exist to change one line.
+    // If pk does not exist, catastrophic changes
+    // may occur (SET the whole database with changes).
+    // Pk is expected to be a list of primary keys
+    // FIXME: Update documentation concerning this
+    // method.
+    update: function(table, data, pk) {
+      var sets = [], where = [], row, value, base;
 
       table = escape_id(table);
 
-      for (row_id in data.rows) {
-        propValue = data.rows[row_id];
-        for(keyInfo in data.updateInfo) {
-          value = data.updateInfo[keyInfo];
-          if (!isInt(value)){
-            value = escape_str(value);
+      function inArr(arr, v) {
+        return arr.some(function(i) {
+          return i == v;
+        });
+      }
+      
+      for (var j in data) {
+        row = data[j];
+        for (var k in row) {
+          value = row[k];
+          if (!isInt(value) && !isIn(value)) value = escape_str(value);
+          if (!inArr(pk, k)) {
+            sets.push(escape_id(k) + "=" + value);
+          } else {
+            // k in pk
+            where.push(escape_id(k) + "=" + value);
           }
-          colAndVal += escape_id(keyInfo) + affectation + value + separateur;
         }
-        colAndVal = ' SET ' + colAndVal.substring(0, colAndVal.length - 2);
       }
-      if (data.rows[row_id].length && data.rows[row_id].length > 1) { // FIXME: AUGH REFERENCES
-        affectation = " IN ";
-        propValue = tuplify(propValue);
-      }
-      requette = statement + table + colAndVal + ' WHERE ' + escape_id(row_id) + affectation + propValue + ";";
-      return requette;
+
+      base = "UPDATE " + table + " SET " + sets.join(", ") + " WHERE " + where.join(" AND ") + ";";
+      console.log(base); 
+      return base;
     },
 
     execute: function(sql, callback) {
@@ -273,7 +290,7 @@ function db(options) {
 
     insert: function (table, rows) {
       var statement = 'INSERT INTO ', vals,
-          keys = [], groups = [];
+          keys = [], groups = [], insert_value;
       
       table = escape_id(table);
       statement += table+' ';
@@ -288,7 +305,7 @@ function db(options) {
         }
         groups.push(tuplify(vals));
       });
-    
+
       statement += tuplify(keys) + ' VALUES ';
       statement += groups.join(', ').trim() + ';';
       return statement;

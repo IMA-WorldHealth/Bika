@@ -1,7 +1,7 @@
 define("customizedModule/UnitsForm", 
 	["dijit/form/Form","dijit/form/CheckBox","dojo/_base/declare", "dojo/on"], 
 	function(Form, CheckBox, declare, on){
-		return declare("customizedModule.FormChooser",Form,{
+		return declare("customizedModule.UnitsForm",Form,{
 			checks:null,
 			constructor: function(){
 				this.checks = [];				
@@ -12,7 +12,8 @@ define("customizedModule/UnitsForm",
 			placeControls: function(values){
 				//creation des checks
 				for(var i=0; i<values.length; i++){
-					var control = new CheckBox({value:values[i]},values[i]+'ID');
+					var control = new CheckBox({value:values[i].name},values[i].id);
+					console.log('fin creation', control);
 					this.checks.push(control);
 				}
 			},

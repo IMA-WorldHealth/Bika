@@ -21,10 +21,10 @@
            ], function (UnitsForm, JsonRest,TextBox,CheckBox, Button, on, Deferred, topic, Dialog, domCons){
            	//declarations des variables
            	var bCreer, bAnnuler,bModifier,bSupprimer, txtFirstName, txtLastName, txtEmail,
-           	 txtUserName, txtPassWord, txtConformPassWord, chkAdministrator,
-              chkFinance, chkManager, chkDocteur, chkAdmin, roleStore,
+           	 txtUserName, txtPassWord, txtConformPassWord, chkAdministrator, roleStore,
                userGrid, userStore, roleGridQuery = {}, userGridQuery = {}, 
-               crudStore, dataAdmin, dataFinance, dataManager, dataDoctor, dialog, roleGrid, fcAdmin, fcFinance, fcManager,fcDoctor;
+               crudStore,f, dialog, roleGrid, tabContainerID=[];
+               var deferred = new Deferred();
 
            	  //creations champs des saisies
            	txtFirstName = new TextBox({class:"saisie", style:"width:220px;"},"firstnameID");
@@ -39,40 +39,44 @@
             bModifier = new Button({label:"Modifier", onClick:modifier}, "modifierID");
             bSupprimer = new Button({label:"Supprimer", onClick:supprimer}, "supprimerID");
             bAnnuler = new Button({label:"Annuler"},"annulerID");
-
-           	//creation des cases a caucher
-            /*chkAdministrator = new CheckBox({value:'Administrator'},"chkadministratorID");
-           	chkAdmin = new CheckBox({value:'admin'},"chkadminID");
-           	chkFinance = new CheckBox({value:'Finance'},"chkfinanceID");
-           	chkManager = new CheckBox({value:'Manager'},"chkmanagerID");
-           	chkDocteur = new CheckBox({value:'Docteur'},"chkdocteurID");*/
-
-           	
-
             //stores
-            //crudStore = new JsonRest({target:'/data/'});
+            crudStore = new JsonRest({target:'/data/'});
              
 
-            /* (function(){
+             (function(){
               //formulaire pour admin role
-              fcAdmin = new FormChooser({},"adminroleformID");
-              var tabUnits = getUnits("admin");
-              tabUnits.then(function(values){
+              f = new UnitsForm({},"divformdroit");
+              var drawTDElements = function(id, roles){
                 var node;
-                for(var i = 0; i< values.length; i++) {
-                      node = domCons.toDom("<div id=\""+values[i]+'ID'+"\"></div><span>"+values[i]+"</span><br/>"); 
-                      domCons.place(node,"adminroleformID");
-                      }
-                      node = domCons.toDom("<div id=\""+"adminroleformIDAll"+"\"></div><span>"+"Tous"+"</span><br/>"); 
-                      domCons.place(node,"adminroleformID");
-                      node = domCons.toDom("<div id=\""+"adminroleformIDOK"+"\"></div>"); 
-                      domCons.place(node,"adminroleformID");
-                      fcAdmin.placeControls(values); 
-                      fcAdmin.addLastCheck("adminroleformIDAll");
-              new Button({label:'Ok', onClick:sauverAdmin}).placeAt(fcAdmin.domNode);
-              fcAdmin.startup();
-              });
-            })();*/
+                for(var i=0; i<roles.length; i++){
+                  tabContainerID.push(roles[i].id);
+                  node = domCons.toDom("<td id=\""+roles[i].id+"\"></td>"); 
+                  domCons.place(node,"ligneID");
+                }
+                console.log('tout va bien');
+                deferred.resolve(true);
+              }
+
+              var drawDIVElements = function(id, units){
+                var node;
+                 for(var j=0; j<units.length; j++){                      
+                      node = domCons.toDom("<div id=\""+units[j].id+"\"></div><span>"+units[j].name+"</span><br/>");
+                      console.log('id est ', id);
+                      domCons.place(node,""+id);
+                    }
+                    f.placeControls(units);
+                    deferred = undefined;
+              }
+
+              var res = getChild(0, drawTDElements);
+              res.then(function(value){
+                console.log('nous on commence');
+               for(var j=0; j<tabContainerID.length; j++){
+                getChild(tabContainerID[j], drawDIVElements);
+               }
+              });       
+            
+            })();
 
            
            //	initUnitGrid();
@@ -177,6 +181,34 @@
             }
             var annuler = function(){
               
+            }
+            //pour eviter le probleme d'asynchronisme la construction doit c fer o nivo de getchikd qui doit recevoir un callback
+            /*function getChild(id){
+             var deferred = new Deferred();
+             var children = []
+             sql={};               
+             
+               sql.e = [{t:'unit', c:['id', 'name']}];
+               sql.cond = [{t:'unit', cl:'parent', v:id, z:'='}];
+               crudStore.query(sql).then(function(items){
+               for(var i=0; i<items.length; i++){
+                children.push(items[i]);
+               }
+               console.log(items);
+               deferred.resolve(children);
+               }); 
+              return deferred.promise; 
+            }*/
+
+            function getChild(id, cb){
+             sql={};    
+             sql.e = [{t:'unit', c:['id', 'name']}];
+             sql.cond = [{t:'unit', cl:'parent', v:id, z:'='}];
+             crudStore.query(sql).then(function(data){
+              return cb(id, data);
+             }); 
+             if(deferred)
+             return deferred.promise;              
             }
 
             
