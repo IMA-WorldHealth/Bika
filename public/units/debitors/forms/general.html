@@ -1,18 +1,20 @@
-<form name="bika-units-debitors-forms-general-form">
-  <fieldset class="tab tab-left-align">   
-    <label>Debitor: <input type="text" id="bika-units-debitors-forms-general-debitor"></label>	 
-    <label>Name: <input type="text" id="bika-units-debitors-forms-general-name"></label>	 
-    <label>Address: <input type="text" id="bika-units-debitors-forms-general-address_1"></label>	 
-    <label>Address: <input type="text" id="bika-units-debitors-forms-general-address_2"></label>		 
-    <label>Country: <input type="text" id="bika-units-debitors-forms-general-country"></label> 
-    <label>City: <input type="text" id="bika-units-debitors-forms-general-city"></label>	 
-    <label>Att.: <input type="text" id="bika-units-debitors-forms-general-att"></label>	 
+<link rel="stylesheet" href="/units/debitors/forms/general.css">
+<form id="bika-units-debitors-forms-general-form">
+  <fieldset class="tab">
+    <label>Debitor: <input type="text" id="bika-units-debitors-forms-general-debitor" name="debitor"></label>	 
+    <label>Name: <input type="text" name="name"></label>	 
+    <label>Address: <input type="text" name="address_1"></label>	 
+    <label>Address: <input type="text" name="address_2"></label>		 
+    <label>Country: <input id="bika-units-debitors-forms-general-country" name="country"></label> 
+    <label>City: <input id="bika-units-debitors-forms-general-city" name="city"></label>	 
+    <label>Att.: <input type="text" name="att"></label>	 
   </fieldset> 
-  <fieldset class="tab tab-right-align">
-    <label>Locked: <input type="checkbox" id="bika-units-debitors-forms-general-inputVer"></label>
+  <fieldset class="tab">
+    <label>Locked: <input type="checkbox" name="locked"></label>
     <button id="bika-units-debitors-forms-general-totals">Show Totals</button>	 
-    <label>Debitor Group: <input id="bika-units-debitors-forms-general-groupID"></label>
-    <label>Email: <input type="text" id="bika-units-debitors-forms-general-email"></label>	
-    <label>Telephone: <input type="text" id="bika-units-debitors-forms-general-phone"></label>	 
+    <label>Debitor Group: <input name="group_id"></label>
+    <label>Email: <input type="email" name="email"></label>	
+    <label>Telephone: <input type="tel" name="phone"></label>	 
   </fieldset>
 </form>
+<script src="/units/debitors/forms/general.js"></script>

@@ -5778,6 +5778,26 @@ INSERT INTO `location`(`id`,`city`,`region`,`country_code`) VALUES
   (27,'Bumba','Équateur',52),
   (28,'Mbanza-Ngungu','Bas-Congo',52);
 
+
+--
+-- table `bika`.`payment`
+--    describes the amount of time you can go with paying
+-- months is mediumint to allow "infinite" amount of time
+DROP TABLE `payment`;
+CREATE TABLE IF NOT EXISTS `payment` (
+  `id`        smallint unsigned NOT NULL,
+  `days`      smallint unsigned DEFAULT 0,
+  `months`    mediumint unsigned DEFAULT 0,
+  `text`      varchar(50) NOT NULL,
+  `note`      text,
+  PRIMARY KEY (`id`)
+) ENGINE=Innodb;
+
+INSERT INTO `payment` (`id`, `days`, `months`, `text`, `note`) VALUES
+  (1, 14, 0, "Two Weeks"),
+  (2, 0, 1, "One Month");
+
+
 --
 -- Table `bika`.`debitor`
 --
@@ -5800,7 +5820,7 @@ CREATE TABLE IF NOT EXISTS `debitor` (
   `name`           text,
   `note`           text,
   `our_contact`    int(11) DEFAULT NULL,
-  `payment_id`     int(11) DEFAULT NULL,
+  `payment_id`     smallint unsigned NOT NULL,
   `phone`          text,
   `price_group_id` int(11) DEFAULT NULL,
   `debitor_text1`  text,
@@ -5813,18 +5833,13 @@ CREATE TABLE IF NOT EXISTS `debitor` (
   PRIMARY KEY (`enterprise_id`,`id`),
   KEY `location_id` (`location_id`),
   KEY `enterprise_id` (`enterprise_id`),
+  KEY `payment_id` (`payment_id`),
   CONSTRAINT `debitor_ibfk_1` FOREIGN KEY (`location_id`) REFERENCES `location` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `debitor_ibfk_2` FOREIGN KEY (`enterprise_id`) REFERENCES `enterprise` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `debitor_ibfk_2` FOREIGN KEY (`enterprise_id`) REFERENCES `enterprise` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `debitor_ibfk_3` FOREIGN KEY (`payment_id`) REFERENCES `payment` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB;
 
 INSERT INTO `debitor` (`enterprise_id`,`id`,`address_1`,`address_2`,`location_id`,`contact`,`dun`,`email`, `group_id`,`interest`,`locked`,`max_credit`,`name`,`note`,`our_contact`,`payment_iD`,`phone`,`price_group_id`,`debitor_text1`,`debitor_text2`,`debitor_text3`,`debitor_text4`,`debitor_text5`,`internet_order`,`international`) VALUES
   (101,'1','Bandal','Masina',1,'e54','non','carloscnk@francite.com',2,'34',0,'344','Carlos','je suis toujours la',212,323,'3454',234,'papa','maman','yaya','koko','noko','44','33'),
   (102,'3','Lemba','Limete',1,'fxv','d','gered@caramail.com',2,'767',0,'55','Gered','ils vont bien depuis longtemps',980,876,'802',789,'jon','cnk','ded','chris','ger','77','86');
-
---
--- table `bika`.`payment`
---    describes the amount of time you can go with paying
-DROP TABLE `payment`;
-CREATE TABLE IF NOT EXISTS `payment` (
-  `id`        smallint unsigned NOT NULL,
 

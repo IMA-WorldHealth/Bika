@@ -1,7 +1,26 @@
-.general {
-  float         : right;
-  right         : 20px;
-  width         : 69.5%;
-  border        : 1px solid #ABC8E2;
-  border-radius : 3px;
+.tab {
+  display: block;
+  height: 100%;
+  overflow: hidden;
+  float: left;
+  margin: 0;
+}
+
+.tab label {
+  display: block;
+  font-weight: bold;
+}
+
+.tab input {
+  padding-left: 3.5em;
+  float: right;
+}
+
+.tab button {
+  float: right;
+}
+
+/* hack to get around dijits floating left */
+.tab .dijit {
+  float: right;
 }
