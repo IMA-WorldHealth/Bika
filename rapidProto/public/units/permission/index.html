@@ -17,8 +17,11 @@
            "dojo/topic",
            "dijit/Dialog",
            "dojo/dom-construct",
+           "gridx/core/model/cache/Async",
+           "gridx/modules/SingleSort",
+           "gridx/Grid",
            "dojo/domReady!"
-           ], function (UnitsForm, JsonRest,TextBox,CheckBox, Button, on, Deferred, topic, Dialog, domCons){
+           ], function (UnitsForm, JsonRest,TextBox,CheckBox, Button, on, Deferred, topic, Dialog, domCons, Cache, SingleSort, Grid){
            	//declarations des variables
            	var bCreer, bAnnuler,bModifier,bSupprimer, txtFirstName, txtLastName, txtEmail,
            	 txtUserName, txtPassWord, txtConformPassWord, chkAdministrator, roleStore,
@@ -50,7 +53,7 @@
                 var node;
                 for(var i=0; i<roles.length; i++){
                   tabContainerID.push(roles[i].id);
-                  node = domCons.toDom("<td id=\""+roles[i].id+"\"></td>"); 
+                  node = domCons.toDom("<td id=\""+roles[i].id+"\" ></td>"); 
                   domCons.place(node,"ligneID");
                 }
                 console.log('tout va bien');
@@ -78,54 +81,35 @@
             
             })();
 
-           
-           //	initUnitGrid();
-           // initUserGrid();
+            //*********************************************
+            //**************LES FONCTIONS******************
+            //*********************************************
 
+            var creer = function(){
 
-           
-         /*  function	initUnitGrid(){
-            var hasWidget;
-           	roleStore = new JsonRest({
-                        target: '/data/'
-                    });
+            }
+            var modifier = function(){
+              
+            }
+            var supprimer = function(){
+              
+            }
+            var annuler = function(){
+              
+            }
+            function getChild(id, cb){
+             sql={};    
+             sql.e = [{t:'unit', c:['id', 'name']}];
+             sql.cond = [{t:'unit', cl:'parent', v:id, z:'='}];
+             crudStore.query(sql).then(function(data){
+              return cb(id, data);
+             }); 
+             if(deferred)
+             return deferred.promise;              
+            }
+           initUserGrid();        
 
-                    var columns = [{
-                        id: 'id',
-                        field: 'id',
-                        name: 'ID'
-                    }, {
-                        id: 'name',
-                        field: 'name',
-                        name: 'UNIT NAME'
-                    }, {
-                        id: 'desc',
-                        field: 'desc',
-                        name: 'UNIT DESCRIPTION'
-                    }];
-
-                    var e = [{t : 'unit', c : ['id', 'name', 'desc']}];                    
-                    roleGridQuery.e = e;
-                    var requetteGrid = JSON.stringify(roleGridQuery);
-
-                    roleGrid = new Grid({
-                        style: "height:300px;",
-                        cacheClass: Cache,
-                        store: roleStore,
-                        query: '?'+requetteGrid,
-                        structure: columns,
-                        selectRowTriggerOnCell: true,
-                        modules: [
-                            CellWidget,
-                            SingleSort,
-                            Row
-                            ]
-                    }, "divTabRole");            
-            roleGrid.startup();	
-
-           	}*/
-
-           /*  function initUserGrid(){
+            function initUserGrid(){
             userStore = new JsonRest({
                         target: '/data/'
                     });
@@ -149,7 +133,7 @@
                     var requetteGrid = JSON.stringify(userGridQuery);
 
                     userGrid = new Grid({
-                        style: "height:240px;",
+                        style: "height:230px;",
                         cacheClass: Cache,
                         store: userStore,
                         query: '?'+requetteGrid,
@@ -158,60 +142,9 @@
                         modules: [
                             SingleSort,
                             ],
-                    }, "sub");
-            chkAdmin.startup();
-            chkDocteur.startup();
-            chkFinance.startup();
-            chkManager.startup();
-            chkAdministrator.startup();
+                    }, "divuser");
             userGrid.startup(); 
-            }*/
-
-            //********************************************************
-            //*******************LES FONCTIONS************************
-            //********************************************************
-            var creer = function(){
-
-            }
-            var modifier = function(){
-              
-            }
-            var supprimer = function(){
-              
-            }
-            var annuler = function(){
-              
-            }
-            //pour eviter le probleme d'asynchronisme la construction doit c fer o nivo de getchikd qui doit recevoir un callback
-            /*function getChild(id){
-             var deferred = new Deferred();
-             var children = []
-             sql={};               
-             
-               sql.e = [{t:'unit', c:['id', 'name']}];
-               sql.cond = [{t:'unit', cl:'parent', v:id, z:'='}];
-               crudStore.query(sql).then(function(items){
-               for(var i=0; i<items.length; i++){
-                children.push(items[i]);
-               }
-               console.log(items);
-               deferred.resolve(children);
-               }); 
-              return deferred.promise; 
-            }*/
-
-            function getChild(id, cb){
-             sql={};    
-             sql.e = [{t:'unit', c:['id', 'name']}];
-             sql.cond = [{t:'unit', cl:'parent', v:id, z:'='}];
-             crudStore.query(sql).then(function(data){
-              return cb(id, data);
-             }); 
-             if(deferred)
-             return deferred.promise;              
-            }
-
-            
+            }  
         });
         </script>      
          
@@ -239,28 +172,35 @@
           </form>     		
      	</div> 
       <!--cette div contient des bouttons-->     
-      <div id="divAction">
+      <center><div id="divAction">
         <fieldset >
           <legend>Actions</legend>
           <div id="creerID"></div>
-          <div id="modifierID"></div><br/>
+          <div id="modifierID"></div>
           <div id="supprimerID"></div>
-          <div id="annulerID"></div><br/>
+          <div id="annulerID"></div>
         </fieldset>             		
-     	</div>
+     	</div></center>
       <!--cette div contient les checks box-->
-      <div id="divformdroit">
+      <center><div id="divformdroit">
+        <fieldset>
+          <legend>Droits</legend>
         <form id="droitformID">
           <table>
             <tr id="ligneID">
             </tr>
           </table>
         </form>
-      </div>      
+      </fieldset>
+      </div>   </center> 
+      <!-- cette div contient un grid listant les utilisateurs-->
+    <div id="divuser"> 
+    <fieldset>
+      <legend>Users</legend>
+    </fieldset>     
+    </div>     
     </div>
-    <!-- cette div contient un grid listant les utilisateurs-->
-    <div id="sub">      
-    </div>
-    </body>
+  </body> 
+    
 </html>   
 

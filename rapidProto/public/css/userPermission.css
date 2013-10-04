@@ -5,21 +5,31 @@
 
 #divAction{
  	position: absolute;
- 	width:250px;
- 	top:5px;
- 	right:350px;
+ 	width:100%;
+ 	top:440px;
+ 	left:5px;
 }
 
 #divForm{
  	position: absolute;
- 	width: 500px;
+ 	width: 45%;
  	top:5px;
  	left:5px;
+}
+
+#divformdroit{
+	position:absolute;
+	width: 100%;
+	top:260px;
+	left:5px;
 }
 
 #newuserformID  .saisie{
  float:right;
 }
-#sub{
-	height:40%;	
+#divuser{
+	position: absolute;
+	width: 50%;
+	top: 5px;
+	right: 5px	
 }

@@ -12,7 +12,7 @@ define("customizedModule/UnitsForm",
 			placeControls: function(values){
 				//creation des checks
 				for(var i=0; i<values.length; i++){
-					var control = new CheckBox({value:values[i].name},values[i].id);
+					var control = new CheckBox({value:values[i].name},""+values[i].id);
 					console.log('fin creation', control);
 					this.checks.push(control);
 				}
