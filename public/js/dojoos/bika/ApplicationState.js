@@ -1,4 +1,4 @@
-define([
+define("bika/ApplicationState", [
   "dojo/_base/declare",
   "dojo/on"
 ], function(declare, on) { 
@@ -72,7 +72,7 @@ define([
   }
 
   //Utility functions
-
+ 
   //@sfount - raw javascript haX (ref: Javascript Closure)
   var loopCallback = function(component_id) { 
     //summary: 
@@ -84,7 +84,7 @@ define([
     }
   }
 
-  return declare("customizedModule.ApplicationState", null, { 
+  return declare("bika.ApplicationState", null, { 
     //summary: 
     //  publicly available attributes and methods
     //

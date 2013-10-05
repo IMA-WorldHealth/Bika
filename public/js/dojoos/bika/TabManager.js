@@ -1,7 +1,7 @@
-define("customizedModule/TabManager", 
-  ["dijit/layout/TabContainer", "dojox/layout/ContentPane","dojo/_base/declare", "customizedModule/ApplicationState"], 
+define("bika/TabManager", 
+  ["dijit/layout/TabContainer", "dojox/layout/ContentPane","dojo/_base/declare", "bika/ApplicationState"], 
   function(TabContainer, ContentPane, declare, ApplicationState){
-    return declare("customizedModule.TabManager",TabContainer,{
+    return declare("bika.TabManager",TabContainer,{
 
       /////
       // module: TabManager 
