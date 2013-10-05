@@ -1,8 +1,19 @@
 define("customizedModule/TabManager", 
-  ["dijit/layout/TabContainer", "dojox/layout/ContentPane","dojo/_base/declare"], 
-  function(TabContainer, ContentPane, declare){
+  ["dijit/layout/TabContainer", "dojox/layout/ContentPane","dojo/_base/declare", "customizedModule/ApplicationState"], 
+  function(TabContainer, ContentPane, declare, ApplicationState){
     return declare("customizedModule.TabManager",TabContainer,{
 
+      /////
+      // module: TabManager 
+      // summary: 
+      // TODO: 
+      //  -reformat code (remove duplication of code, multiple initiations of ContentPane)
+      //  -Final tab can be closed if a new tab is open and then closed
+      //  -tabs should NOT be re-purposed, close tab and open new tab in its place
+      /////
+
+      //TODO: figure out how to return a new instance of the object - no need initialise within modules
+      app_state: new ApplicationState(),
       selectedTab:null,
       constructor:function(args){       
         this.watch("selectedChildWidget", function(name, oval, nval){
@@ -12,10 +23,19 @@ define("customizedModule/TabManager",
           }
           });       
       },
+
+      urlToId: function(url) { 
+        //Remove leading '/'
+        var id = url.substr(1, url.length-2);
+        return id.replace('/', '-');
+      },
+
+      //TODO: clean up this function - ContentPane should only be initialised in one place (lots of repeated code)
       addChildren: function(title, href, closable, simpleOpen) {
 
-        console.log(href);
-        console.log(urlToId(href));
+        var uid = this.urlToId(href);
+        //@sfount - raw scope haX
+        var t = this;
 
         var enfants = this.getChildren();
         if(enfants.length == 0) {
@@ -24,7 +44,11 @@ define("customizedModule/TabManager",
           var aine = new ContentPane({
                     title: title,
                     href: href,
-                    closable: false
+                    closable: false,
+                    onClose: function() { 
+                      t.app_state.unregister(uid);
+                      return true;
+                    }
             });
 
             this.addChild(aine);
@@ -50,6 +74,8 @@ define("customizedModule/TabManager",
             //ajout de l'enfant
 
               if(simpleOpen){
+
+                t.app_state.unregister(t.urlToId(selectedTab.get('href')));
                 selectedTab.set('title', title);
                 selectedTab.set('href', href);
                 selectedTab.set('closable', false);               
@@ -57,7 +83,11 @@ define("customizedModule/TabManager",
                   var d = new ContentPane({
                       title: title,
                       href: href,
-                      closable: true
+                      closable: true,
+                      onClose: function() { 
+                        t.app_state.unregister(uid);
+                        return true;
+                      }
                   });
                   this.addChild(d);
                 }       
@@ -89,6 +119,9 @@ define("customizedModule/TabManager",
             //ajout de l'enfant
 
               if(simpleOpen){
+                //oh lawd
+                
+                t.app_state.unregister(t.urlToId(selectedTab.get('href')));
                 //enfants[0].set('title', title);
                 //enfants[0].set('href', href);
                 selectedTab.set('title', title);
@@ -98,7 +131,11 @@ define("customizedModule/TabManager",
                   var d = new ContentPane({
                       title: title,
                       href: href,
-                      closable: true
+                      closable: true,
+                      onClose: function() { 
+                        t.app_state.unregister(uid);
+                        return true;
+                      }
                   });
                   this.addChild(d);
                 }
@@ -110,12 +147,6 @@ define("customizedModule/TabManager",
 
         
         
-      },
-
-      urlToId: function(url) { 
-        //Remove leading '/'
-        var id = url.substr(1);
-        return id.replace('/', '-');
       }
 
     });

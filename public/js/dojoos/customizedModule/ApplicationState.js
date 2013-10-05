@@ -43,7 +43,7 @@ define([
   }
 
   var unregister = function(caller_id) { 
-    
+      console.log("unregister called for: " + caller_id, "unhooking event listerners");
   }
 
   //@sfount - raw javascript haX (ref: Javascript Closure)
@@ -61,6 +61,7 @@ define([
     getComponent : getComponent,
     setComponent : setComponent,
     getValue : getValue,
-    register : register
+    register : register,
+    unregister: unregister
   });
 });

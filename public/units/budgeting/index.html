@@ -1,17 +1,17 @@
 <link href="../css/budget.css" rel="stylesheet">
-<div id="units-budgeting-selection">
+<div id="bika-units-budgeting-selection">
   <!--Placeholder for Account Select-->
   <label>Select Account: </label>
-  <div id="units-budgeting-account"></div>
+  <div id="bika-units-budgeting-account"></div>
 </div>
-<div id="units-budgeting-budgetDisplay">
+<div id="bika-units-budgeting-budgetDisplay">
   <fieldset>
     <legend>Previous Fiscal Year</legend>
     <table class="budget-table">
       <thead>
         <tr><th>Period</th><th>Actual</th><th>Budget</th></tr>
       </thead>
-      <tbody id="units-budgeting-previous">
+      <tbody id="bika-units-budgeting-previous">
         <!--Generated with dojo-->
       </tbody>
     </table>
@@ -22,7 +22,7 @@
       <thead>
         <tr><th>Period</th><th>Actual</th><th>Budget</th></tr>
       </thead>
-      <tbody id="units-budgeting-current">
+      <tbody id="bika-units-budgeting-current">
         <!--Generated with dojo-->
       </tbody>
     </table>
@@ -33,7 +33,7 @@
       <thead>
         <tr><th>Period</th><th>Actual</th><th>Budget</th></tr>
       </thead>
-      <tbody id="units-budgeting-next">
+      <tbody id="bika-units-budgeting-next">
         <!--Generated with dojo-->
       </tbody>
     </table>
@@ -77,6 +77,7 @@
     //  -Highlight Start of fiscal year (row outline) ?End of fiscal year
     ///////
 
+    var uid = "bika-units-budgeting";
     var app_state = new ApplicationState();
     //label months provided by Date object (given 0 - 11)
     var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -93,8 +94,8 @@
     var fiscal_array = [{id : "previous"}, {id : "current"}, {id : "next"}];
 
     //access to any application level componenet changes
-    app_state.register("units-budgeting", "enterprise-select", function(value) { 
-      console.log("units-budgeting responding to: ", value);
+    app_state.register(uid, "enterprise-select", function(value) { 
+      console.log(uid, "responding to: ", value);
     });
 
     //i_handle.remove();
@@ -116,7 +117,7 @@
       function renderTables() { 
         //Populate the budget table with blank rows, account for fiscal years starting in any month
         for(var i=0; i<fiscal_array.length; i++) { 
-          var tableid = "units-budgeting-" + fiscal_array[i].id;
+          var tableid = "bika-units-budgeting-" + fiscal_array[i].id;
           var budget_table = dom.byId(tableid);
 
           for(var j=0; j<months.length; j++) { 
@@ -222,8 +223,8 @@
 
       var budget_result = model.query();
       //@sfount - the methods returned here should be passed to whoever needs them, not stored at the top
-      tablebind[id] = bindBudgetTable("units-budgeting-" + id, budget_result, model);
-      tablebind[id] = bindTotal("units-budgeting-" + id, budget_result);
+      tablebind[id] = bindBudgetTable("bika-units-budgeting-" + id, budget_result, model);
+      tablebind[id] = bindTotal("bika-units-budgeting-" + id, budget_result);
 
     } 
 
@@ -390,7 +391,7 @@
         var account_select = new Select({
           store: account_select_store, 
           query: format_account_query
-        }, "units-budgeting-account");
+        }, "bika-units-budgeting-account");
 
         account_select.on("setStore", function() { 
           deferred.resolve(this.get('value'));
