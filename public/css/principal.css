@@ -17,26 +17,26 @@ html, body {
   padding : 0;
 }
  
-#bc {
+#bika-border-container {
   width   : 100%;
   height  : 100%;
   margin  : 0;
   padding : 0;
 }
 
-#sidebar {
+#bika-sidebar {
   width   : 15%;
   padding : 0;
   margin  : 0;
   position: relative;
 }
 
-#center_panel {
+#bika-center-panel {
   margin  : 0;
   padding : 0;
 }
 
-.dock {
+.bika-dock {
   font-family: Arial, sans-serif;
   height: 50px;
   width: 100%;
@@ -44,7 +44,7 @@ html, body {
   overflow: hidden;
 }
 
-.dock ul {
+.bika-dock ul {
   float: right;
   margin: 0;
   padding: 0;
@@ -52,7 +52,7 @@ html, body {
   display:inline-block;
 }
 
-.dock li {
+.bika-dock li {
   font-size: 2em;
   width: 50px;
   height: 50px;
@@ -64,14 +64,14 @@ html, body {
   background: #ececec;
 }
 
-.dock li a, 
-.dock li a:after,
-.dock li a:visited {
+.bika-dock li a, 
+.bika-dock li a:after,
+.bika-dock li a:visited {
   background-position: center;
   color: rgb(0,0,0);
 }
 
-.dock li:hover {
+.bika-dock li:hover {
   background: #f3f3f3;
 }
 
@@ -84,14 +84,14 @@ html, body {
 }
 
 /*Gross CSS - element styles need aligning*/
-#application-select { 
+#bika-application-select { 
   position: absolute;
   left : 0px;
   bottom: 0px;
   width: 100%;
 }
 
-#application-select .dijitSelect { 
+#bika-application-select .dijitSelect { 
   width: 100%
 }
 
