@@ -42,6 +42,10 @@ define([
     }
   }
 
+  var unregister = function(caller_id) { 
+    
+  }
+
   //@sfount - raw javascript haX (ref: Javascript Closure)
   var loopCallback = function(component_id) { 
     return function(value) { 

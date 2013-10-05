@@ -14,6 +14,9 @@ define("customizedModule/TabManager",
       },
       addChildren: function(title, href, closable, simpleOpen) {
 
+        console.log(href);
+        console.log(urlToId(href));
+
         var enfants = this.getChildren();
         if(enfants.length == 0) {
 
@@ -107,7 +110,14 @@ define("customizedModule/TabManager",
 
         
         
+      },
+
+      urlToId: function(url) { 
+        //Remove leading '/'
+        var id = url.substr(1);
+        return id.replace('/', '-');
       }
+
     });
   }
   );
