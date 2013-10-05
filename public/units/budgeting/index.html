@@ -111,7 +111,10 @@
 
       settupAccount.then(function(value) { 
         account_id = value;
-        settupBudget(fiscal_year_id, account_id);
+        //TODO: This is a temporary fix, error handling should be thought through
+        if(account_id) { 
+        	settupBudget(fiscal_year_id, account_id);
+        }
       })
 
       function renderTables() { 
