@@ -43,7 +43,14 @@ define([
   }
 
   var unregister = function(caller_id) { 
-      console.log("unregister called for: " + caller_id, "unhooking event listerners");
+      //TODO: make this search faster, currently iterates through a LOT of elements
+      for(comp in listener) { 
+        for(unit in listener[comp]) { 
+          if(unit==caller_id) { //Would like to find a better way of checking this
+            delete listener[comp][unit];
+          }
+        }
+      }
   }
 
   //@sfount - raw javascript haX (ref: Javascript Closure)

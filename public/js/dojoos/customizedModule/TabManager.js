@@ -27,7 +27,7 @@ define("customizedModule/TabManager",
       urlToId: function(url) { 
         //Remove leading '/'
         var id = url.substr(1, url.length-2);
-        return id.replace('/', '-');
+        return "bika-" + id.replace('/', '-');
       },
 
       //TODO: clean up this function - ContentPane should only be initialised in one place (lots of repeated code)
