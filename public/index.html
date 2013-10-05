@@ -1,12 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Main Page</title>
+  <title>Bika Health Information System</title>
   <meta charset="utf-8">
   <link rel="stylesheet" href="./css/principal.css" media="screen" />
   <link rel="stylesheet" href="js/dojoos/dijit/themes/claro/claro.css"/>
   <link rel="stylesheet" href="./css/icons/iconic_fill/iconic_fill.css"/> <!-- needed for icon font -->
-  <script>dojoConfig = {parseOnLoad: true, debug: true}</script>
+  <script>
+    dojoConfig = {
+      parseOnLoad: true,
+      debug: true
+    }
+  </script>
   <script type="text/javascript" src="js/dojoos/dojo/dojo.js"></script>
   <script>
     require(["dijit/layout/BorderContainer", "dijit/Menu", "dijit/MenuItem", "dijit/MenuSeparator", "bika/TabManager", "dijit/tree/ObjectStoreModel", "dijit/Tree", "dojo/store/JsonRest", "dijit/layout/ContentPane", "customizedModule/SelectX", "bika/ApplicationState", "dojo/domReady!"],
@@ -36,54 +41,70 @@
           region: 'center',
         }, "bika-center-panel");
 
-        bc.addChild(center_panel);
-        bc.addChild(sidebar);
+      bc.addChild(center_panel);
+      bc.addChild(sidebar);
 
-        var treeStore = new JsonRest({
-          target: '/tree',
-          getChildren: function(object) {
-            return this.query("?" + JSON.stringify({
-              'entities' : [{
-                t : 'unit',
-                c : ['id', 'name', 'desc', 'parent', 'has_children', 'url']
-              }],
-              'cond' : [{
-                t : 'unit',
-                cl: 'parent',
-                z : '=',
-                v : object.id
-              }]
-            }));
-          }
-        });
-
-        var treeModel = new ObjectStoreModel({
-          store: treeStore,
-          query: "?" + JSON.stringify({
-            'entities': [{
-              t: 'unit',
-              c: ['id', 'name', 'desc', 'parent', 'has_children', 'url']
+      var treeStore = new JsonRest({
+        target: '/tree',
+        getChildren: function(object) {
+          return this.query("?" + JSON.stringify({
+            'entities' : [{
+              t : 'unit',
+              c : ['id', 'name', 'desc', 'parent', 'has_children', 'url']
             }],
-            'cond': [{
-              t: 'unit',
-              cl: 'id',
-              z: '=',
-              v: 0
+            'cond' : [{
+              t : 'unit',
+              cl: 'parent',
+              z : '=',
+              v : object.id
             }]
-          }),
-          mayHaveChildren: function(obj) {
-            return obj.has_children;
-          }
-        });
+          }));
+        }
+      });
 
-        var unitsTree = new Tree({
-          model: treeModel,
-          showRoot: false,
-          onOpenClick: true,
-          onClick: function(item) {
-            if (item.has_children === 0) {
-              tabManager.addChildren(item.name, item.url, true, true);
-            }
+      var treeModel = new ObjectStoreModel({
+        store: treeStore,
+        query: "?" + JSON.stringify({
+          'entities': [{
+            t: 'unit',
+            c: ['id', 'name', 'desc', 'parent', 'has_children', 'url']
+          }],
+          'cond': [{
+            t: 'unit',
+            cl: 'id',
+            z: '=',
+            v: 0
+          }]
+        }),
+        mayHaveChildren: function(obj) {
+          return obj.has_children;
+        }
+      });
+
+      var unitsTree = new Tree({
+        model: treeModel,
+        showRoot: false,
+        onOpenClick: true,
+        onClick: function(item) {
+          if (item.has_children === 0) {
+            tabManager.addChildren(item.name, item.url, true, true);
+          }
+        }
+      }, "tree");
+
+      var menuContext = new Menu({
+        targetNodeIds: ["tree"],
+        selector: ".dijitTreeNodeContainer > .dijitTreeNode > .dijitTreeNodeContainer > .dijitTreeNode", // FIXME: find a better selector
+        id: "menuContext",
+        style: "display: none;"
+      });
+      
+      var open = new MenuItem({
+        label: "Open in new tab",
+        onClick: function(item) {
+          var itemTree = dijit.byNode(this.getParent().currentTarget);
+          if (itemTree.item.has_children === 0) {
+            tabManager.addChildren(itemTree.item.name, itemTree.item.url, true, false);
           }
         }, "bika-tree");
 
@@ -156,7 +177,7 @@
           app_state.setComponent("fiscal-select", fiscal_select);
         }
 
-      });
+    });
   </script>
 </head>
 <body class="claro">
