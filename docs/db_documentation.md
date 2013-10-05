@@ -135,22 +135,21 @@ db.execute(sql);
 db.js has a very uniform syntax.  For `update`, `delete`, `insert`, the first parameter
 is always a table name.  The second is a JSON object.
 
+For update specifically, the third parameter is ~required~ and must is a unique identifier
+(or list of unique identifiers) to populate the where condition.
+
 ```javascript
 var table = 'module';
-var update_obj = {
-  rows: {id: 1},
-  updateInfo: {
-    'name': 'db.js'.
-    'descr': 'Generic Database Interface'.
-    'version': 0.01
-  }
-}
+var row = [
+  {id: 1, txt: 'hello world!'},
+];
+var pk = ["id"];
 
-db.update(table, update_obj); // returns "UPDATE `module` SET `name`='db.js', `descr`='Generic Database Interface', `version`='0.01' WHERE `id`=1;"
+db.update(table, row, pk); // returns "UPDATE `module` SET `txt` = 'db.js', WHERE `id` = 1;"
 ```
 
-Multi-row updates are provided by passing an array to rows.  For example `rows: {id: [1, 2, 3]}` will map
-to "WHERE `id` IN (1, 2, 3)".  See the jasmine tests for more examples.
+There is no (safe) current support for multi-row updates, although the above syntax may be leveraged
+to allow multirow updates.  
 
 #### Insert
 
