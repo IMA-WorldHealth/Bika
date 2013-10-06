@@ -6,6 +6,10 @@
   margin: 0;
 }
 
+fieldset.tab {
+  height: 100%;
+}
+
 .tab label {
   display: block;
   font-weight: bold;
