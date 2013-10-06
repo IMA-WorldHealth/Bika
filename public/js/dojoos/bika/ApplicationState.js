@@ -5,11 +5,15 @@ define("bika/ApplicationState", [
 
   //////
   // module: ApplicationState
-  // description: Maintains pointers to top level application components and their attributes (values, events etc.), these values can 
-  // then be safely loaded and used by modules nested in the application
+  // summary: 
+  //  Maintains pointers to top level application components and their attributes (values, events etc.), these values can 
+  //  then be safely loaded and used by modules nested in the application
+  //  
+  //  A module registering a callback with ApplicationState (register) should use bika-unit-unitname as the caller_id, this ID
+  //  is the URL to the resources and uniquely identifies a unit
   // 
   // TODO: 
-  //  -Doesn't currently support multiple event types - I'm not losing any sleep over it
+  // -Doesn't currently support multiple event types - I'm not losing any sleep over it
   // 
   // temporary: What purpose does this serve?
   // -cache value of often accessed componenets - fewer requests to the DOM 
@@ -21,7 +25,7 @@ define("bika/ApplicationState", [
   var component = {};
   var listener = {};
 
-  //Allows application track and remove event handles to respond to errors etc. not used otherwise
+  //Allows application to track and remove event handles to respond to errors etc. not used otherwise
   var handle = {};
 
   var setComponent = function(component_id, reference) { 
@@ -72,7 +76,6 @@ define("bika/ApplicationState", [
   }
 
   //Utility functions
- 
   //@sfount - raw javascript haX (ref: Javascript Closure)
   var loopCallback = function(component_id) { 
     //summary: 
