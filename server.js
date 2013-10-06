@@ -8,7 +8,6 @@ var express = require('express')
   , path = require('path')
   , auth = require('./lib/auth')
   , error = require('./lib/error/404.js')
-  //, um = require('./lib/util/userManager')
   , app = express();
 
 app.set('env', 'production'); // Change this to change application behavior
@@ -396,9 +395,5 @@ app.get('/tree', function(req, res) {
     }
   });
 });
-
-//app.get('/tree', function(req, res) {
-// um.manageUser(req, res);
-// });
 
 app.listen(3000, console.log('Environment:', app.get('env'), "Rapid Prototype listening on port 3000"));
