@@ -78,11 +78,11 @@
     ///////
 
     var uid = "bika-units-budgeting";
+    //TODO: return an initialised object, should not have to manually create instance
     var app_state = new ApplicationState();
     //label months provided by Date object (given 0 - 11)
     var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-    //@sfount - this data should be imported from the application structure 
     var enterprise_id = app_state.getValue("enterprise-select");
     var fiscal_year_id = app_state.getValue("fiscal-select");
 
@@ -97,8 +97,6 @@
     app_state.register(uid, "enterprise-select", function(value) { 
       console.log(uid, "responding to: ", value);
     });
-
-    //i_handle.remove();
     
     initUI();
 
