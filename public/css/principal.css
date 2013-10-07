@@ -1,4 +1,3 @@
-
 /* Rules for the whole app */
 
 /* fonts */
@@ -10,9 +9,14 @@
 
 
 /* Interface Styles */
+
+* {
+  outline: none;
+}
+
 html, body {
   width   : 100%;
-  height  : 100%;sid
+  height  : 100%;
   margin  : 0;
   padding : 0;
 }
@@ -22,6 +26,7 @@ html, body {
   height  : 100%;
   margin  : 0;
   padding : 0;
+  border  : none;
 }
 
 #bika-sidebar {
@@ -29,6 +34,7 @@ html, body {
   padding : 0;
   margin  : 0;
   position: relative;
+  border: none;
 }
 
 #bika-center-panel {
@@ -40,28 +46,26 @@ html, body {
   font-family: Arial, sans-serif;
   height: 50px;
   width: 100%;
-  border-bottom: thin solid #b8b8b9;
-  overflow: hidden;
+  background: #ececec;
 }
 
 .bika-dock ul {
-  float: right;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display:inline-block;
+  float      : right;
+  margin     : 0;
+  padding    : 0;
+  list-style : none;
+  display    : inline-block;
 }
 
 .bika-dock li {
-  font-size: 2em;
-  width: 50px;
-  height: 50px;
-  float: right;
-  text-align: center;
-  font-weight: bold;
-  cursor: auto;
-  border: solid 1px #b8b8b9;
-  background: #ececec;
+  font-size   : 2em;
+  width       : 50px;
+  height      : 50px;
+  float       : right;
+  text-align  : center;
+  font-weight : bold;
+  cursor      : auto;
+  background  : #ececec;
 }
 
 .bika-dock li a, 
@@ -75,29 +79,14 @@ html, body {
   background: #f3f3f3;
 }
 
-
-html, body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  width: 100%;
-}
-
 /*Gross CSS - element styles need aligning*/
 #bika-application-select { 
-  position: absolute;
-  left : 0px;
-  bottom: 0px;
-  width: 100%;
+  position : absolute;
+  left     : 0;
+  bottom   : 0;
+  width    : 100%;
 }
 
 #bika-application-select .dijitSelect { 
   width: 100%
 }
-
-
-
-
-
-
-
