@@ -101,21 +101,33 @@
     var tablebind = {};
     var fiscal_array = [{id : "previous"}, {id : "current"}, {id : "next"}];
 
+    //This should be encapsulated somewhere
+    var budget_dependencies = {"enterprise" : false, "fiscal" : true};
+
     //access to any application level componenet changes
     app_state.register(uid, "enterprise-select", function(value) { 
+      //Change will effect both enterprise AND fiscal, have to wait for dependencies, TODO determine dependencies from code
       console.log(uid, "responding to: ", value);
+      budget_dependencies.enterprise = true;
       account_id = value;
-      refreshUI();
-      settupBudget(fiscal_year_id, account_id);
-      //refreshUI();
+      
+      //Should make a call to updateAccount as well
     });
 
     app_state.register(uid, "fiscal-select", function(value) { 
+      //Change will only effect fiscal year, no need to udpate account, TODO determine dependencies from code
       console.log(uid, "responding to: ", value);
+      budget_dependencies.fiscal = true;
       fiscal_year_id = value;
-      refreshUI();
-      settupBudget(fiscal_year_id, account_id);
 
+      //really think this one through 
+      if(budget_dependencies.enterprise) { 
+        updateAccount(fiscal_year_id, account_id);
+      } else { 
+        budget_dependencies.fiscal = false;
+        refreshUI();
+        settupBudget(fiscal_year_id, account_id);
+      }
     });
     
     initUI();
@@ -410,6 +422,20 @@
       }
     }
 
+    function updateAccount(enterprise_id) { 
+
+      budget_dependencies.enterprise = false;
+      budget_dependencies.fiscal = false;
+      var update_query = {};
+      var e = [{t : 'account', c : ['id', 'locked', 'account_txt', 'account_type_id', 'account_category']}];
+      var c = [{t : 'account', cl : 'enterprise_id', v : enterprise_id, z : '='}];
+
+      update_query.e = e;
+      update_query.c = c;
+     
+      var format_update_query = '?' + JSON.stringify(update_query);
+
+    } 
 
     function initAccountSelect(enterprise_id) { 
       var deferred = new Deferred();
@@ -441,7 +467,7 @@
         });
 
         account_select.on("change", function(value) {
-        
+        console.log("account select change called");
         account_id = value;
             for(index in tablebind) { 
               tablebind[index].unbind();
