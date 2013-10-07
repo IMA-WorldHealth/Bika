@@ -1,3 +1,4 @@
+var tc;
 require([
   "dojo/_base/declare",
   "dojo/store/Memory",
@@ -9,58 +10,52 @@ require([
   "dgrid/OnDemandGrid",
   "dgrid/Selection",
   "dgrid/extensions/DijitRegistry",
+  "bika/ApplicationState",
   "dojo/domReady!"],
   function (declare, Memory, JsonRest, Cache, TabContainer,
-    Select, ContentPane, OnDemandGrid, Selection, DijitRegistry) {
+    Select, ContentPane, OnDemandGrid, Selection, DijitRegistry, AppState) {
 
-  var tc = new TabContainer({}, "bika-units-debitors-tabcontainer");
+  // import application-level variables
+  var app = new AppState();
 
-  // GLOBAL for the application
-  var enterprise_id = dijit.byId('change_enterprise').get('value');
+  tc = new TabContainer({}, "bika-units-debitors-tabcontainer");
 
-  var gen = new ContentPane({
+  tc.addChild(new ContentPane({
       title  : "General",
-      id     : "bika-units-debitors-forms-general",
       href   : "units/debitors/forms/general.html",
-  });
+  }));
 
-  var fac = new ContentPane({
+  tc.addChild(new ContentPane({
       title  : "Invoicing",
-      id     : "bika-units-debitors-forms-invoicing",
       href   : "units/debitors/forms/invoicing.html",
-  });
+  }));
 
-  var note = new ContentPane({
+  tc.addChild(new ContentPane({
     title  : "Note",
-    id     : "bika-units-debitors-forms-note",
     href   : "units/debitors/forms/note.html",
-  });
+  }));
 
-  var text = new ContentPane({
+  tc.addChild(new ContentPane({
     title  : "Text",
-    id     : "bika-units-debitors-forms-text",
     href   : "units/debitors/forms/text.html",
-  });
-  
-  tc.addChild(gen);
-  tc.addChild(fac);
-  tc.addChild(note);
-  tc.addChild(text);
+  }));
 
   var columns = [
       {id : 'id'        , field : 'id'       , label : 'Debitor'} ,
       {id : 'name'      , field : 'name'     , label : 'Name'},
       {id : 'address_1' , field : 'address_1', label : 'Address'},
       {id : 'address_2' , field : 'address_2', label : 'Address'},
-      {id : 'group_id'  , field : 'group_id' , label : 'Group'}, // make a select there
+      {id : 'group_id'  , field : 'group_id' , label : 'Group'},
       {id : 'city'      , field : 'city'     , label : 'City'},
       {id : 'country'   , field : 'country'  , label : 'Country'},
       {id : 'phone'     , field : 'phone'    , label : 'Telephone'}
   ];
 
+  var esval = app.getValue("enterprise-select");
+
   var query = {
     e: [{t: 'debitor', c: ['id', 'name', 'address_1', 'address_2', 'group_id', 'location_id', 'email', 'phone', 'max_credit', 'interest', 'price_group_id']}],
-    c: [{t: 'debitor', cl: 'enterprise_id', z: '=', v: enterprise_id}]
+    c: [{t: 'debitor', cl: 'enterprise_id', z: '=', v: esval}]
   };
 
   var grid_rest_store = new JsonRest({
@@ -78,12 +73,30 @@ require([
       columns : columns
   }, 'bika-units-debitors-grid');
 
-  
+  app.setComponent("units-debitors-grid", grid);
+  //app.setComponent("units-debitors-store", store);
+
   // suppress sorting
   grid.on("dgrid-sort", function (evt) {
     evt.preventDefault();
   });
 
+  grid.on("dgrid-select", function(evt) {
+    var rows = evt.rows;
+    refreshtabcontainer(rows);
+  });
+
   grid.startup();
   tc.startup();
+
+  function refreshtabcontainer(rows) {
+    var activeforms = tc.getChildren().filter(function(tab) { return tab.isLoaded; });
+    activeforms.forEach(function(tab) {
+      // Ad-hock API:
+      //    expect each form to impliment a getParent() method that assigns
+      //    refreshform(rows) to the content pane that refreshs the contents
+      //    of each form.
+      tab.refreshform(rows);
+    });
+  }
 });

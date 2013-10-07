@@ -8,11 +8,12 @@
 
 fieldset.tab {
   height: 100%;
+  width: 30%;
 }
 
 .tab label {
   display: block;
-  font-weight: bold;
+  clear: both;
 }
 
 .tab input {
@@ -27,4 +28,6 @@ fieldset.tab {
 /* hack to get around dijits floating left */
 .tab .dijit {
   float: right;
+  display: block;
+  padding: 2.5px;
 }
