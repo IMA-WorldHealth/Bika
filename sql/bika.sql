@@ -457,13 +457,7 @@ REPLACE INTO `unit` (`id`, `name`, `desc`, `parent`, `has_children`, `url`) VALU
   (23, 'Billing C', '3 Fils', 20, 0, 'Lien hypertext'),
   (24, 'Balance', 'The Balance Sheet', 5, 0, '/units/balance/'),
   (25, 'Transaction', 'The Transaction Page', 5, 0, '/units/transaction/'),
-  (26, 'Demo', 'Demos of key functionality', 0, 1, ''),
-  (27, 'FullGrid', 'Demo: Full-page grid', 26, 0, '/units/demos/fullgrid/'),
-  (28, 'PDFedit', 'Demo: PDFeditor', 26, 0, '/units/demos/pdfedit/'),
-  (29, 'Graphics', 'Demo: Dojo Charting', 26, 0, '/units/demos/charting/'),
-  (30, 'Error', 'Demo: This page doesn\'t exist', 26, 0, '/units/demos/error/'),
-  (31, 'Linkage', 'Demo: SelectX updates each other', 26, 0, '/units/demos/linkage/');
-
+  (26, 'Debitors', 'The debitors configuraiton page', 5, 0, '/units/debitors/');
 /*!40000 ALTER TABLE `unit` ENABLE KEYS */;
 
 -- Dumping structure for table bika.permission
@@ -486,8 +480,16 @@ INSERT INTO `permission` (`id`, `id_unit`, `id_user`) VALUES
     (3, 4, 13),
     (4, 3, 13),
     (5, 6, 13),
-    (6, 7, 13);
+    (6, 7, 13),
+    (7, 8, 1),
+    (8, 1, 1), 
+    (9, 4, 1),
+    (10, 3, 1),
+    (11, 6, 1),
+    (12, 7, 1),
+    (13, 26, 1);
     
+
 -- Dumping structure for table bika.role
 DROP TABLE IF EXISTS `role`;
 CREATE TABLE IF NOT EXISTS `role` (
