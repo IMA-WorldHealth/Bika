@@ -75,7 +75,15 @@
     //  -Highlighting for errors on incorrect inputs for budgeting etc (Red box around invalid input)
     //  -If changes to budget are made, user should not be able to change accounts until discarded (reset) or updated
     //  -Highlight Start of fiscal year (row outline) ?End of fiscal year
+    //  -Some object are getting thrown initialised and sticking around way too long (ref: models etc. on view refresh)
     ///////
+    
+    /////
+    // This update: 
+    //  -respond to enterprise and fiscal select changes
+    //  -refresh / remove rows manually - have them respond to changes to the store in future 
+    //  -
+    /////
 
     var uid = "bika-units-budgeting";
     //TODO: return an initialised object, should not have to manually create instance
@@ -96,6 +104,18 @@
     //access to any application level componenet changes
     app_state.register(uid, "enterprise-select", function(value) { 
       console.log(uid, "responding to: ", value);
+      account_id = value;
+      refreshUI();
+      settupBudget(fiscal_year_id, account_id);
+      //refreshUI();
+    });
+
+    app_state.register(uid, "fiscal-select", function(value) { 
+      console.log(uid, "responding to: ", value);
+      fiscal_year_id = value;
+      refreshUI();
+      settupBudget(fiscal_year_id, account_id);
+
     });
     
     initUI();
@@ -145,25 +165,47 @@
               id : tableid + '-' + row_index,
               class : "empty"
             });
-                var td_period = domConstruct.create("td", {
-                  id : tableid + '-' + row_index + '-period'
-                }, tr);
-                //@sfount - Research Actual vs. Budget and implement correctly
-                var td_actual = domConstruct.create("td", { 
-                  id : tableid + '-' + row_index + '-actual'
-                }, tr);
-                var td_budget = domConstruct.create("td", { 
-                  //@sfount - update this to give uniform naming convention 
-                  id : tableid + '-' + row_index + '-budgetRow'
-                }, tr);
 
-                return tr;
+            var td_period = domConstruct.create("td", {
+              id : tableid + '-' + row_index + '-period'
+            }, tr);
+            //@sfount - Research Actual vs. Budget and implement correctly
+            var td_actual = domConstruct.create("td", { 
+              id : tableid + '-' + row_index + '-actual'
+            }, tr);
+            var td_budget = domConstruct.create("td", { 
+              //@sfount - update this to give uniform naming convention 
+              id : tableid + '-' + row_index + '-budgetRow'
+            }, tr);
+
+            return tr;
           }
 
         }
       }
     }
     
+    function refreshUI() { 
+      //basically duplicated code - not a good thing
+      for(var i=0; i<fiscal_array.length; i++) { 
+        var tableid = "bika-units-budgeting-" + fiscal_array[i].id;
+        var budget_table = dom.byId(tableid);
+
+        for(var j=0; j<months.length; j++) { 
+          var tr = dom.byId(tableid + '-' + j);
+          domAttr.set(tr, 'class', 'empty');
+
+          //eugh
+          var trchildren = tr.childNodes;
+          for(child in trchildren) { 
+            if(typeof trchildren[child]) { 
+              domAttr.set(trchildren[child], "innerHTML", "");
+            }
+          }
+        }
+      }
+    }
+
     function settupBudget(fiscalyearid, accountid) { 
 
       //request information about current fiscal year
