@@ -1,38 +1,25 @@
 #principal {
 	position:relative;
-	height:60%;
+	height:70%;
 }
 
-#divTabRole{
+#divAction{
  	position: absolute;
- 	width:55%;
+ 	width:250px;
  	top:5px;
- 	right:5px;
+ 	right:350px;
 }
 
 #divForm{
  	position: absolute;
+ 	width: 500px;
  	top:5px;
  	left:5px;
- 	border-color: red;
- 	z-index: 3;
-
 }
 
 #newuserformID  .saisie{
  float:right;
- border:1px solid ##B0C4DE;
- border-radius:5px;
- box-shadow:1px 1px 2px #C0C0C0 inset;
 }
-
-#roleID{
- 	width:350px;
- 	margin-left: auto;
- 	margin-right: auto;
- 	text-align: center;
-}
-
 #sub{
 	height:40%;	
 }
