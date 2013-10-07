@@ -457,13 +457,7 @@ REPLACE INTO `unit` (`id`, `name`, `desc`, `parent`, `has_children`, `url`) VALU
   (23, 'Billing C', '3 Fils', 20, 0, 'Lien hypertext'),
   (24, 'Balance', 'The Balance Sheet', 5, 0, '/units/balance/'),
   (25, 'Transaction', 'The Transaction Page', 5, 0, '/units/transaction/'),
-  (26, 'Demo', 'Demos of key functionality', 0, 1, ''),
-  (27, 'FullGrid', 'Demo: Full-page grid', 26, 0, '/units/demos/fullgrid/'),
-  (28, 'PDFedit', 'Demo: PDFeditor', 26, 0, '/units/demos/pdfedit/'),
-  (29, 'Graphics', 'Demo: Dojo Charting', 26, 0, '/units/demos/charting/'),
-  (30, 'Error', 'Demo: This page doesn\'t exist', 26, 0, '/units/demos/error/'),
-  (31, 'Linkage', 'Demo: SelectX updates each other', 26, 0, '/units/demos/linkage/');
-
+  (26, 'Debitors', 'The debitors configuraiton page', 5, 0, '/units/debitors/');
 /*!40000 ALTER TABLE `unit` ENABLE KEYS */;
 
 -- Dumping structure for table bika.permission
@@ -477,7 +471,8 @@ CREATE TABLE IF NOT EXISTS `permission` (
   KEY `id_user` (`id_user`),
   CONSTRAINT `permission_ibfk_2` FOREIGN KEY (`id_unit`) REFERENCES `unit` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `permission_ibfk_3` FOREIGN KEY (`id_user`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
+
 
 INSERT INTO `permission` (`id`, `id_unit`, `id_user`) VALUES
     (1, 8, 13),
@@ -485,8 +480,16 @@ INSERT INTO `permission` (`id`, `id_unit`, `id_user`) VALUES
     (3, 4, 13),
     (4, 3, 13),
     (5, 6, 13),
-    (6, 7, 13);
+    (6, 7, 13),
+    (7, 8, 1),
+    (8, 1, 1), 
+    (9, 4, 1),
+    (10, 3, 1),
+    (11, 6, 1),
+    (12, 7, 1),
+    (13, 26, 1);
     
+
 -- Dumping structure for table bika.role
 DROP TABLE IF EXISTS `role`;
 CREATE TABLE IF NOT EXISTS `role` (
@@ -507,44 +510,6 @@ REPLACE INTO `role` (`id`, `name`, `description`, `role_head`) VALUES
     (5, 'Doctor', 'The physicien', 15);
 /*!40000 ALTER TABLE `role` ENABLE KEYS */;
 
-
--- Dumping structure for table bika.role_unit
-DROP TABLE IF EXISTS `role_unit`;
-CREATE TABLE IF NOT EXISTS `role_unit` (
-  `id` int(5) NOT NULL AUTO_INCREMENT,
-  `id_role` smallint(5) unsigned NOT NULL,
-  `id_unit` mediumint(9) NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `id_role` (`id_role`),
-  KEY `id_unit` (`id_unit`),
-  CONSTRAINT `role_unit_ibfk_1` FOREIGN KEY (`id_unit`) REFERENCES `unit` (`id`),
-  CONSTRAINT `role_unit_ibfk_2` FOREIGN KEY (`id_role`) REFERENCES `role` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
-
--- Dumping data for table bika.role_unit: ~19 rows (environ)
-/*!40000 ALTER TABLE `role_unit` DISABLE KEYS */;
-REPLACE INTO `role_unit` (`id`, `id_role`, `id_unit`) VALUES
-    (1, 1, 0),
-    (3, 2, 2),
-    (4, 2, 3),
-    (5, 2, 4),
-    (6, 3, 6),
-    (7, 3, 7),
-    (8, 3, 8),
-    (9, 3, 9),
-    (10, 3, 10),
-    (11, 3, 20),
-    (12, 3, 21),
-    (13, 3, 22),
-    (14, 4, 12),
-    (15, 4, 13),
-    (16, 4, 14),
-    (17, 5, 16),
-    (18, 5, 17),
-    (19, 5, 18),
-    (20, 5, 19);
-/*!40000 ALTER TABLE `role_unit` ENABLE KEYS */;
 
 DROP TABLE IF EXISTS `budget`;
 CREATE TABLE IF NOT EXISTS `budget` (
@@ -5515,63 +5480,6 @@ REPLACE INTO `transaction` (`journal_id`, `line_id`, `account_id`, `credit`, `de
     (1000, 4, 711000, 23, 0, '0', 'descrip 4', 5, '2013-03-01', 1, 1, 910.00),
     (1000, 5, 711100, 0, 100, '0', 'descrip 5', 4, '2013-02-15', 1, 1, 910.00);
 /*!40000 ALTER TABLE `transaction` ENABLE KEYS */;
-
--- Dumping structure for table bika.user_role
-DROP TABLE IF EXISTS `user_role`;
-CREATE TABLE IF NOT EXISTS `user_role` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `id_role` smallint(5) unsigned NOT NULL,
-  `id_user` smallint(5) unsigned NOT NULL,
-  `all_right` tinyint(1) NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `id_role_unit` (`id_role`,`id_user`),
-  KEY `id_user` (`id_user`),
-  CONSTRAINT `user_role_ibfk_2` FOREIGN KEY (`id_user`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `user_role_ibfk_3` FOREIGN KEY (`id_role`) REFERENCES `role` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=latin1;
-
--- Dumping data for table bika.user_role: ~12 rows (environ)
-/*!40000 ALTER TABLE `user_role` DISABLE KEYS */;
-REPLACE INTO `user_role` (`id`, `id_role`, `id_user`, `all_right`) VALUES
-    (1, 1, 1, 1),
-    (2, 1, 2, 1),
-    (3, 1, 3, 1),
-    (4, 5, 8, 1),
-    (5, 3, 8, 1),
-    (6, 3, 12, 0),
-    (7, 5, 4, 1),
-    (8, 3, 5, 1),
-    (9, 4, 6, 1),
-    (10, 2, 7, 1),
-    (11, 4, 9, 1),
-    (12, 2, 9, 0);
-/*!40000 ALTER TABLE `user_role` ENABLE KEYS */;
-
-
--- Dumping structure for table bika.user_role_description
-DROP TABLE IF EXISTS `user_role_description`;
-CREATE TABLE IF NOT EXISTS `user_role_description` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `id_role_unit` int(5) NOT NULL,
-  `id_user` smallint(5) unsigned NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `id_role_unit` (`id_role_unit`,`id_user`),
-  KEY `id_user` (`id_user`),
-  CONSTRAINT `user_role_description_ibfk_1` FOREIGN KEY (`id_role_unit`) REFERENCES `role_unit` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `user_role_description_ibfk_2` FOREIGN KEY (`id_user`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
-
--- Dumping data for table bika.user_role_description: ~7 rows (environ)
-/*!40000 ALTER TABLE `user_role_description` DISABLE KEYS */;
-REPLACE INTO `user_role_description` (`id`, `id_role_unit`, `id_user`) VALUES
-    (4, 4, 9),
-    (5, 5, 9),
-    (1, 8, 12),
-    (2, 9, 12),
-    (3, 10, 12),
-    (6, 11, 12),
-    (7, 13, 12);
-/*!40000 ALTER TABLE `user_role_description` ENABLE KEYS */;
 
 CREATE TABLE `debitor` (
   `company_id` int(11) NOT NULL,
