@@ -23,11 +23,8 @@
            "dojo/domReady!"
            ], function (UnitsForm, JsonRest,TextBox,CheckBox, Button, on, Deferred, topic, Dialog, domCons, Cache, SingleSort, Grid){
            	//declarations des variables
-           	var bCreer, bAnnuler,bModifier,bSupprimer, txtFirstName, txtLastName, txtEmail,
-           	 txtUserName, txtPassWord, txtConformPassWord, chkAdministrator, roleStore,
-               userGrid, userStore, roleGridQuery = {}, userGridQuery = {}, 
-               crudStore,f, dialog, roleGrid, tabContainerID=[];
-               var deferred = new Deferred();
+           	var bCreer, bAnnuler,bModifier,bSupprimer, txtFirstName, txtLastName, txtEmail, txtUserName, txtPassWord, txtConformPassWord, chkAdministrator, roleStore, userGrid, userStore, roleGridQuery = {}, userGridQuery = {},   crudStore,f, dialog, roleGrid, tabContainerID=[];
+            var deferred = new Deferred();
 
            	  //creations champs des saisies
            	txtFirstName = new TextBox({class:"saisie", style:"width:220px;"},"firstnameID");
@@ -53,10 +50,9 @@
                 var node;
                 for(var i=0; i<roles.length; i++){
                   tabContainerID.push(roles[i].id);
-                  node = domCons.toDom("<td id=\""+roles[i].id+"\" ></td>"); 
+                  node = domCons.toDom("<td id=\""+roles[i].id+"\"></td>"); 
                   domCons.place(node,"ligneID");
                 }
-                console.log('tout va bien');
                 deferred.resolve(true);
               }
 
@@ -64,7 +60,6 @@
                 var node;
                  for(var j=0; j<units.length; j++){                      
                       node = domCons.toDom("<div id=\""+units[j].id+"\"></div><span>"+units[j].name+"</span><br/>");
-                      console.log('id est ', id);
                       domCons.place(node,""+id);
                     }
                     f.placeControls(units);
@@ -73,20 +68,35 @@
 
               var res = getChild(0, drawTDElements);
               res.then(function(value){
-                console.log('nous on commence');
                for(var j=0; j<tabContainerID.length; j++){
                 getChild(tabContainerID[j], drawDIVElements);
                }
               });       
             
             })();
+            initUserGrid(); 
 
             //*********************************************
             //**************LES FONCTIONS******************
             //*********************************************
 
-            var creer = function(){
-
+            function creer(){
+              var sql_insertion = {t:'user', data:[{id:'', username: txtUserName.value, password: txtPassWord.value, first: txtFirstName.value, last:txtLastName.value, email:txtEmail.value, logged_in:0}]};
+              crudStore.put(sql_insertion);
+              //recherche du dernier id inserer
+              var sql_selection={};
+              sql_selection.e=[{t:'user', c:['id']}];
+              sql_selection.cond = [{t:'user', cl:'username', v:txtUserName.value, z:'=', l:'AND'}, {t:'user', cl:'password', v:txtPassWord.value, z:'='}];
+              crudStore.query(sql_selection).then(function(data){
+                for(var i=0; i<f.checks.length; i++){
+                  if(f.checks[i].get('checked')==true){
+                    crudStore.put({t:'permission', data:[{id:'', id_unit: f.checks[i].id, id_user: data[0].id}]});
+                    console.log('ok!');                    
+                  }
+                }
+                f.unCheckAll();
+                formReInit();
+              });
             }
             var modifier = function(){
               
@@ -107,7 +117,15 @@
              if(deferred)
              return deferred.promise;              
             }
-           initUserGrid();        
+
+            function formReInit(){
+              txtEmail.setValue('');
+              txtFirstName.setValue('');
+              txtPassWord.setValue('');
+              txtConformPassWord.setValue('');
+              txtUserName.setValue('');
+              txtLastName.setValue('');
+            }                  
 
             function initUserGrid(){
             userStore = new JsonRest({
@@ -194,10 +212,7 @@
       </fieldset>
       </div>   </center> 
       <!-- cette div contient un grid listant les utilisateurs-->
-    <div id="divuser"> 
-    <fieldset>
-      <legend>Users</legend>
-    </fieldset>     
+    <div id="divuser">        
     </div>     
     </div>
   </body> 
