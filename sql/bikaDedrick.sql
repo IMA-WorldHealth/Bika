@@ -1,10 +1,10 @@
 -- NOTE: We are going completely to _underscore_ syntax --
 
 -- Dumping database structure for bikaDedrick
-DROP DATABASE IF EXISTS `bikaDedrick`;
-CREATE DATABASE IF NOT EXISTS `bikaDedrick` /*!40100 DEFAULT CHARACTER SET utf8 */;
-USE `bikaDedrick`;
-GRANT ALL ON `bikaDedrick`.* TO 'bika'@'%' IDENTIFIED BY 'HISCongo2013';
+DROP DATABASE IF EXISTS `bika`;
+CREATE DATABASE IF NOT EXISTS `bika` /*!40100 DEFAULT CHARACTER SET utf8 */;
+USE `bika`;
+GRANT ALL ON `bika`.* TO 'bika'@'%' IDENTIFIED BY 'HISCongo2013';
 
 -- Dumping structure for table bika.enterprise
 DROP TABLE IF EXISTS `enterprise`;

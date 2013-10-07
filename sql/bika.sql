@@ -465,6 +465,19 @@ REPLACE INTO `unit` (`id`, `name`, `desc`, `parent`, `has_children`, `url`) VALU
 
 /*!40000 ALTER TABLE `unit` ENABLE KEYS */;
 
+-- Dumping structure for table bika.permission
+DROP TABLE IF EXISTS `permission`;
+CREATE TABLE IF NOT EXISTS `permission` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id_unit` mediumint(9) NOT NULL,
+  `id_user` smallint(5) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `id_unit` (`id_unit`),
+  KEY `id_user` (`id_user`),
+  CONSTRAINT `permission_ibfk_2` FOREIGN KEY (`id_unit`) REFERENCES `unit` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `permission_ibfk_3` FOREIGN KEY (`id_user`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
 -- Dumping structure for table bika.role
 DROP TABLE IF EXISTS `role`;
 CREATE TABLE IF NOT EXISTS `role` (
