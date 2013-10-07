@@ -343,7 +343,8 @@ REPLACE INTO `user` (`id`, `username`, `password`, `first`, `last`, `email`, `lo
     (9, 'm1', 'm', 'Manager Administrateur', 'Gerant Systeme', 'manage@his.cd', 0),
     (10, 'docta1', 'dd', 'Docteur Simple', 'Limité', 'doctasimple@his.cd', 0),
     (11, 'admin', 'lmt', 'Administrateur', 'Limite', 'adminlimit@his.com', 0),
-    (12, 'fin', 'f', 'Financier subalterne', 'Sous Financier', 'finance@his.com', 0);
+    (12, 'fin', 'f', 'Financier subalterne', 'Sous Financier', 'finance@his.com', 0),
+    (13, 'sfount', '1', 'Steven', 'Fountain', 'StevenFountain@live.co.uk', 0);
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 
 -- Dumping structure for table bika.journal
@@ -478,6 +479,14 @@ CREATE TABLE IF NOT EXISTS `permission` (
   CONSTRAINT `permission_ibfk_3` FOREIGN KEY (`id_user`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+INSERT INTO `permission` (`id`, `id_unit`, `id_user`) VALUES
+    (1, 8, 13),
+    (2, 1, 13), 
+    (3, 4, 13),
+    (4, 3, 13),
+    (5, 6, 13),
+    (6, 7, 13);
+    
 -- Dumping structure for table bika.role
 DROP TABLE IF EXISTS `role`;
 CREATE TABLE IF NOT EXISTS `role` (
