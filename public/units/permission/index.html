@@ -7,7 +7,7 @@
         <link rel = "stylesheet" type = "text/css" href="../css/userPermission.css" media="screen" />
         <script>
         require([
-         	"customizedModule/UnitsForm",
+          "customizedModule/UnitsForm",
            "dojo/store/JsonRest",
            "dijit/form/TextBox",
            "dijit/form/CheckBox",
@@ -22,20 +22,20 @@
            "gridx/Grid",
            "dojo/domReady!"
            ], function (UnitsForm, JsonRest,TextBox,CheckBox, Button, on, Deferred, topic, Dialog, domCons, Cache, SingleSort, Grid){
-           	//declarations des variables
-           	var bCreer, bAnnuler,bModifier,bSupprimer, txtFirstName, txtLastName, txtEmail, txtUserName, txtPassWord, txtConformPassWord, chkAdministrator, roleStore, userGrid, userStore, roleGridQuery = {}, userGridQuery = {},   crudStore,f, dialog, roleGrid, tabContainerID=[];
+            //declarations des variables
+            var bCreer, bAnnuler,bModifier,bSupprimer, txtFirstName, txtLastName, txtEmail, txtUserName, txtPassWord, txtConformPassWord, chkAdministrator, roleStore, userGrid, userStore, roleGridQuery = {}, userGridQuery = {},   crudStore,f, dialog, roleGrid, tabContainerID=[];
             var deferred = new Deferred();
 
-           	  //creations champs des saisies
-           	txtFirstName = new TextBox({class:"saisie", style:"width:220px;"},"firstnameID");
-           	txtLastName = new TextBox({class:"saisie", style:"width:220px;"},"lastnameID");
-           	txtEmail = new TextBox({class:"saisie", style:"width:220px;"},"emailID");
-           	txtUserName = new TextBox({class:"saisie", style:"width:220px;"},"usernameID");
-           	txtPassWord = new TextBox({class:"saisie", type:"password", style:"width:220px;"},"passwordID");
-           	txtConformPassWord = new TextBox({class:"saisie", type:"password", style:"width:220px;"},"confirmpasswordID");
+              //creations champs des saisies
+            txtFirstName = new TextBox({class:"saisie", style:"width:220px;"},"firstnameID");
+            txtLastName = new TextBox({class:"saisie", style:"width:220px;"},"lastnameID");
+            txtEmail = new TextBox({class:"saisie", style:"width:220px;"},"emailID");
+            txtUserName = new TextBox({class:"saisie", style:"width:220px;"},"usernameID");
+            txtPassWord = new TextBox({class:"saisie", type:"password", style:"width:220px;"},"passwordID");
+            txtConformPassWord = new TextBox({class:"saisie", type:"password", style:"width:220px;"},"confirmpasswordID");
 
             //creation des boutons
-            bCreer = new Button({label:"Creer", onClick:creer}, "creerID");
+            bCreer = new Button({label:"Creer", onClick:validation}, "creerID");
             bModifier = new Button({label:"Modifier", onClick:modifier}, "modifierID");
             bSupprimer = new Button({label:"Supprimer", onClick:supprimer}, "supprimerID");
             bAnnuler = new Button({label:"Annuler"},"annulerID");
@@ -74,6 +74,8 @@
               });       
             
             })();
+            document.getElementById("spanbademailID").style.display="none";
+            document.getElementById("spanbadpasswordID").style.display="none";
             initUserGrid(); 
 
             //*********************************************
@@ -91,7 +93,6 @@
                 for(var i=0; i<f.checks.length; i++){
                   if(f.checks[i].get('checked')==true){
                     crudStore.put({t:'permission', data:[{id:'', id_unit: f.checks[i].id, id_user: data[0].id}]});
-                    console.log('ok!');                    
                   }
                 }
                 f.unCheckAll();
@@ -162,7 +163,25 @@
                             ],
                     }, "divuser");
             userGrid.startup(); 
-            }  
+            } 
+
+            function validation(){
+              var email = txtEmail.value;
+              var indexAt = email.indexOf('@',0);
+              var indexDot = email.lastIndexOf('.',email.length);
+              //verification email
+              if(indexAt!=-1 && indexDot!=-1 && indexAt<indexDot) {
+                //verification mot de passe    
+                  if (txtPassWord.value != txtConformPassWord.value){
+                    document.getElementById("spanbadpasswordID").style.display="";
+                    document.getElementById("spanbadpasswordID").innerHTML = "<font color='red' size='2'>Mot de passe incorrect</font>";
+                  }else{
+                    creer();
+                  }
+              }else{
+                document.getElementById("spanbademailID").style.display="";
+                document.getElementById("spanbademailID").innerHTML = "<font color='red' size='2'>Email fournit est incorrect</font>";
+              } }
         });
         </script>      
          
@@ -170,25 +189,25 @@
     </head>
     <body class = "claro">
      <div id="principal">
-     	<div id="divForm">
-     	    <form id="newuserformID">
-	            <div><label><b>First Name :</b></label><div class="saisie" id="firstnameID"></div></div>
-	            <br/>
-	            <div><label><b>Last Name :</b></label><div class="saisie" id="lastnameID"></div></div>
-	            <br/>
-	            <div><label><b>Email :</b></label><div class="saisie" id="emailID"></div></div>
-	            <br/>
-	            <span id="spanbademailID"><div id="bademailID"></div></span>
-	            <br/>
-	            <div><label><b>User Name :</b></label><div  class="saisie" id="usernameID"></div></div>
-	            <br/> 
-	            <div><label><b>Password :</b></label><div class="saisie" id="passwordID"></div></div>
-	            <br/>
-	            <div><label><b>Confirm Password :</b></label><div class="saisie" id="confirmpasswordID"></div></div>
-	            <br/>
+      <div id="divForm">
+          <form id="newuserformID">
+              <div><label><b>First Name :</b></label><div class="saisie" id="firstnameID"></div></div>
+              <br/>
+              <div><label><b>Last Name :</b></label><div class="saisie" id="lastnameID"></div></div>
+              <br/>
+              <div><label><b>Email :</b></label><div class="saisie" id="emailID"></div></div>
+              <br/>
+              <span id="spanbademailID"><div id="bademailID"></div></span>
+              <br/>
+              <div><label><b>User Name :</b></label><div  class="saisie" id="usernameID"></div></div>
+              <br/> 
+              <div><label><b>Password :</b></label><div class="saisie" id="passwordID"></div></div>
+              <br/>
+              <div><label><b>Confirm Password :</b></label><div class="saisie" id="confirmpasswordID"></div></div>
+              <br/>
               <span id="spanbadpasswordID"><div id="badpasswordID"></div></span><br/>
-          </form>     		
-     	</div> 
+          </form>         
+      </div> 
       <!--cette div contient des bouttons-->     
       <center><div id="divAction">
         <fieldset >
@@ -197,8 +216,8 @@
           <div id="modifierID"></div>
           <div id="supprimerID"></div>
           <div id="annulerID"></div>
-        </fieldset>             		
-     	</div></center>
+        </fieldset>                 
+      </div></center>
       <!--cette div contient les checks box-->
       <center><div id="divformdroit">
         <fieldset>
@@ -217,5 +236,4 @@
     </div>
   </body> 
     
-</html>   
-
+</html> 
