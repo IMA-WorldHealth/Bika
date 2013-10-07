@@ -1,6 +1,6 @@
 // server.js
 var express = require('express')
-  , db = require('./lib/database/db')({config: {user: 'bika', database: 'bikaDedrick', host: 'localhost', password: 'HISCongo2013'}})
+  , db = require('./lib/database/db')({config: {user: 'bika', database: 'bika', host: 'localhost', password: 'HISCongo2013'}})
   , queryHandler = require('./lib/database/myQueryHandler')
   , url = require('url')
   , qs = require('querystring')
