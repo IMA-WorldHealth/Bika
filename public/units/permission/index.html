@@ -7,7 +7,8 @@
         <link rel = "stylesheet" type = "text/css" href="../css/userPermission.css" media="screen" />
         <script>
         require([
-          "customizedModule/UnitsForm",
+           "dojo/_base/declare",
+           "customizedModule/UnitsForm",
            "dojo/store/JsonRest",
            "dijit/form/TextBox",
            "dijit/form/CheckBox",
@@ -17,14 +18,17 @@
            "dojo/topic",
            "dijit/Dialog",
            "dojo/dom-construct",
-           "gridx/core/model/cache/Async",
-           "gridx/modules/SingleSort",
-           "gridx/Grid",
+           "dgrid/OnDemandGrid",
+           "dgrid/Selection",
            "dojo/domReady!"
-           ], function (UnitsForm, JsonRest,TextBox,CheckBox, Button, on, Deferred, topic, Dialog, domCons, Cache, SingleSort, Grid){
+           ], function (declare, UnitsForm, JsonRest,TextBox,CheckBox, Button, on, Deferred, topic, Dialog, domCons, OnDemandGrid, Selection){
             //declarations des variables
-            var bCreer, bAnnuler,bModifier,bSupprimer, txtFirstName, txtLastName, txtEmail, txtUserName, txtPassWord, txtConformPassWord, chkAdministrator, roleStore, userGrid, userStore, roleGridQuery = {}, userGridQuery = {},   crudStore,f, dialog, roleGrid, tabContainerID=[];
+            var bCreer, bAnnuler, bModifier, bSupprimer, txtFirstName, txtLastName,
+                txtEmail, txtUserName, txtPassWord, txtConformPassWord, chkAdministrator,
+                roleStore, userGrid, userStore, roleGridQuery = {}, userGridQuery = {},
+                crudStore, crudStoreDEL,f, dialog, FullGrid, tabContainerID=[], selectedUserId;
             var deferred = new Deferred();
+
 
               //creations champs des saisies
             txtFirstName = new TextBox({class:"saisie", style:"width:220px;"},"firstnameID");
@@ -41,6 +45,7 @@
             bAnnuler = new Button({label:"Annuler"},"annulerID");
             //stores
             crudStore = new JsonRest({target:'/data/'});
+            crudStoreDEL = new JsonRest({target:'/data/:table/:id'});
              
 
              (function(){
@@ -102,8 +107,8 @@
             var modifier = function(){
               
             }
-            var supprimer = function(){
-              
+           function supprimer(){
+            crudStore.query({t:'user', ids:{id:[selectedUserId]}, action:'DEL'}); 
             }
             var annuler = function(){
               
@@ -126,62 +131,73 @@
               txtConformPassWord.setValue('');
               txtUserName.setValue('');
               txtLastName.setValue('');
+              document.getElementById("spanbadpasswordID").style.display="none";
+              document.getElementById("spanbademailID").style.display="none";
             }                  
 
-            function initUserGrid(){
-            userStore = new JsonRest({
-                        target: '/data/'
+            function initUserGrid(){ 
+              var e = [{t : 'user', c : ['id', 'username', 'email', 'password','first', 'last', 'logged_in']}];                    
+              userGridQuery.e = e;
+              var requetteGrid = JSON.stringify(userGridQuery);
+              userStore = new JsonRest({
+                        target: 'data/'
                     });
+              var coloumns = [{id:'id', field:'id', label:'ID'},
+                              {id:'username', field:'username', label:'User Name'},
+                              {id:'email', field:'email', label:'Email'}];
+              userGrid = new (declare([OnDemandGrid, Selection]))({
+                            store: userStore,
+                            query: '?'+requetteGrid,
+                            style: "height:230px;",
+                            columns: coloumns
+                            }, "divuser");
+              userGrid.startup();
 
-                    var columns = [{
-                        id: 'id',
-                        field: 'id',
-                        name: 'ID'
-                    }, {
-                        id: 'username',
-                        field: 'username',
-                        name: 'USER NAME'
-                    }, {
-                        id: 'email',
-                        field: 'email',
-                        name: 'EMAIL'
-                    }];
 
-                    var e = [{t : 'user', c : ['id', 'username', 'email']}];                    
-                    userGridQuery.e = e;
-                    var requetteGrid = JSON.stringify(userGridQuery);
-
-                    userGrid = new Grid({
-                        style: "height:230px;",
-                        cacheClass: Cache,
-                        store: userStore,
-                        query: '?'+requetteGrid,
-                        structure: columns,
-                        selectRowTriggerOnCell: true,
-                        modules: [
-                            SingleSort,
-                            ],
-                    }, "divuser");
-            userGrid.startup(); 
+              //creation d'un ecouteur et traitement evenement
+                userGrid.on("dgrid-select",function(event) {
+                            txtFirstName.setValue(event.rows[0].data.first);
+                            txtLastName.setValue(event.rows[0].data.last);
+                            txtEmail.setValue(event.rows[0].data.email);
+                            txtUserName.setValue(event.rows[0].data.username);
+                            txtPassWord.setValue(event.rows[0].data.password);
+                            txtConformPassWord.setValue(event.rows[0].data.password);
+                            selectedUserId = event.rows[0].data.id;
+                }); 
             } 
 
             function validation(){
               var email = txtEmail.value;
               var indexAt = email.indexOf('@',0);
               var indexDot = email.lastIndexOf('.',email.length);
+              var emailClean, pwClean;
               //verification email
               if(indexAt!=-1 && indexDot!=-1 && indexAt<indexDot) {
-                //verification mot de passe    
-                  if (txtPassWord.value != txtConformPassWord.value){
-                    document.getElementById("spanbadpasswordID").style.display="";
-                    document.getElementById("spanbadpasswordID").innerHTML = "<font color='red' size='2'>Mot de passe incorrect</font>";
-                  }else{
-                    creer();
-                  }
+                document.getElementById("spanbademailID").style.display="none";
+                document.getElementById("spanbademailID").innerHTML = ""; 
+                emailClean = true;              
               }else{
                 document.getElementById("spanbademailID").style.display="";
                 document.getElementById("spanbademailID").innerHTML = "<font color='red' size='2'>Email fournit est incorrect</font>";
-              } }
+                emailClean = false;
+              } 
+
+               //verification mot de passe    
+                  if (txtPassWord.value != txtConformPassWord.value){
+                    document.getElementById("spanbadpasswordID").style.display="";
+                    document.getElementById("spanbadpasswordID").innerHTML = "<font color='red' size='2'>Mot de passe incorrect</font>";
+                    pwClean = false;
+                  }else{
+                    document.getElementById("spanbadpasswordID").style.display="none";
+                    document.getElementById("spanbadpasswordID").innerHTML = "";
+                    pwClean = true;
+                  }
+
+                  if(emailClean && pwClean){
+                    creer();
+                  }
+
+            }
         });
         </script>      
          
@@ -196,7 +212,6 @@
               <div><label><b>Last Name :</b></label><div class="saisie" id="lastnameID"></div></div>
               <br/>
               <div><label><b>Email :</b></label><div class="saisie" id="emailID"></div></div>
-              <br/>
               <span id="spanbademailID"><div id="bademailID"></div></span>
               <br/>
               <div><label><b>User Name :</b></label><div  class="saisie" id="usernameID"></div></div>
