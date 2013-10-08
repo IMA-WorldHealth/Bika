@@ -170,7 +170,7 @@
         //Settup model and view for the fiscal year Selection componenet
         
         var fiscal_query = {};
-        var e = [{t : 'fiscal_year', c : ['id', 'start_month', 'start_year']}];
+        var e = [{t : 'fiscal_year', c : ['id', 'start_month', 'start_year', 'fiscal_year_txt']}];
         var c = [{t : 'fiscal_year', cl : 'enterprise_id', v : enterprise_id, z : '='}];
         fiscal_query.e = e;
         fiscal_query.c = c;
@@ -180,7 +180,7 @@
         var fiscal_store = new JsonRest({
           target : "/data/",
           getLabel :  function(data) { 
-            return data.start_month + "/" + data.start_year;
+            return data.fiscal_year_txt;
           }
         });
         

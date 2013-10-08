@@ -128,7 +128,7 @@
 
       //really think this one through 
       if(budget_dependencies.enterprise) { 
-        updateAccount(fiscal_year_id, account_id);
+        updateAccount(account_id);
       } else { 
         budget_dependencies.fiscal = false;
         refreshUI();
@@ -439,6 +439,7 @@
 
     function updateAccount(enterprise_id) { 
 
+      refreshUI();
       budget_dependencies.enterprise = false;
       budget_dependencies.fiscal = false;
       var update_query = {};
@@ -450,10 +451,12 @@
      
       var format_update_query = '?' + JSON.stringify(update_query);
 
+      console.log("Updating account_select with", enterprise_id);
       account_select.query = format_update_query;
       account_select.removeOption(account_select.getOptions());
       account_select.setStore(account_select.store);
       account_select.set('value', account_select.get('value'));
+
     } 
 
     function initAccountSelect(enterprise_id) { 
