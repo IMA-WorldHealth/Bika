@@ -9,7 +9,7 @@ GRANT ALL ON `bika`.* TO 'bika'@'%' IDENTIFIED BY 'HISCongo2013';
 -- Dumping structure for table bika.enterprise
 DROP TABLE IF EXISTS `enterprise`;
 CREATE TABLE IF NOT EXISTS `enterprise` (
-  `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
+  `id` smallint unsigned NOT NULL AUTO_INCREMENT,
   `region` varchar(70) NOT NULL,
   `country` varchar(70) NOT NULL,
   `city` varchar(70) NOT NULL,
@@ -30,7 +30,6 @@ CREATE TABLE IF NOT EXISTS `account_type` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table bika.account_type: ~6 rows (environ)
 /*!40000 ALTER TABLE `account_type` DISABLE KEYS */;
 REPLACE INTO `account_type` (`id`, `type`) VALUES
     (1, 'income/expense'),
@@ -39,7 +38,6 @@ REPLACE INTO `account_type` (`id`, `type`) VALUES
 /*!40000 ALTER TABLE `account_type` ENABLE KEYS */;
 
 
--- Dumping data for table bika.enterprise: ~2 rows (environ)
 /*!40000 ALTER TABLE `enterprise` DISABLE KEYS */;
 
 REPLACE INTO `enterprise` (`id`, `region`, `country`, `city`, `name`, `phone`, `email`, `type`, `cash_account`) VALUES
@@ -50,8 +48,8 @@ REPLACE INTO `enterprise` (`id`, `region`, `country`, `city`, `name`, `phone`, `
 -- Dumping structure for table bika.account
 DROP TABLE IF EXISTS `account`;
 CREATE TABLE IF NOT EXISTS `account` (
-  `enterprise_id` smallint(5) unsigned NOT NULL,
-  `id` mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
+  `enterprise_id` smallint unsigned NOT NULL,
+  `id` mediumint unsigned NOT NULL AUTO_INCREMENT,
   `locked` tinyint(1) NOT NULL,
   `account_txt` text,
   `account_type_id` mediumint(8) unsigned NOT NULL,
@@ -269,29 +267,28 @@ INSERT INTO `account` (`enterprise_id`, `id`, `locked`, `account_txt`, `account_
     (101, 760500, 0, 'Autres subventions', 1, '300');
 /*!40000 ALTER TABLE `account` ENABLE KEYS */;
 
--- Dumping structure for table bika.currency
+--
+-- `bika`.`currency`
+--
 DROP TABLE IF EXISTS `currency`;
 CREATE TABLE IF NOT EXISTS `currency` (
-  `id` tinyint(3) unsigned NOT NULL,
+  `id` tinyint unsigned NOT NULL,
   `name` text NOT NULL,
   `symbol` varchar(15) NOT NULL,
+  `note` text,
+  `current_rate` mediumint unsigned,
+  `last_rate` mediumint unsigned,
+  `updated` date NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB;
 
--- Dumping data for table bika.currency: ~3 rows (environ)
-/*!40000 ALTER TABLE `currency` DISABLE KEYS */;
-REPLACE INTO `currency` (`id`, `name`, `symbol`) VALUES
-    (1, 'Franc Congolais', 'FC'),
-    (2, 'United States Dollar', 'USD'),
-    (3, 'Euro', 'EU');
-/*!40000 ALTER TABLE `currency` ENABLE KEYS */;
-
-
--- Dumping structure for table bika.fiscal_year
+--
+-- table `bika`.`fiscal_year`
+--
 DROP TABLE IF EXISTS `fiscal_year`;
 CREATE TABLE IF NOT EXISTS `fiscal_year` (
-  `enterprise_id` smallint(5) unsigned NOT NULL,
-  `id` mediumint(8) unsigned NOT NULL,
+  `enterprise_id` smallint unsigned NOT NULL,
+  `id` mediumint unsigned NOT NULL,
   `number_of_months` mediumint(8) unsigned NOT NULL,
   `fiscal_year_txt` text NOT NULL,
   `transaction_start_number` int(10) unsigned NOT NULL,
@@ -329,10 +326,9 @@ CREATE TABLE IF NOT EXISTS `user` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8;
 
--- Dumping data for table bika.user: ~12 rows (environ)
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
 REPLACE INTO `user` (`id`, `username`, `password`, `first`, `last`, `email`, `logged_in`) VALUES
-    (1, 'jniles', 'K3mb3J@m', 'Jonathan', 'Niles', 'jonathanwniles@gmail.com', 0),
+    (1, 'jniles', 'malamumoke', 'Jonathan', 'Niles', 'jonathanwniles@gmail.com', 0),
     (2, 'chris', 'c', 'CHRIS ', 'LOMAME', 'chris@ima.org', 0),
     (3, 'rdc', 'r', 'CONGO', 'DEMOCRATIQUE', 'rdc@rdc.cd', 0),
     (4, 'docta', 'd', 'Docteur House', 'Machine', 'd@his.cd', 0),
@@ -343,31 +339,35 @@ REPLACE INTO `user` (`id`, `username`, `password`, `first`, `last`, `email`, `lo
     (9, 'm1', 'm', 'Manager Administrateur', 'Gerant Systeme', 'manage@his.cd', 0),
     (10, 'docta1', 'dd', 'Docteur Simple', 'Limité', 'doctasimple@his.cd', 0),
     (11, 'admin', 'lmt', 'Administrateur', 'Limite', 'adminlimit@his.com', 0),
-    (12, 'fin', 'f', 'Financier subalterne', 'Sous Financier', 'finance@his.com', 0);
+    (12, 'fin', 'f', 'Financier subalterne', 'Sous Financier', 'finance@his.com', 0),
+    (13, 'sfount', '1', 'Steven', 'Fountain', 'StevenFountain@live.co.uk', 0);
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
+
+--
+-- table `bika`.`journal`
 
 -- Dumping structure for table bika.journal
 DROP TABLE IF EXISTS `journal`;
 CREATE TABLE IF NOT EXISTS `journal` (
-  `fiscal_year_id` mediumint(8) unsigned NOT NULL,
-  `id` mediumint(8) unsigned NOT NULL,
+  `fiscal_year_id` mediumint unsigned NOT NULL,
+  `id` mediumint unsigned NOT NULL,
   `date` date NOT NULL,
-  `user_id` smallint(5) unsigned NOT NULL,
+  `user_id` smallint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `fiscal_year_id` (`fiscal_year_id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `journal_ibfk_1` FOREIGN KEY (`fiscal_year_id`) REFERENCES `fiscal_year` (`id`),
   CONSTRAINT `journal_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB;
 
--- Dumping data for table bika.journal: ~1 rows (environ)
 /*!40000 ALTER TABLE `journal` DISABLE KEYS */;
 REPLACE INTO `journal` (`fiscal_year_id`, `id`, `date`, `user_id`) VALUES
     (2013001, 1000, '2013-07-23', 1);
 /*!40000 ALTER TABLE `journal` ENABLE KEYS */;
 
-
--- Dumping structure for table bika.period
+--
+-- table `bika`.`period`
+--
 DROP TABLE IF EXISTS `period`;
 CREATE TABLE IF NOT EXISTS `period` (
   `fiscal_year_id` mediumint(8) unsigned NOT NULL,
@@ -414,7 +414,6 @@ REPLACE INTO `period` (`fiscal_year_id`, `id`, `period_start`, `period_stop`, `o
 ALTER TABLE `enterprise`
   ADD CONSTRAINT `enterprise_ibfk_1` FOREIGN KEY (`cash_account`) REFERENCES `account` (`id`);
 
-
 -- Dumping structure for table bika.unit
 DROP TABLE IF EXISTS `unit`;
 CREATE TABLE IF NOT EXISTS `unit` (
@@ -456,15 +455,38 @@ REPLACE INTO `unit` (`id`, `name`, `desc`, `parent`, `has_children`, `url`) VALU
   (23, 'Billing C', '3 Fils', 20, 0, 'Lien hypertext'),
   (24, 'Balance', 'The Balance Sheet', 5, 0, '/units/balance/'),
   (25, 'Transaction', 'The Transaction Page', 5, 0, '/units/transaction/'),
-  (26, 'Demo', 'Demos of key functionality', 0, 1, ''),
-  (27, 'FullGrid', 'Demo: Full-page grid', 26, 0, '/units/demos/fullgrid/'),
-  (28, 'PDFedit', 'Demo: PDFeditor', 26, 0, '/units/demos/pdfedit/'),
-  (29, 'Graphics', 'Demo: Dojo Charting', 26, 0, '/units/demos/charting/'),
-  (30, 'Error', 'Demo: This page doesn\'t exist', 26, 0, '/units/demos/error/'),
-  (31, 'Linkage', 'Demo: SelectX updates each other', 26, 0, '/units/demos/linkage/');
-
+  (26, 'Debitors', 'The debitors configuraiton page', 5, 0, '/units/debitors/');
 /*!40000 ALTER TABLE `unit` ENABLE KEYS */;
 
+-- Dumping structure for table bika.permission
+DROP TABLE IF EXISTS `permission`;
+CREATE TABLE IF NOT EXISTS `permission` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id_unit` mediumint(9) NOT NULL,
+  `id_user` smallint(5) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `id_unit` (`id_unit`),
+  KEY `id_user` (`id_user`),
+  CONSTRAINT `permission_ibfk_2` FOREIGN KEY (`id_unit`) REFERENCES `unit` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `permission_ibfk_3` FOREIGN KEY (`id_user`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+
+INSERT INTO `permission` (`id`, `id_unit`, `id_user`) VALUES
+    (1, 8, 13),
+    (2, 1, 13), 
+    (3, 4, 13),
+    (4, 3, 13),
+    (5, 6, 13),
+    (6, 7, 13),
+    (7, 8, 1),
+    (8, 1, 1), 
+    (9, 4, 1),
+    (10, 3, 1),
+    (11, 6, 1),
+    (12, 7, 1),
+    (13, 26, 1);
+    
 -- Dumping structure for table bika.role
 DROP TABLE IF EXISTS `role`;
 CREATE TABLE IF NOT EXISTS `role` (
@@ -486,47 +508,9 @@ REPLACE INTO `role` (`id`, `name`, `description`, `role_head`) VALUES
 /*!40000 ALTER TABLE `role` ENABLE KEYS */;
 
 
--- Dumping structure for table bika.role_unit
-DROP TABLE IF EXISTS `role_unit`;
-CREATE TABLE IF NOT EXISTS `role_unit` (
-  `id` int(5) NOT NULL AUTO_INCREMENT,
-  `id_role` smallint(5) unsigned NOT NULL,
-  `id_unit` mediumint(9) NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `id_role` (`id_role`),
-  KEY `id_unit` (`id_unit`),
-  CONSTRAINT `role_unit_ibfk_1` FOREIGN KEY (`id_unit`) REFERENCES `unit` (`id`),
-  CONSTRAINT `role_unit_ibfk_2` FOREIGN KEY (`id_role`) REFERENCES `role` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
-
--- Dumping data for table bika.role_unit: ~19 rows (environ)
-/*!40000 ALTER TABLE `role_unit` DISABLE KEYS */;
-REPLACE INTO `role_unit` (`id`, `id_role`, `id_unit`) VALUES
-    (1, 1, 0),
-    (3, 2, 2),
-    (4, 2, 3),
-    (5, 2, 4),
-    (6, 3, 6),
-    (7, 3, 7),
-    (8, 3, 8),
-    (9, 3, 9),
-    (10, 3, 10),
-    (11, 3, 20),
-    (12, 3, 21),
-    (13, 3, 22),
-    (14, 4, 12),
-    (15, 4, 13),
-    (16, 4, 14),
-    (17, 5, 16),
-    (18, 5, 17),
-    (19, 5, 18),
-    (20, 5, 19);
-/*!40000 ALTER TABLE `role_unit` ENABLE KEYS */;
-
 DROP TABLE IF EXISTS `budget`;
 CREATE TABLE IF NOT EXISTS `budget` (
-  `enterprise_id` int(11) NOT NULL DEFAULT '0',
+  `enterprise_id` smallint unsigned NOT NULL DEFAULT '0',
   `account_id` int(11) NOT NULL DEFAULT '0',
   `period_id` int(11) NOT NULL,
   `budget` decimal(2,0) DEFAULT NULL,
@@ -5460,157 +5444,422 @@ INSERT INTO `budget` (`enterprise_id`, `account_id`, `period_id`, `budget`) VALU
 (101, 760500, 33, 0.00),
 (101, 760500, 34, 0.00);
 
--- Dumping structure for table bika.transaction
-DROP TABLE IF EXISTS `transaction`;
-CREATE TABLE IF NOT EXISTS `transaction` (
-  `journal_id` mediumint(8) unsigned NOT NULL,
-  `line_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `account_id` mediumint(8) unsigned NOT NULL,
-  `credit` int(11) NOT NULL,
-  `debit` int(11) NOT NULL,
-  `doc_id` tinytext NOT NULL,
-  `description` tinytext,
-  `trans_number` int(10) unsigned NOT NULL,
-  `trans_date` date NOT NULL,
-  `sys_currency` tinyint(3) unsigned NOT NULL,
-  `trans_currency` tinyint(3) unsigned NOT NULL,
-  `exchange_rate` decimal(6,2) NOT NULL,
-  PRIMARY KEY (`line_id`),
-  KEY `journal_id` (`journal_id`),
-  KEY `account_id` (`account_id`),
-  KEY `sys_currency` (`sys_currency`),
-  KEY `trans_currency` (`trans_currency`),
-  CONSTRAINT `transaction_ibfk_1` FOREIGN KEY (`journal_id`) REFERENCES `journal` (`id`),
-  CONSTRAINT `transaction_ibfk_2` FOREIGN KEY (`account_id`) REFERENCES `account` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
-
--- Dumping data for table bika.transaction: ~5 rows (environ)
-/*!40000 ALTER TABLE `transaction` DISABLE KEYS */;
-REPLACE INTO `transaction` (`journal_id`, `line_id`, `account_id`, `credit`, `debit`, `doc_id`, `description`, `trans_number`, `trans_date`, `sys_currency`, `trans_currency`, `exchange_rate`) VALUES
-    (1000, 1, 220700, 40, 0, '20', 'descrip 1', 3, '2013-07-23', 1, 1, 920.00),
-    (1000, 2, 220700, 0, 20, '40', 'descrip 2', 3, '2013-07-23', 1, 1, 930.00),
-    (1000, 3, 650100, 100, 0, '0', 'descrip 3', 4, '2013-02-15', 1, 1, 910.00),
-    (1000, 4, 711000, 23, 0, '0', 'descrip 4', 5, '2013-03-01', 1, 1, 910.00),
-    (1000, 5, 711100, 0, 100, '0', 'descrip 5', 4, '2013-02-15', 1, 1, 910.00);
-/*!40000 ALTER TABLE `transaction` ENABLE KEYS */;
-
--- Dumping structure for table bika.user_role
-DROP TABLE IF EXISTS `user_role`;
-CREATE TABLE IF NOT EXISTS `user_role` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `id_role` smallint(5) unsigned NOT NULL,
-  `id_user` smallint(5) unsigned NOT NULL,
-  `all_right` tinyint(1) NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `id_role_unit` (`id_role`,`id_user`),
-  KEY `id_user` (`id_user`),
-  CONSTRAINT `user_role_ibfk_2` FOREIGN KEY (`id_user`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `user_role_ibfk_3` FOREIGN KEY (`id_role`) REFERENCES `role` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=latin1;
-
--- Dumping data for table bika.user_role: ~12 rows (environ)
-/*!40000 ALTER TABLE `user_role` DISABLE KEYS */;
-REPLACE INTO `user_role` (`id`, `id_role`, `id_user`, `all_right`) VALUES
-    (1, 1, 1, 1),
-    (2, 1, 2, 1),
-    (3, 1, 3, 1),
-    (4, 5, 8, 1),
-    (5, 3, 8, 1),
-    (6, 3, 12, 0),
-    (7, 5, 4, 1),
-    (8, 3, 5, 1),
-    (9, 4, 6, 1),
-    (10, 2, 7, 1),
-    (11, 4, 9, 1),
-    (12, 2, 9, 0);
-/*!40000 ALTER TABLE `user_role` ENABLE KEYS */;
-
-
--- Dumping structure for table bika.user_role_description
-DROP TABLE IF EXISTS `user_role_description`;
-CREATE TABLE IF NOT EXISTS `user_role_description` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `id_role_unit` int(5) NOT NULL,
-  `id_user` smallint(5) unsigned NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `id_role_unit` (`id_role_unit`,`id_user`),
-  KEY `id_user` (`id_user`),
-  CONSTRAINT `user_role_description_ibfk_1` FOREIGN KEY (`id_role_unit`) REFERENCES `role_unit` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `user_role_description_ibfk_2` FOREIGN KEY (`id_user`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
-
--- Dumping data for table bika.user_role_description: ~7 rows (environ)
-/*!40000 ALTER TABLE `user_role_description` DISABLE KEYS */;
-REPLACE INTO `user_role_description` (`id`, `id_role_unit`, `id_user`) VALUES
-    (4, 4, 9),
-    (5, 5, 9),
-    (1, 8, 12),
-    (2, 9, 12),
-    (3, 10, 12),
-    (6, 11, 12),
-    (7, 13, 12);
-/*!40000 ALTER TABLE `user_role_description` ENABLE KEYS */;
-
-CREATE TABLE `debitor` (
-  `company_id` int(11) NOT NULL,
-  `debitor_id` varchar(15) NOT NULL,
-  `address_1` text,
-  `address_2` text,
-  `city` text,
-  `company_number` text,
-  `contact` text,
-  `country` text,
-  `dun` varchar(3) DEFAULT NULL,
-  `email` text,
-  `fax` text,
-  `group_id` int(11) DEFAULT NULL,
-  `interest` varchar(3) DEFAULT NULL,
-  `locked` varchar(3) DEFAULT NULL,
-  `max_credit` varchar(45) DEFAULT NULL,
-  `name` text,
-  `note` text,
-  `our_contact` int(11) DEFAULT NULL,
-  `payment_id` int(11) DEFAULT NULL,
-  `phone` text,
-  `price_group_id` int(11) DEFAULT NULL,
-  `debitor_text1` text,
-  `debitor_text2` text,
-  `debitor_text3` text,
-  `debitor_text4` text,
-  `debitor_text5` text,
-  `internet_order` varchar(3) DEFAULT NULL,
-  `international` varchar(3) DEFAULT NULL,
-  PRIMARY KEY (`company_id`,`debitor_id`)
-) ENGINE=InnoDB;
-
-INSERT INTO `debitor` (`company_id`,`debitor_id`,`address_1`,`address_2`,`city`,`company_number`,`contact`,`country`,`dun`,`email`,`fax`,`group_id`,`interest`,`locked`,`max_credit`,`name`,`note`,`our_contact`,`payment_iD`,`phone`,`price_group_id`,`debitor_text1`,`debitor_text2`,`debitor_text3`,`debitor_text4`,`debitor_text5`,`internet_order`,`international`) VALUES (1,'1','Bandal','masina','Tshikapa','2','e54','Autriche','non','carloscnk@francite.com','454',2,'34','non','344','Carlos','je suis toujours la',212,323,'3454',234,'papa','maman','yaya','koko','noko','44','33'),(2,'3','Lemba','limete','Bunia','3','fxv','République de Corée','d','gered@caramail.com','4556',2,'767','non','55','Gered','ils vont bien depuis longtemps',980,876,'802',789,'jon','cnk','ded','chris','ger','77','86');
-
+--
+-- table `bika`.`country`
+--
 DROP TABLE IF EXISTS `country`;
-
 CREATE TABLE `country` (
-  `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
-  `code` int(3) NOT NULL,
+  `id` smallint unsigned NOT NULL AUTO_INCREMENT,
+  `code` smallint unsigned NOT NULL,
   `country_en` varchar(45) NOT NULL,
   `country_fr` varchar(45) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `code_unique` (`code`)
-) ENGINE=InnoDB ;
+) ENGINE=InnoDB;
 
-INSERT INTO `country`(`id`,`code`,`country_en`,`country_fr`) VALUES (1,4,'Afghanistan','Afghanistan'),(2,8,'Albania','Albanie'),(3,10,'Antarctica','Antarctique'),(4,12,'Algeria','Algérie'),(5,16,'American Samoa','Samoa Américaines'),(6,20,'Andorra','Andorre'),(7,24,'Angola','Angola'),(8,28,'Antigua and Barbuda','Antigua-et-Barbuda'),(9,31,'Azerbaijan','Azerbaïdjan'),(10,32,'Argentina','Argentine'),(11,36,'Australia','Australie'),(12,40,'Austria','Autriche'),(13,44,'Bahamas','Bahamas'),(14,48,'Bahrain','Bahreïn'),(15,50,'Bangladesh','Bangladesh'),(16,51,'Armenia','Arménie'),(17,52,'Barbados','Barbade'),(18,56,'Belgium','Belgique'),(19,60,'Bermuda','Bermudes'),(20,64,'Bhutan','Bhoutan'),(21,68,'Bolivia','Bolivie'),(22,70,'Bosnia and Herzegovina','Bosnie-Herzégovine'),(23,72,'Botswana','Botswana'),(24,74,'Bouvet Island','Île Bouvet'),(25,76,'Brazil','Brésil'),(26,84,'Belize','Belize'),(27,86,'British Indian Ocean Territory','Territoire Britannique de l\'Océan Indien'),(28,90,'Solomon Islands','Îles Salomon'),(29,92,'British Virgin Islands','Îles Vierges Britanniques'),(30,96,'Brunei Darussalam','Brunéi Darussalam'),(31,100,'Bulgaria','Bulgarie'),(32,104,'Myanmar','Myanmar'),(33,108,'Burundi','Burundi'),(34,112,'Belarus','Bélarus'),(35,116,'Cambodia','Cambodge'),(36,120,'Cameroon','Cameroun'),(37,124,'Canada','Canada'),(38,132,'Cape Verde','Cap-vert'),(39,136,'Cayman Islands','Îles Caïmanes'),(40,140,'Central African','République Centrafricaine'),(41,144,'Sri Lanka','Sri Lanka'),(42,148,'Chad','Tchad'),(43,152,'Chile','Chili'),(44,156,'China','Chine'),(45,158,'Taiwan','Taïwan'),(46,162,'Christmas Island','Île Christmas'),(47,166,'Cocos (Keeling) Islands','Îles Cocos (Keeling)'),(48,170,'Colombia','Colombie'),(49,174,'Comoros','Comores'),(50,175,'Mayotte','Mayotte'),(51,178,'Republic of the Congo','République du Congo'),(52,180,'The Democratic Republic Of The Congo','République Démocratique du Congo'),(53,184,'Cook Islands','Îles Cook'),(54,188,'Costa Rica','Costa Rica'),(55,191,'Croatia','Croatie'),(56,192,'Cuba','Cuba'),(57,196,'Cyprus','Chypre'),(58,203,'Czech Republic','République Tchèque'),(59,204,'Benin','Bénin'),(60,208,'Denmark','Danemark'),(61,212,'Dominica','Dominique'),(62,214,'Dominican Republic','République Dominicaine'),(63,218,'Ecuador','Équateur'),(64,222,'El Salvador','El Salvador'),(65,226,'Equatorial Guinea','Guinée Équatoriale'),(66,231,'Ethiopia','Éthiopie'),(67,232,'Eritrea','Érythrée'),(68,233,'Estonia','Estonie'),(69,234,'Faroe Islands','Îles Féroé'),(70,238,'Falkland Islands','Îles (malvinas) Falkland'),(71,239,'South Georgia and the South Sandwich Islands','Géorgie du Sud et les Îles Sandwich du Sud'),(72,242,'Fiji','Fidji'),(73,246,'Finland','Finlande'),(74,248,'Åland Islands','Îles Åland'),(75,250,'France','France'),(76,254,'French Guiana','Guyane Française'),(77,258,'French Polynesia','Polynésie Française'),(78,260,'French Southern Territories','Terres Australes Françaises'),(79,262,'Djibouti','Djibouti'),(80,266,'Gabon','Gabon'),(81,268,'Georgia','Géorgie'),(82,270,'Gambia','Gambie'),(83,275,'Occupied Palestinian Territory','Territoire Palestinien Occupé'),(84,276,'Germany','Allemagne'),(85,288,'Ghana','Ghana'),(86,292,'Gibraltar','Gibraltar'),(87,296,'Kiribati','Kiribati'),(88,300,'Greece','Grèce'),(89,304,'Greenland','Groenland'),(90,308,'Grenada','Grenade'),(91,312,'Guadeloupe','Guadeloupe'),(92,316,'Guam','Guam'),(93,320,'Guatemala','Guatemala'),(94,324,'Guinea','Guinée'),(95,328,'Guyana','Guyana'),(96,332,'Haiti','Haïti'),(97,334,'Heard Island and McDonald Islands','Îles Heard et Mcdonald'),(98,336,'Vatican City State','Saint-Siège (état de la Cité du Vatican)'),(99,340,'Honduras','Honduras'),(100,344,'Hong Kong','Hong-Kong'),(101,348,'Hungary','Hongrie'),(102,352,'Iceland','Islande'),(103,356,'India','Inde'),(104,360,'Indonesia','Indonésie'),(105,364,'Islamic Republic of Iran','République Islamique d\'Iran'),(106,368,'Iraq','Iraq'),(107,372,'Ireland','Irlande'),(108,376,'Israel','Israël'),(109,380,'Italy','Italie'),(110,384,'Côte d\'Ivoire','Côte d\'Ivoire'),(111,388,'Jamaica','Jamaïque'),(112,392,'Japan','Japon'),(113,398,'Kazakhstan','Kazakhstan'),(114,400,'Jordan','Jordanie'),(115,404,'Kenya','Kenya'),(116,408,'Democratic People\'s Republic of Korea','République Populaire Démocratique de Corée'),(117,410,'Republic of Korea','République de Corée'),(118,414,'Kuwait','Koweït'),(119,417,'Kyrgyzstan','Kirghizistan'),(120,418,'Lao People\'s Democratic Republic','République Démocratique Populaire Lao'),(121,422,'Lebanon','Liban'),(122,426,'Lesotho','Lesotho'),(123,428,'Latvia','Lettonie'),(124,430,'Liberia','Libéria'),(125,434,'Libyan Arab Jamahiriya','Jamahiriya Arabe Libyenne'),(126,438,'Liechtenstein','Liechtenstein'),(127,440,'Lithuania','Lituanie'),(128,442,'Luxembourg','Luxembourg'),(129,446,'Macao','Macao'),(130,450,'Madagascar','Madagascar'),(131,454,'Malawi','Malawi'),(132,458,'Malaysia','Malaisie'),(133,462,'Maldives','Maldives'),(134,466,'Mali','Mali'),(135,470,'Malta','Malte'),(136,474,'Martinique','Martinique'),(137,478,'Mauritania','Mauritanie'),(138,480,'Mauritius','Maurice'),(139,484,'Mexico','Mexique'),(140,492,'Monaco','Monaco'),(141,496,'Mongolia','Mongolie'),(142,498,'Republic of Moldova','République de Moldova'),(143,500,'Montserrat','Montserrat'),(144,504,'Morocco','Maroc'),(145,508,'Mozambique','Mozambique'),(146,512,'Oman','Oman'),(147,516,'Namibia','Namibie'),(148,520,'Nauru','Nauru'),(149,524,'Nepal','Népal'),(150,528,'Netherlands','country-Bas'),(151,530,'Netherlands Antilles','Antilles Néerlandaises'),(152,533,'Aruba','Aruba'),(153,540,'New Caledonia','Nouvelle-Calédonie'),(154,548,'Vanuatu','Vanuatu'),(155,554,'New Zealand','Nouvelle-Zélande'),(156,558,'Nicaragua','Nicaragua'),(157,562,'Niger','Niger'),(158,566,'Nigeria','Nigéria'),(159,570,'Niue','Niué'),(160,574,'Norfolk Island','Île Norfolk'),(161,578,'Norway','Norvège'),(162,580,'Northern Mariana Islands','Îles Mariannes du Nord'),(163,581,'United States Minor Outlying Islands','Îles Mineures Éloignées des États-Unis'),(164,583,'Federated States of Micronesia','États Fédérés de Micronésie'),(165,584,'Marshall Islands','Îles Marshall'),(166,585,'Palau','Palaos'),(167,586,'Pakistan','Pakistan'),(168,591,'Panama','Panama'),(169,598,'Papua New Guinea','Papouasie-Nouvelle-Guinée'),(170,600,'Paraguay','Paraguay'),(171,604,'Peru','Pérou'),(172,608,'Philippines','Philippines'),(173,612,'Pitcairn','Pitcairn'),(174,616,'Poland','Pologne'),(175,620,'Portugal','Portugal'),(176,624,'Guinea-Bissau','Guinée-Bissau'),(177,626,'Timor-Leste','Timor-Leste'),(178,630,'Puerto Rico','Porto Rico'),(179,634,'Qatar','Qatar'),(180,638,'Réunion','Réunion'),(181,642,'Romania','Roumanie'),(182,643,'Russian Federation','Fédération de Russie'),(183,646,'Rwanda','Rwanda'),(184,654,'Saint Helena','Sainte-Hélène'),(185,659,'Saint Kitts and Nevis','Saint-Kitts-et-Nevis'),(186,660,'Anguilla','Anguilla'),(187,662,'Saint Lucia','Sainte-Lucie'),(188,666,'Saint-Pierre and Miquelon','Saint-Pierre-et-Miquelon'),(189,670,'Saint Vincent and the Grenadines','Saint-Vincent-et-les Grenadines'),(190,674,'San Marino','Saint-Marin'),(191,678,'Sao Tome and Principe','Sao Tomé-et-Principe'),(192,682,'Saudi Arabia','Arabie Saoudite'),(193,686,'Senegal','Sénégal'),(194,690,'Seychelles','Seychelles'),(195,694,'Sierra Leone','Sierra Leone'),(196,702,'Singapore','Singapour'),(197,703,'Slovakia','Slovaquie'),(198,704,'Vietnam','Viet Nam'),(199,705,'Slovenia','Slovénie'),(200,706,'Somalia','Somalie'),(201,710,'South Africa','Afrique du Sud'),(202,716,'Zimbabwe','Zimbabwe'),(203,724,'Spain','Espagne'),(204,732,'Western Sahara','Sahara Occidental'),(205,736,'Sudan','Soudan'),(206,740,'Suriname','Suriname'),(207,744,'Svalbard and Jan Mayen','Svalbard etÎle Jan Mayen'),(208,748,'Swaziland','Swaziland'),(209,752,'Sweden','Suède'),(210,756,'Switzerland','Suisse'),(211,760,'Syrian Arab Republic','République Arabe Syrienne'),(212,762,'Tajikistan','Tadjikistan'),(213,764,'Thailand','Thaïlande'),(214,768,'Togo','Togo'),(215,772,'Tokelau','Tokelau'),(216,776,'Tonga','Tonga'),(217,780,'Trinidad and Tobago','Trinité-et-Tobago'),(218,784,'United Arab Emirates','Émirats Arabes Unis'),(219,788,'Tunisia','Tunisie'),(220,792,'Turkey','Turquie'),(221,795,'Turkmenistan','Turkménistan'),(222,796,'Turks and Caicos Islands','Îles Turks et Caïques'),(223,798,'Tuvalu','Tuvalu'),(224,800,'Uganda','Ouganda'),(225,804,'Ukraine','Ukraine'),(226,807,'The Former Yugoslav Republic of Macedonia','L\'ex-République Yougoslave de Macédoine'),(227,818,'Egypt','Égypte'),(228,826,'United Kingdom','Royaume-Uni'),(229,833,'Isle of Man','Île de Man'),(230,834,'United Republic Of Tanzania','République-Unie de Tanzanie'),(231,840,'United States','États-Unis'),(232,850,'U.S. Virgin Islands','Îles Vierges des États-Unis'),(233,854,'Burkina Faso','Burkina Faso'),(234,858,'Uruguay','Uruguay'),(235,860,'Uzbekistan','Ouzbékistan'),(236,862,'Venezuela','Venezuela'),(237,876,'Wallis and Futuna','Wallis et Futuna'),(238,882,'Samoa','Samoa'),(239,887,'Yemen','Yémen'),(240,891,'Serbia and Montenegro','Serbie-et-Monténégro'),(241,894,'Zambia','Zambie');
+INSERT INTO `country`(`id`,`code`,`country_en`,`country_fr`) VALUES 
+  (1,4,'Afghanistan','Afghanistan'),
+  (2,8,'Albania','Albanie'),
+  (3,10,'Antarctica','Antarctique'),
+  (4,12,'Algeria','Algérie'),
+  (5,16,'American Samoa','Samoa Américaines'),
+  (6,20,'Andorra','Andorre'),
+  (7,24,'Angola','Angola'),
+  (8,28,'Antigua and Barbuda','Antigua-et-Barbuda'),
+  (9,31,'Azerbaijan','Azerbaïdjan'),
+  (10,32,'Argentina','Argentine'),
+  (11,36,'Australia','Australie'),
+  (12,40,'Austria','Autriche'),
+  (13,44,'Bahamas','Bahamas'),
+  (14,48,'Bahrain','Bahreïn'),
+  (15,50,'Bangladesh','Bangladesh'),
+  (16,51,'Armenia','Arménie'),
+  (17,52,'Barbados','Barbade'),
+  (18,56,'Belgium','Belgique'),
+  (19,60,'Bermuda','Bermudes'),
+  (20,64,'Bhutan','Bhoutan'),
+  (21,68,'Bolivia','Bolivie'),
+  (22,70,'Bosnia and Herzegovina','Bosnie-Herzégovine'),
+  (23,72,'Botswana','Botswana'),
+  (24,74,'Bouvet Island','Île Bouvet'),
+  (25,76,'Brazil','Brésil'),
+  (26,84,'Belize','Belize'),
+  (27,86,'British Indian Ocean Territory','Territoire Britannique de l\'Océan Indien'),
+  (28,90,'Solomon Islands','Îles Salomon'),
+  (29,92,'British Virgin Islands','Îles Vierges Britanniques'),
+  (30,96,'Brunei Darussalam','Brunéi Darussalam'),
+  (31,100,'Bulgaria','Bulgarie'),
+  (32,104,'Myanmar','Myanmar'),
+  (33,108,'Burundi','Burundi'),
+  (34,112,'Belarus','Bélarus'),
+  (35,116,'Cambodia','Cambodge'),
+  (36,120,'Cameroon','Cameroun'),
+  (37,124,'Canada','Canada'),
+  (38,132,'Cape Verde','Cap-vert'),
+  (39,136,'Cayman Islands','Îles Caïmanes'),
+  (40,140,'Central African','République Centrafricaine'),
+  (41,144,'Sri Lanka','Sri Lanka'),
+  (42,148,'Chad','Tchad'),
+  (43,152,'Chile','Chili'),
+  (44,156,'China','Chine'),
+  (45,158,'Taiwan','Taïwan'),
+  (46,162,'Christmas Island','Île Christmas'),
+  (47,166,'Cocos (Keeling) Islands','Îles Cocos (Keeling)'),
+  (48,170,'Colombia','Colombie'),
+  (49,174,'Comoros','Comores'),
+  (50,175,'Mayotte','Mayotte'),
+  (51,178,'Republic of the Congo','République du Congo'),
+  (52,180,'The Democratic Republic Of The Congo','République Démocratique du Congo'),
+  (53,184,'Cook Islands','Îles Cook'),
+  (54,188,'Costa Rica','Costa Rica'),
+  (55,191,'Croatia','Croatie'),
+  (56,192,'Cuba','Cuba'),
+  (57,196,'Cyprus','Chypre'),
+  (58,203,'Czech Republic','République Tchèque'),
+  (59,204,'Benin','Bénin'),
+  (60,208,'Denmark','Danemark'),
+  (61,212,'Dominica','Dominique'),
+  (62,214,'Dominican Republic','République Dominicaine'),
+  (63,218,'Ecuador','Équateur'),
+  (64,222,'El Salvador','El Salvador'),
+  (65,226,'Equatorial Guinea','Guinée Équatoriale'),
+  (66,231,'Ethiopia','Éthiopie'),
+  (67,232,'Eritrea','Érythrée'),
+  (68,233,'Estonia','Estonie'),
+  (69,234,'Faroe Islands','Îles Féroé'),
+  (70,238,'Falkland Islands','Îles (malvinas) Falkland'),
+  (71,239,'South Georgia and the South Sandwich Islands','Géorgie du Sud et les Îles Sandwich du Sud'),
+  (72,242,'Fiji','Fidji'),
+  (73,246,'Finland','Finlande'),
+  (74,248,'Åland Islands','Îles Åland'),
+  (75,250,'France','France'),
+  (76,254,'French Guiana','Guyane Française'),
+  (77,258,'French Polynesia','Polynésie Française'),
+  (78,260,'French Southern Territories','Terres Australes Françaises'),
+  (79,262,'Djibouti','Djibouti'),
+  (80,266,'Gabon','Gabon'),
+  (81,268,'Georgia','Géorgie'),
+  (82,270,'Gambia','Gambie'),
+  (83,275,'Occupied Palestinian Territory','Territoire Palestinien Occupé'),
+  (84,276,'Germany','Allemagne'),
+  (85,288,'Ghana','Ghana'),
+  (86,292,'Gibraltar','Gibraltar'),
+  (87,296,'Kiribati','Kiribati'),
+  (88,300,'Greece','Grèce'),
+  (89,304,'Greenland','Groenland'),
+  (90,308,'Grenada','Grenade'),
+  (91,312,'Guadeloupe','Guadeloupe'),
+  (92,316,'Guam','Guam'),
+  (93,320,'Guatemala','Guatemala'),
+  (94,324,'Guinea','Guinée'),
+  (95,328,'Guyana','Guyana'),
+  (96,332,'Haiti','Haïti'),
+  (97,334,'Heard Island and McDonald Islands','Îles Heard et Mcdonald'),
+  (98,336,'Vatican City State','Saint-Siège (état de la Cité du Vatican)'),
+  (99,340,'Honduras','Honduras'),
+  (100,344,'Hong Kong','Hong-Kong'),
+  (101,348,'Hungary','Hongrie'),
+  (102,352,'Iceland','Islande'),
+  (103,356,'India','Inde'),
+  (104,360,'Indonesia','Indonésie'),
+  (105,364,'Islamic Republic of Iran','République Islamique d\'Iran'),
+  (106,368,'Iraq','Iraq'),
+  (107,372,'Ireland','Irlande'),
+  (108,376,'Israel','Israël'),
+  (109,380,'Italy','Italie'),
+  (110,384,'Côte d\'Ivoire','Côte d\'Ivoire'),
+  (111,388,'Jamaica','Jamaïque'),
+  (112,392,'Japan','Japon'),
+  (113,398,'Kazakhstan','Kazakhstan'),
+  (114,400,'Jordan','Jordanie'),
+  (115,404,'Kenya','Kenya'),
+  (116,408,'Democratic People\'s Republic of Korea','République Populaire Démocratique de Corée'),
+  (117,410,'Republic of Korea','République de Corée'),
+  (118,414,'Kuwait','Koweït'),
+  (119,417,'Kyrgyzstan','Kirghizistan'),
+  (120,418,'Lao People\'s Democratic Republic','République Démocratique Populaire Lao'),
+  (121,422,'Lebanon','Liban'),
+  (122,426,'Lesotho','Lesotho'),
+  (123,428,'Latvia','Lettonie'),
+  (124,430,'Liberia','Libéria'),
+  (125,434,'Libyan Arab Jamahiriya','Jamahiriya Arabe Libyenne'),
+  (126,438,'Liechtenstein','Liechtenstein'),
+  (127,440,'Lithuania','Lituanie'),
+  (128,442,'Luxembourg','Luxembourg'),
+  (129,446,'Macao','Macao'),
+  (130,450,'Madagascar','Madagascar'),
+  (131,454,'Malawi','Malawi'),
+  (132,458,'Malaysia','Malaisie'),
+  (133,462,'Maldives','Maldives'),
+  (134,466,'Mali','Mali'),
+  (135,470,'Malta','Malte'),
+  (136,474,'Martinique','Martinique'),
+  (137,478,'Mauritania','Mauritanie'),
+  (138,480,'Mauritius','Maurice'),
+  (139,484,'Mexico','Mexique'),
+  (140,492,'Monaco','Monaco'),
+  (141,496,'Mongolia','Mongolie'),
+  (142,498,'Republic of Moldova','République de Moldova'),
+  (143,500,'Montserrat','Montserrat'),
+  (144,504,'Morocco','Maroc'),
+  (145,508,'Mozambique','Mozambique'),
+  (146,512,'Oman','Oman'),
+  (147,516,'Namibia','Namibie'),
+  (148,520,'Nauru','Nauru'),
+  (149,524,'Nepal','Népal'),
+  (150,528,'Netherlands','country-Bas'),
+  (151,530,'Netherlands Antilles','Antilles Néerlandaises'),
+  (152,533,'Aruba','Aruba'),
+  (153,540,'New Caledonia','Nouvelle-Calédonie'),
+  (154,548,'Vanuatu','Vanuatu'),
+  (155,554,'New Zealand','Nouvelle-Zélande'),
+  (156,558,'Nicaragua','Nicaragua'),
+  (157,562,'Niger','Niger'),
+  (158,566,'Nigeria','Nigéria'),
+  (159,570,'Niue','Niué'),
+  (160,574,'Norfolk Island','Île Norfolk'),
+  (161,578,'Norway','Norvège'),
+  (162,580,'Northern Mariana Islands','Îles Mariannes du Nord'),
+  (163,581,'United States Minor Outlying Islands','Îles Mineures Éloignées des États-Unis'),
+  (164,583,'Federated States of Micronesia','États Fédérés de Micronésie'),
+  (165,584,'Marshall Islands','Îles Marshall'),
+  (166,585,'Palau','Palaos'),
+  (167,586,'Pakistan','Pakistan'),
+  (168,591,'Panama','Panama'),
+  (169,598,'Papua New Guinea','Papouasie-Nouvelle-Guinée'),
+  (170,600,'Paraguay','Paraguay'),
+  (171,604,'Peru','Pérou'),
+  (172,608,'Philippines','Philippines'),
+  (173,612,'Pitcairn','Pitcairn'),
+  (174,616,'Poland','Pologne'),
+  (175,620,'Portugal','Portugal'),
+  (176,624,'Guinea-Bissau','Guinée-Bissau'),
+  (177,626,'Timor-Leste','Timor-Leste'),
+  (178,630,'Puerto Rico','Porto Rico'),
+  (179,634,'Qatar','Qatar'),
+  (180,638,'Réunion','Réunion'),
+  (181,642,'Romania','Roumanie'),
+  (182,643,'Russian Federation','Fédération de Russie'),
+  (183,646,'Rwanda','Rwanda'),
+  (184,654,'Saint Helena','Sainte-Hélène'),
+  (185,659,'Saint Kitts and Nevis','Saint-Kitts-et-Nevis'),
+  (186,660,'Anguilla','Anguilla'),
+  (187,662,'Saint Lucia','Sainte-Lucie'),
+  (188,666,'Saint-Pierre and Miquelon','Saint-Pierre-et-Miquelon'),
+  (189,670,'Saint Vincent and the Grenadines','Saint-Vincent-et-les Grenadines'),
+  (190,674,'San Marino','Saint-Marin'),
+  (191,678,'Sao Tome and Principe','Sao Tomé-et-Principe'),
+  (192,682,'Saudi Arabia','Arabie Saoudite'),
+  (193,686,'Senegal','Sénégal'),
+  (194,690,'Seychelles','Seychelles'),
+  (195,694,'Sierra Leone','Sierra Leone'),
+  (196,702,'Singapore','Singapour'),
+  (197,703,'Slovakia','Slovaquie'),
+  (198,704,'Vietnam','Viet Nam'),
+  (199,705,'Slovenia','Slovénie'),
+  (200,706,'Somalia','Somalie'),
+  (201,710,'South Africa','Afrique du Sud'),
+  (202,716,'Zimbabwe','Zimbabwe'),
+  (203,724,'Spain','Espagne'),
+  (204,732,'Western Sahara','Sahara Occidental'),
+  (205,736,'Sudan','Soudan'),
+  (206,740,'Suriname','Suriname'),
+  (207,744,'Svalbard and Jan Mayen','Svalbard etÎle Jan Mayen'),
+  (208,748,'Swaziland','Swaziland'),
+  (209,752,'Sweden','Suède'),
+  (210,756,'Switzerland','Suisse'),
+  (211,760,'Syrian Arab Republic','République Arabe Syrienne'),
+  (212,762,'Tajikistan','Tadjikistan'),
+  (213,764,'Thailand','Thaïlande'),
+  (214,768,'Togo','Togo'),
+  (215,772,'Tokelau','Tokelau'),
+  (216,776,'Tonga','Tonga'),
+  (217,780,'Trinidad and Tobago','Trinité-et-Tobago'),
+  (218,784,'United Arab Emirates','Émirats Arabes Unis'),
+  (219,788,'Tunisia','Tunisie'),
+  (220,792,'Turkey','Turquie'),
+  (221,795,'Turkmenistan','Turkménistan'),
+  (222,796,'Turks and Caicos Islands','Îles Turks et Caïques'),
+  (223,798,'Tuvalu','Tuvalu'),
+  (224,800,'Uganda','Ouganda'),
+  (225,804,'Ukraine','Ukraine'),
+  (226,807,'The Former Yugoslav Republic of Macedonia','L\'ex-République Yougoslave de Macédoine'),
+  (227,818,'Egypt','Égypte'),
+  (228,826,'United Kingdom','Royaume-Uni'),
+  (229,833,'Isle of Man','Île de Man'),
+  (230,834,'United Republic Of Tanzania','République-Unie de Tanzanie'),
+  (231,840,'United States','États-Unis'),
+  (232,850,'U.S. Virgin Islands','Îles Vierges des États-Unis'),
+  (233,854,'Burkina Faso','Burkina Faso'),
+  (234,858,'Uruguay','Uruguay'),
+  (235,860,'Uzbekistan','Ouzbékistan'),
+  (236,862,'Venezuela','Venezuela'),
+  (237,876,'Wallis and Futuna','Wallis et Futuna'),
+  (238,882,'Samoa','Samoa'),
+  (239,887,'Yemen','Yémen'),
+  (240,891,'Serbia and Montenegro','Serbie-et-Monténégro'),
+  (241,894,'Zambia','Zambie');
 
 /* Table bika.location */ 	
 DROP TABLE IF EXISTS `location`;
-
 CREATE TABLE `location` (
-  `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
+  `id` smallint unsigned NOT NULL AUTO_INCREMENT,
   `city` varchar(45) DEFAULT NULL,
   `region` varchar(45) DEFAULT NULL,
-  `country_code` smallint(6) NOT NULL,
+  `country_code` smallint unsigned NOT NULL,
   `zone` varchar(45) DEFAULT NULL,
   `village` varchar(45) DEFAULT NULL,
-  PRIMARY KEY (`id`,`country_code`)
+  PRIMARY KEY (`id`),
+  KEY `country_code` (`country_code`)
+--  CONSTRAINT `location_ibfk_1` FOREIGN KEY `country_code` REFERENCES `country` (`code`)
 ) ENGINE=InnoDB;
 
 /*Data for the table `location` */
 
-INSERT INTO `location`(`id`,`city`,`region`,`country_code`) VALUES (1,'Kinshasa','Kinshasa',52),(2,'Lubumbashi','Katanga',52),(3,'Mbuji-Mayi','Kasaï-Oriental',52),(4,'Kananga','Kasaï-Occidental',52),(5,'Kisangani','Orientale',52),(6,'Bukavu','Sud-Kivu',52),(7,'Tshikapa','Kasaï-Occidental',52),(8,'Kolwezi','Katanga',52),(9,'Likasi','Katanga',52),(10,'Goma','Nord-Kivu',52),(11,'Kikwit','Bandundu',52),(12,'Uvira','Sud-Kivu',52),(13,'Bunia','Orientale',52),(14,'Mbandaka','Équateur',52),(15,'Matadi','Bas-Congo',52),(16,'Kabinda','Kasaï-Oriental',52),(17,'Butembo','Nord-Kivu',52),(18,'Mwene-Ditu','Kasaï-Oriental',52),(19,'Isiro','Orientale',52),(20,'Kindu','Maniema',52),(21,'Boma','Bas-Congo',52),(22,'Kamina','Katanga',52),(23,'Gandajika','Kasaï-Oriental',52),(24,'Bandundu','Bandundu',52),(25,'Gemena','Équateur',52),(26,'Kipushi','Katanga',52),(27,'Bumba','Équateur',52),(28,'Mbanza-Ngungu','Bas-Congo',52);
+INSERT INTO `location`(`id`,`city`,`region`,`country_code`, `zone`, `village`) VALUES 
+  (1,'Kinshasa','Kinshasa',52, null, null),
+  (2,'Lubumbashi','Katanga',52, null, null),
+  (3,'Mbuji-Mayi','Kasaï-Oriental',52, null, null),
+  (4,'Kananga','Kasaï-Occidental',52, null, null),
+  (5,'Kisangani','Orientale',52, null, null),
+  (6,'Bukavu','Sud-Kivu',52, null, null),
+  (7,'Tshikapa','Kasaï-Occidental',52, null, null),
+  (8,'Kolwezi','Katanga',52, null, null),
+  (9,'Likasi','Katanga',52, null, null),
+  (10,'Goma','Nord-Kivu',52, null, null), 
+  (11,'Kikwit','Bandundu',52, null, null),
+  (12,'Uvira','Sud-Kivu',52, null, null),
+  (13,'Bunia','Orientale',52, null, null),
+  (14,'Mbandaka','Équateur',52, null, null),
+  (15,'Matadi','Bas-Congo',52, null, null),
+  (16,'Kabinda','Kasaï-Oriental',52, null, null),
+  (17,'Butembo','Nord-Kivu',52, null, null),
+  (18,'Mwene-Ditu','Kasaï-Oriental',52, null, null),
+  (19,'Isiro','Orientale',52, null, null),
+  (20,'Kindu','Maniema',52, null, null), 
+  (21,'Boma','Bas-Congo',52, null, null),
+  (22,'Kamina','Katanga',52, null, null),
+  (23,'Gandajika','Kasaï-Oriental',52, null, null),
+  (24,'Bandundu','Bandundu',52, null, null),
+  (25,'Gemena','Équateur',52, null, null),
+  (26,'Kipushi','Katanga',52, null, null),
+  (27,'Bumba','Équateur',52, null, null),
+  (28,'Mbanza-Ngungu','Bas-Congo',52, null, null);
+
+--
+-- table `bika`.`payment`
+--    describes the amount of time you can go with paying
+-- months is mediumint to allow "infinite" amount of time
+DROP TABLE IF EXISTS `payment`;
+CREATE TABLE IF NOT EXISTS `payment` (
+  `id`        tinyint unsigned NOT NULL,
+  `days`      smallint unsigned DEFAULT 0,
+  `months`    mediumint unsigned DEFAULT 0,
+  `text`      varchar(50) NOT NULL,
+  `note`      text,
+  PRIMARY KEY (`id`)
+) ENGINE=Innodb;
+
+INSERT INTO `payment` (`id`, `days`, `months`, `text`, `note`) VALUES
+  (1, 14, 0, "Two Weeks", ""),
+  (2, 0, 1, "One Month", "");
+
+--
+-- Table `bika`.`organisation`
+--
+
+-- NOTE the british spelling.  This one's for you, steve.
+DROP TABLE IF EXISTS `organisation`;
+CREATE TABLE IF NOT EXISTS `organisation` (
+  `id`  smallint unsigned NOT NULL,
+  `enterprise_id` smallint unsigned NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `account_number` mediumint unsigned NOT NULL,
+  `location_id` smallint unsigned NOT NULL,
+  `address_1`  varchar(150),
+  `address_2` varchar(150),
+  `payment_id` tinyint unsigned NOT NULL,
+  `phone` varchar(10),
+  `email` varchar(30),
+  PRIMARY KEY (`id`),
+  KEY `enterprise_id` (`enterprise_id`),
+  KEY `account_number` (`account_number`),
+  KEY `location_id` (`location_id`),
+  KEY `payment_id` (`payment_id`),
+  CONSTRAINT `organisation_ibfk_1` FOREIGN KEY (`enterprise_id`) REFERENCES `enterprise` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `organisation_ibfk_2` FOREIGN KEY (`account_number`) REFERENCES `account` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `organisation_ibfk_3` FOREIGN KEY (`location_id`) REFERENCES `location` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `organisation_ibfk_4` FOREIGN KEY (`payment_id`) REFERENCES `payment` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+INSERT INTO `organisation` (`id`, `enterprise_id`, `name`, `account_number`, `location_id`, `address_1`, `address_2`, `payment_id`, `phone`, `email`) VALUES
+  (1, 101, "Bureau Centrale de Zone", 410100, 1, null, null, 2, null, null),
+  (2, 101, "ITM Vanga", 410200, 1, null, null, 1, null, null),
+  (3, 101, "All Patients", 600100, 1, null, null, 1, null, null );
+
+--
+-- Table `bika`.`patient`
+--
+-- NOTE the british spelling of organisation.  It's still for you, steve.
+DROP TABLE IF EXISTS `patient`;
+CREATE TABLE IF NOT EXISTS `patient` (
+  `id` int unsigned NOT NULL,
+  `organisation_id` smallint unsigned NOT NULL,
+  `first_name` varchar(150) NOT NULL,
+  `last_name` varchar(150) NOT NULL,
+  `dob` date NOT NULL,
+  `parent_name` varchar(150),
+  `sex` char(1) NOT NULL, -- 'm' or 'f'
+  `religion` varchar(50) NOT NULL,
+  `marital_status` varchar(50),
+  `phone` varchar(12),
+  `email` varchar(20),
+  `addr_1` varchar(100),
+  `addr_2` varchar(100),
+  `village` varchar(100),
+  `zone` varchar(100),
+  `city` varchar(100),
+  `country` varchar(100),
+  PRIMARY KEY (`id`),
+  KEY `first_name` (`first_name`),
+  KEY `organisation_id` (`organisation_id`),
+  CONSTRAINT `patient_ibfk_1` FOREIGN KEY (`organisation_id`) REFERENCES `organisation` (`id`) ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+INSERT INTO `patient` (`id`, `organisation_id`, `first_name`, `last_name`, `dob`, `parent_name`, `sex`, `religion`, `marital_status`, `phone`, `email`, `addr_1`, `addr_2`, `village`, `zone`, `city`, `country`) VALUES 
+  (1, 3, "Steven", "Fountain", '1993-02-08', "Paul", "m", "christian", "single", null, "sfount@example.com", null, null, "Vanga", "Vanga", "Kikwit", "Republic Democratic du Congo"),
+  (2, 3, "Jonathan", "Niles", '1992-06-07', "Wayne", "m", "christian", "single", null, "jniles@example.com", null, null, "Cafu La Mour", "Nord", "Cap Haitian", "Haiti"),
+  (3, 3, "Dedrick", "Kitamuka", '1988-05-16', "Deiu", "m", "catholic", "single", null, "kitamuka@example.com", null, null, "Kinshasa", "Ngili", "Kinshasa", "Republic Democratic du Congo"),
+  (4, 3, "Chris", "Niles", '1990-05-19', "Wayne", "m", "christian", "divorced", null, "cniles@example.com", null, null, "Vanga", "Vanga", "Kikwit", "Republic Democratic du Congo");
+
+--
+-- table `bika`.`transaction`
+--
+DROP TABLE IF EXISTS `transaction`;
+CREATE TABLE IF NOT EXISTS `transaction` (
+  `enterprise_id` smallint unsigned NOT NULL,
+  `fiscal_year_id` mediumint unsigned NOT NULL,
+  `id` int unsigned NOT NULL,
+  `invoice_number` int unsigned NOT NULL,
+  `journal_id` mediumint unsigned NOT NULL,
+  `account_number` mediumint unsigned NOT NULL,
+  `debit` mediumint unsigned NOT NULL,
+  `credit` mediumint unsigned NOT NULL,
+  `currency` tinyint unsigned NOT NULL,
+  `organisation_id` smallint unsigned NOT NULL,
+  `text` text,
+  `date` date NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `enterprise_id` (`enterprise_id`),
+  KEY `fiscal_year_id` (`fiscal_year_id`),
+  KEY `journal_id` (`journal_id`),
+  KEY `account_number` (`account_number`),
+  KEY `currency` (`currency`),
+  KEY `organisation_id` (`organisation_id`),
+  CONSTRAINT `transaction_ibfk_1` FOREIGN KEY (`enterprise_id`) REFERENCES `enterprise` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
+  CONSTRAINT `transaction_ibfk_2` FOREIGN KEY (`fiscal_year_id`) REFERENCES `fiscal_year` (`id`) ON UPDATE CASCADE,
+  CONSTRAINT `transaction_ibfk_3` FOREIGN KEY (`journal_id`) REFERENCES `journal` (`id`),
+  CONSTRAINT `transaction_ibfk_4` FOREIGN KEY (`account_number`) REFERENCES `account` (`id`),
+  CONSTRAINT `transaction_ibfk_5` FOREIGN KEY (`currency`) REFERENCES `currency` (`id`),
+  CONSTRAINT `transaction_ibfk_6` FOREIGN KEY (`organisation_id`) REFERENCES `organisation` (`id`)
+) ENGINE=InnoDB;

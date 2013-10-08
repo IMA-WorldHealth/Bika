@@ -1,15 +1,18 @@
-#units-budgeting-budgetDisplay {
+#bika-units-budgeting-budgetDisplay {
 	position: relative;
 	text-align: center;
 	padding-top: 30px;
 }
 
-fieldset { 
+#bika-units-budgeting-account { 
+	/*just a temporary setting TODO set width of selection to width of biggest option
+		-freegin selection changes size of down arrow based on option width - looks gross*/
+	width: 500px
+}
 
+fieldset { 
 	margin: 0;
 	padding: 5;
-	
-
 }
 
 fieldset { 

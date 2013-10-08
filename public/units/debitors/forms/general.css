@@ -1,0 +1,33 @@
+.tab {
+  display: block;
+  height: 100%;
+  overflow: hidden;
+  float: left;
+  margin: 0;
+}
+
+fieldset.tab {
+  height: 100%;
+  width: 30%;
+}
+
+.tab label {
+  display: block;
+  clear: both;
+}
+
+.tab input {
+  padding-left: 3.5em;
+  float: right;
+}
+
+.tab button {
+  float: right;
+}
+
+/* hack to get around dijits floating left */
+.tab .dijit {
+  float: right;
+  display: block;
+  padding: 2.5px;
+}

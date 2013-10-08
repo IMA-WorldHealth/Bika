@@ -1,142 +1,187 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Main Page</title>
+  <title>Bika Health Information System</title>
   <meta charset="utf-8">
   <link rel="stylesheet" href="./css/principal.css" media="screen" />
   <link rel="stylesheet" href="js/dojoos/dijit/themes/claro/claro.css"/>
   <link rel="stylesheet" href="./css/icons/iconic_fill/iconic_fill.css"/> <!-- needed for icon font -->
-  <script>dojoConfig = {parseOnLoad: true, debug: true}</script>
+  <script>
+    dojoConfig = {
+      parseOnLoad: true,
+      debug: true
+    }
+  </script>
   <script type="text/javascript" src="js/dojoos/dojo/dojo.js"></script>
   <script>
-    require(["dijit/layout/BorderContainer", "dijit/Menu", "dijit/MenuItem", "dijit/MenuSeparator", "customizedModule/TabManager", "dijit/tree/ObjectStoreModel", "dijit/Tree", "dojo/store/JsonRest", "dijit/layout/ContentPane", "customizedModule/SelectX", "dojo/domReady!"],
-      function(BorderContainer, Menu, MenuItem, MenuSeparator, TabManager, ObjectStoreModel, Tree, JsonRest, ContentPane, SelectX) {
+    require(["dijit/layout/BorderContainer", "dijit/Menu", "dijit/MenuItem", "dijit/MenuSeparator", "bika/TabManager", "dijit/tree/ObjectStoreModel", "dijit/Tree", "dojo/store/JsonRest", "dijit/layout/ContentPane", "customizedModule/SelectX", "bika/ApplicationState", "dojo/domReady!"],
+      function(BorderContainer, Menu, MenuItem, MenuSeparator, TabManager, ObjectStoreModel, Tree, JsonRest, ContentPane, SelectX, ApplicationState) {
 
-        var enterpriseSelect, enterpriseSelect_query;
+        /////
+        // Applicaton Structure
+        // 
+        // TODO: 
+        // -Reformat (/clean up) module - consistent styling / naming (tabs/ identation) - delcare variables at top of funcitons (not interspersed etc.) - Modularise creation and use of components
+        // -Module tests
+        // -[Research] AMD module to carry application component events and values to modules that require them
+        /////
+        var app_state = new ApplicationState();
+        var enterpriseSelect, enterpriseSelect_query, fiscal_select;
 
         initEnterpriseSelect();
+        initFiscalSelect(100);
+        var bc = new BorderContainer({}, "bika-border-container");
 
-        var bc = new BorderContainer({}, "bc");
-
-        var tabManager = new TabManager({}, "tab_container");
+        var tabManager = new TabManager({}, "bika-tab-container");
         var sidebar = new ContentPane({
           region: 'left',
-        }, "sidebar");
+        }, "bika-sidebar");
 
         var center_panel = new ContentPane({
           region: 'center',
-        }, "center_panel");
+        }, "bika-center-panel");
 
-        bc.addChild(center_panel);
-        bc.addChild(sidebar);
+      bc.addChild(center_panel);
+      bc.addChild(sidebar);
 
-        var treeStore = new JsonRest({
-          target: '/tree',
-          getChildren: function(object) {
-            return this.query("?" + JSON.stringify({
-              'entities' : [{
-                t : 'unit',
-                c : ['id', 'name', 'desc', 'parent', 'has_children', 'url']
-              }],
-              'cond' : [{
-                t : 'unit',
-                cl: 'parent',
-                z : '=',
-                v : object.id
-              }]
-            }));
-          }
-        });
-
-        var treeModel = new ObjectStoreModel({
-          store: treeStore,
-          query: "?" + JSON.stringify({
-            'entities': [{
-              t: 'unit',
-              c: ['id', 'name', 'desc', 'parent', 'has_children', 'url']
+      var treeStore = new JsonRest({
+        target: '/tree',
+        getChildren: function(object) {
+          return this.query("?" + JSON.stringify({
+            'entities' : [{
+              t : 'unit',
+              c : ['id', 'name', 'desc', 'parent', 'has_children', 'url']
             }],
-            'cond': [{
-              t: 'unit',
-              cl: 'id',
-              z: '=',
-              v: 0
+            'cond' : [{
+              t : 'unit',
+              cl: 'parent',
+              z : '=',
+              v : object.id
             }]
-          }),
-          mayHaveChildren: function(obj) {
-            return obj.has_children;
-          }
-        });
-
-        var unitsTree = new Tree({
-          model: treeModel,
-          showRoot: false,
-          onOpenClick: true,
-          onClick: function(item) {
-            if (item.has_children === 0) {
-              tabManager.addChildren(item.name, item.url, true, true);
-            }
-          }
-        }, "tree");
-       var menuContext = new Menu({
-          targetNodeIds: ["tree"],
-          selector: ".dijitTreeNodeContainer > .dijitTreeNode > .dijitTreeNodeContainer > .dijitTreeNode", // FIXME: find a better selector
-          id: "menuContext",
-          style: "display: none;"
-        });
-        
-        var open = new MenuItem({
-          label: "Open in new tab",
-          onClick: function(item) {
-            var itemTree = dijit.byNode(this.getParent().currentTarget);
-            if (itemTree.item.has_children === 0) {
-              tabManager.addChildren(itemTree.item.name, itemTree.item.url, true, false);
-            }
-          }
-        });
-        
-        menuContext.addChild(open);
-        bc.startup();
-        menuContext.startup();
-        unitsTree.startup();
-        tabManager.startup();
-
-        //LES FONCTIONS
-        function initEnterpriseSelect() {
-             enterpriseSelect_query = {};
-             var e = [{t : 'enterprise', c : ['id', 'region', 'country', 'city', 'name', 'phone', 'email', 'type', 'cash_account']}];
-             enterpriseSelect_query.e = e;
-             var requetteEntreprise = JSON.stringify(enterpriseSelect_query);
-             var enterpriseSelect_store = new JsonRest({
-               target: "/data/",
-               getLabel: function (data) {
-                 return data.name + "-" + data.region;
-               }
-             });
-             enterpriseSelect = new SelectX({
-               store: enterpriseSelect_store,
-               style: "width: 200px",
-               query: '?' + requetteEntreprise,
-               }, "change_enterprise");            
-           }
+          }));
+        }
       });
+
+      var treeModel = new ObjectStoreModel({
+        store: treeStore,
+        query: "?" + JSON.stringify({
+          'entities': [{
+            t: 'unit',
+            c: ['id', 'name', 'desc', 'parent', 'has_children', 'url']
+          }],
+          'cond': [{
+            t: 'unit',
+            cl: 'id',
+            z: '=',
+            v: 0
+          }]
+        }),
+        mayHaveChildren: function(obj) {
+          return obj.has_children;
+        }
+      });
+
+      var unitsTree = new Tree({
+        model: treeModel,
+        showRoot: false,
+        onOpenClick: true,
+        onClick: function(item) {
+          if (item.has_children === 0) {
+            tabManager.addChildren(item.name, item.url, true, true);
+          }
+        }
+      }, "bika-tree");
+      
+      var open = new MenuItem({
+        label: "Open in new tab",
+        onClick: function(item) {
+          var itemTree = dijit.byNode(this.getParent().currentTarget);
+          if (itemTree.item.has_children === 0) {
+            tabManager.addChildren(itemTree.item.name, itemTree.item.url, true, false);
+          }
+        }
+       });
+
+      var menuContext = new Menu({
+        targetNodeIds: ["bika-tree"],
+        selector: ".dijitTreeNodeContainer > .dijitTreeNode > .dijitTreeNodeContainer > .dijitTreeNode", // FIXME: find a better selector
+        id: "menuContext",
+        style: "display: none;"
+      });
+      
+      menuContext.addChild(open);
+      bc.startup();
+      menuContext.startup();
+      unitsTree.startup();
+      tabManager.startup();
+
+      //LES FONCTIONS
+      function initEnterpriseSelect() {
+        enterpriseSelect_query = {};
+        var e = [{t : 'enterprise', c : ['id', 'region', 'country', 'city', 'name', 'phone', 'email', 'type', 'cash_account']}];
+        enterpriseSelect_query.e = e;
+        var requetteEntreprise = JSON.stringify(enterpriseSelect_query);
+        var enterpriseSelect_store = new JsonRest({
+          target: "/data/",
+            getLabel: function (data) {
+            return data.name + "-" + data.region;
+          }
+        });
+        enterpriseSelect = new SelectX({
+          store: enterpriseSelect_store,
+          query: '?' + requetteEntreprise,
+        }, "bika-enterprise-select");    
+
+        //Make componenet available to entire application 
+        app_state.setComponent("enterprise-select", enterpriseSelect);        
+      }
+
+      function initFiscalSelect(enterprise_id) { 
+        //Settup model and view for the fiscal year Selection componenet
+        
+        var fiscal_query = {};
+        var e = [{t : 'fiscal_year', c : ['id', 'start_month', 'start_year']}];
+        fiscal_query.e = e;
+        var formatRequest = JSON.stringify(fiscal_query);
+
+        //Using to make use of getLabel - dojo/request may be a better option
+        var fiscal_store = new JsonRest({
+          target : "/data/",
+          getLabel :  function(data) { 
+            return data.start_month + "/" + data.start_year;
+          }
+        });
+        
+        fiscal_select = new SelectX({ 
+          store : fiscal_store,
+          query : '?' + formatRequest
+        }, "bika-fiscal-select");
+
+        //Make componenet available to entire application 
+        app_state.setComponent("fiscal-select", fiscal_select);
+      }
+
+    });
   </script>
 </head>
 <body class="claro">
-  <div id="bc">
-    <div id="sidebar">
-      <div class="dock">
+  <div id="bika-border-container">
+    <div id="bika-sidebar">
+      <div class="bika-dock">
         <ul>
           <li><a class="iconic cog" href="/logout"></a></li>
           <li><a class="iconic equalizer" href="#"></a></li>
           <li><a class="iconic home" href="#"></a></li>
         </ul>
       </div>
-      <div id="tree"></div>
-      <div id="change_enterprise"> 
+      <div id="bika-tree"></div>
+      <div id="bika-application-select">
+        <div id="bika-enterprise-select"></div>
+        <div id="bika-fiscal-select"></div>
       </div>
     </div>
-    <div id="center_panel">
-      <div id="tab_container"></div>
+    <div id="bika-center-panel">
+      <div id="bika-tab-container"></div>
     </div>
   </div>
 </body>

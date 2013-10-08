@@ -1,65 +1,20 @@
-<script>
-  require([
-	  "dojo/store/Memory",
-    "customizedModule/SelectX",
-	  "dojo/store/JsonRest",
-	  "dojo/domReady!"
-    ], function(Memory, SelectX, JsonRest){
-     
-  var groupID = new SelectX({
- 		id: "groupID",
- 		name: "groupID",
- 		onClick:function(){
- 		    this.set('onChange', function(){
- 			  sendData('groupID');
- 			});
- 		}
- 	}, "groupID");
- 	
- 	var country = new SelectX({
- 		id: "country",
- 		name: "country",
- 		store: country_store,
- 		style:"float:right; right: 20px; width:69.5%; border: 1px solid #ABC8E2; border-radius: 3px;",
- 		onClick:function(){
- 		    this.set('onChange', function(){
- 			  sendData('country');
- 			});
- 		}
- 	}, "country");	
- 	
- 	var city = new SelectX({
- 		id: "city",
- 		name: "city",
- 		store: cityStore,
- 		style:"float:right; right: 20px; width:69.5%; border: 1px solid #ABC8E2; border-radius: 3px;",
- 		onClick:function(){
- 		    this.set('onChange', function(){
- 			  sendData('city');
- 			});	   
- 		}
- 	}, "city");	 
-}); 
-</script>
-<div class='divContent'>
-  <div class="two">
-    <div id="divLeft">
-      <label class='genForm' >Debiteur : <input  type="text" id="debitorID" name="debitorID" class="inputGen"></label>	 
-    	<label class='genForm' >Nom : <input  type="text" onBlur="sendData('name')" id="name" name="name" class="inputGen"></label>	 
-    	<label class='genForm' >Adresse : <input  type="text" onBlur="sendData('address1')" id="address1" name="address1" class="inputGen"></label>	 
-    	<label class='genForm' >Adresse : <input  type="text" onBlur="sendData('address2')" id="address2" name="address2" class="inputGen"></label>		 
-    	<label class='genForm' >Le pays : <input  type="text" onBlur="sendData('country')" id="country" name="country" class="inputGen"></label> 
-    	<label class='genForm' >City : <input  type="text" onBlur="sendData('city')" id="city" name="city" class="inputGen"></label>	 
-    	<label class='genForm' >Att. : <input  type="text" id="inputGen7" class="inputGen"></label>	 
-    </div>
-    <div id="divRight">
-      <label class='genVer' for="inputVer">Verouiller : <input  type="checkbox" id="inputVer" class="inputGen"></label><button type="button" id="montrer">Montrer Des</button>	 
-    	<label class='genForm' >Debiteur Groupe : <input id="groupID" class="inputGen"></label>
-    	<label class='genForm' >Email : <input  type="text" onBlur="sendData('email')" id="email" name="email" class="inputGen"></label>	
-      <div class="divPhone">			
-    	  <label class='genForm' >Telephone : <input  type="text" onBlur="sendData('phone')" id="phone" name="phone" class="inputGenNum"></label>	 
-    	  <label class='genForm' >Fax : <input  type="text" onBlur="sendData('fax')" id="fax" name="fax" class="inputGenNum"></label>
-    </div>
-    <div id="tel"><button type="button" id="numTel">Tel</button></div>			
-  </div>
-</div>						
+<link rel="stylesheet" href="/units/debitors/forms/general.css">
+<form id="bika-units-debitors-forms-general-form">
+  <fieldset class="tab">
+    <label>Debitor: <select id="bika-units-debitors-forms-general-debitor" name="debitor"></select></label>	 
+    <label>Name: <input id="bika-units-debitors-forms-general-name"></label>	 
+    <label>Address: <input id="bika-units-debitors-forms-general-address_1"></label>	 
+    <label>Address: <input id="bika-units-debitors-forms-general-address_2"></label>		 
+    <label>Country: <select id="bika-units-debitors-forms-general-country"></select></label> 
+    <label>City: <select id="bika-units-debitors-forms-general-city"></select></label>	 
+    <label>Att.: <input id="bika-units-debitors-forms-general-att"></label>	 
+  </fieldset> 
+  <fieldset class="tab">
+    <label>Locked: <input type="checkbox" id="bika-units-debitors-forms-general-locked"></label>
+    <button id="bika-units-debitors-forms-general-totals">Show Totals</button>	 
+    <label>Debitor Group: <input id="bika-units-debitors-forms-general-group_id"></label>
+    <label>Email: <input type="email" id="bika-units-debitors-forms-general-email"></label>	
+    <label>Telephone: <input type="tel" id="bika-units-debitors-forms-general-phone"></label>	 
+  </fieldset>
+</form>
+<script src="/units/debitors/forms/general.js"></script>

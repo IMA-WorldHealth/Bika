@@ -1,4 +1,3 @@
-
 /* Rules for the whole app */
 
 /* fonts */
@@ -10,85 +9,84 @@
 
 
 /* Interface Styles */
-html, body {
-  width   : 100%;
-  height  : 100%;sid
-  margin  : 0;
-  padding : 0;
+
+* {
+  outline: none;
 }
- 
-#bc {
+
+html, body {
   width   : 100%;
   height  : 100%;
   margin  : 0;
   padding : 0;
 }
+ 
+#bika-border-container {
+  width   : 100%;
+  height  : 100%;
+  margin  : 0;
+  padding : 0;
+  border  : none;
+}
 
-#sidebar {
+#bika-sidebar {
   width   : 15%;
   padding : 0;
   margin  : 0;
   position: relative;
+  border: none;
 }
 
-#center_panel {
+#bika-center-panel {
   margin  : 0;
   padding : 0;
 }
 
-.dock {
+.bika-dock {
   font-family: Arial, sans-serif;
   height: 50px;
   width: 100%;
-  border-bottom: thin solid #b8b8b9;
-  overflow: hidden;
-}
-
-.dock ul {
-  float: right;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display:inline-block;
-}
-
-.dock li {
-  font-size: 2em;
-  width: 50px;
-  height: 50px;
-  float: right;
-  text-align: center;
-  font-weight: bold;
-  cursor: auto;
-  border: solid 1px #b8b8b9;
   background: #ececec;
 }
 
-.dock li a, 
-.dock li a:after,
-.dock li a:visited {
+.bika-dock ul {
+  float      : right;
+  margin     : 0;
+  padding    : 0;
+  list-style : none;
+  display    : inline-block;
+}
+
+.bika-dock li {
+  font-size   : 2em;
+  width       : 50px;
+  height      : 50px;
+  float       : right;
+  text-align  : center;
+  font-weight : bold;
+  cursor      : auto;
+  background  : #ececec;
+}
+
+.bika-dock li a, 
+.bika-dock li a:after,
+.bika-dock li a:visited {
   background-position: center;
   color: rgb(0,0,0);
 }
 
-.dock li:hover {
+.bika-dock li:hover {
   background: #f3f3f3;
 }
 
-
-html, body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  width: 100%;
-}
-#change_enterprise{
-  position:absolute;
-  left : 0px;
-  bottom: 0px;
+/*Gross CSS - element styles need aligning*/
+#bika-application-select { 
+  position : absolute;
+  left     : 0;
+  bottom   : 0;
+  width    : 100%;
 }
 
-
-
-
-
+#bika-application-select .dijitSelect { 
+  width: 100%
+}
