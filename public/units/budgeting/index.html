@@ -81,6 +81,7 @@
     //  -If changes to budget are made, user should not be able to change accounts until discarded (reset) or updated
     //  -Highlight Start of fiscal year (row outline) ?End of fiscal year
     //  -Some object are getting thrown initialised and sticking around way too long (ref: models etc. on view refresh)
+    //  -Clean up error validating with cache_change
     ///////
     
     /////
@@ -99,9 +100,12 @@
     var enterprise_id = app_state.getValue("enterprise-select");
     var fiscal_year_id = app_state.getValue("fiscal-select");
 
+    var cache_change = {};
+
     //Value set with account-select
     var account_id;
     var account_select;
+    var edits = false;
 
     //@sfount - re-write this to inject these value all the way through, stupid to have them accesible to everyone
     var tablebind = {};
@@ -109,6 +113,8 @@
 
     //This should be encapsulated somewhere
     var budget_dependencies = {"enterprise" : false, "fiscal" : true};
+
+    //var cache_change = new Array(3);
 
     //access to any application level componenet changes
     app_state.register(uid, "enterprise-select", function(value) { 
@@ -201,6 +207,26 @@
 
         }
       }
+
+      //should need to last entire life of the module
+      on(dom.byId("bika-units-budgeting-submit"), "click", submitModel);
+      on(dom.byId("bika-units-budgeting-reset"), "click", resetModel);
+    }
+
+    function submitModel() { 
+      console.log("Submit pressed");
+      for(fiscal_year in cache_change) { 
+        var q = cache_change[fiscal_year]["model"].query()
+        for (var i = q.length - 1; i >= 0; i--) {
+          if(q[i].budget != cache_change[fiscal_year]["change"][q[i].id]) { 
+            console.log("Updating", q[i]);
+          }
+        }
+      }
+    }
+
+    function resetModel() { 
+
     }
     
     function refreshUI() { 
@@ -231,22 +257,28 @@
 
       //request information about current fiscal year
       var fyear = {};
-        var fe = [{t : 'fiscal_year', c : ['id', 'number_of_months', 'start_month', 'start_year', 'previous_fiscal_year', 'next_fiscal_year']}];
-        var fc = [{t : 'fiscal_year', cl : 'id', v : fiscalyearid, z : '='}];
+      var fe = [{t : 'fiscal_year', c : ['id', 'number_of_months', 'start_month', 'start_year', 'previous_fiscal_year', 'next_fiscal_year']}];
+      var fc = [{t : 'fiscal_year', cl : 'id', v : fiscalyearid, z : '='}];
 
-        fyear.e = fe;
-        fyear.c = fc;
+      fyear.e = fe;
+      fyear.c = fc;
 
-        request.get('data/?' + JSON.stringify(fyear)).then(function(data) { 
-            var fiscal_data = JSON.parse(data)[0];
-          
-          if(fiscal_data.previous_fiscal_year) { 
-            requestBudget("previous", fiscal_data.previous_fiscal_year, accountid);
-          }
-          if(fiscal_data.next_fiscal_year) { 
-            requestBudget("next", fiscal_data.next_fiscal_year, accountid);
-          }
-          requestBudget("current", fiscalyearid, accountid);
+      //reset 
+      dom.byId("bika-units-budgeting-submit").disabled = true;
+      dom.byId("bika-units-budgeting-reset").disabled = true;
+      edits = false;
+      cache_change = {};
+      
+      request.get('data/?' + JSON.stringify(fyear)).then(function(data) { 
+        var fiscal_data = JSON.parse(data)[0];
+        
+        if(fiscal_data.previous_fiscal_year) { 
+          requestBudget("previous", fiscal_data.previous_fiscal_year, accountid);
+        }
+        if(fiscal_data.next_fiscal_year) { 
+          requestBudget("next", fiscal_data.next_fiscal_year, accountid);
+        }
+        requestBudget("current", fiscalyearid, accountid);
       });
     }
 
@@ -283,7 +315,19 @@
         target : '/data/?' + JSON.stringify(budget_query)
       });
       var cache = new Cache(interface, model);
-      cache.query();
+
+      cache.query().then(function() {
+        //initialise all input errors to false 
+        //temporary id hack
+        var tid = "bika-units-budgeting-" + id;
+        cache_change[tid] = {"error" : [], "model" : {}, "change" : []};
+        for (var i = model.data.length - 1; i >= 0; i--) {
+          cache_change[tid]["error"].push(false);
+          cache_change[tid]["change"][model.data[i].id] = model.data[i].budget;
+        };
+        cache_change[tid]["model"] = model;
+
+      });
 
       var budget_result = model.query();
       //@sfount - the methods returned here should be passed to whoever needs them, not stored at the top
@@ -369,6 +413,9 @@
         domAttr.set(row_id + "-period", "innerHTML", formatDate(item.period_start));
         domAttr.set(row_id + "-actual", "innerHTML", '0.00');
         
+        var submit = dom.byId("bika-units-budgeting-submit");
+        var reset = dom.byId("bika-units-budgeting-reset");
+        //TODO: Move duplicated into a function
         if(dom.byId(row_id + "-budget") != null) { 
           //reference input widget
           domAttr.set(row_id + "-budget", "value", item.budget);
@@ -377,6 +424,7 @@
           //@sfount - this should be resolved (and not nescisary) by removing inputs on changing accounts/fiscal years
           if(!inputbind[item.id]) { 
             var td_budget_input = dom.byId(row_id + "-budget");
+
             inputbind[item.id] = on(td_budget_input, "keyup", function(e) { 
               ///////////
                 //  Currently calling put method on store on every update, there may be a better way to this by updating the item (stored in the most recent query on the model) and obsering that individually 
@@ -384,11 +432,24 @@
                 var newVal = td_budget_input.value;
                 var validBudget = /^\d+(\.\d{1,2})?$/;
 
+                if(!edits) { 
+                  edits = true;
+                  reset.disabled = false;
+                  submit.disabled = false;
+                }
+
                 //Check format of input
                 if(validBudget.test(newVal)) { 
+                  cache_change[tableid]["error"][index] = false;
                   item.budget = Number(newVal);
                   model_ref.put(item);
-              }
+                  if(validateSubmit()) { 
+                    submit.disabled = false;
+                  };
+                } else { 
+                  dom.byId("bika-units-budgeting-submit").disabled = true;
+                  cache_change[tableid]["error"][index] = true;
+                }
               });
           }
         } else { 
@@ -406,11 +467,25 @@
               var newVal = td_budget_input.value;
               var validBudget = /^\d+(\.\d{1,2})?$/;
 
+              if(!edits) { 
+                edits = true;
+                reset.disabled = false;
+                submit.disabled = false;
+              }
+
               //Check format of input
               if(validBudget.test(newVal)) { 
+                cache_change[tableid]["error"][index] = false;
                 item.budget = Number(newVal);
                 model_ref.put(item);
-            }
+                if(validateSubmit()) { 
+                  submit.disabled = false;
+                };
+              } else { 
+                //Horrible number of reads and writes here
+                submit.disabled = true;
+                cache_change[tableid]["error"][index] = true;
+              }
             });   
         }
       }
@@ -505,6 +580,19 @@
     ///////
     // Utility Functions
     ///////
+
+    function validateSubmit() { 
+      for(var error in cache_change) { 
+        for (var i = cache_change[error]["error"].length - 1; i >= 0; i--) {
+          if(cache_change[error]["error"][i]) {
+            return false;
+          }
+        };
+      }
+
+      return true;
+    }
+
     function formatDate(datestring) { 
       var date = new Date(datestring);
           return months[date.getMonth()] + ' ' + date.getFullYear(); 

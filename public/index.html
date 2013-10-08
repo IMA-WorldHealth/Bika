@@ -177,15 +177,17 @@
         var formatRequest = JSON.stringify(fiscal_query);
 
         //Using to make use of getLabel - dojo/request may be a better option
+        //TODO: Change label to show fiscal_year_txt
         var fiscal_store = new JsonRest({
           target : "/data/",
           getLabel :  function(data) { 
-            return data.fiscal_year_txt;
+            return data.start_month + "/" + data.start_year;
           }
         });
         
         fiscal_select = new SelectX({ 
           store : fiscal_store,
+          searchAttr : 'start_month',
           query : '?' + formatRequest
         }, "bika-fiscal-select");
 
