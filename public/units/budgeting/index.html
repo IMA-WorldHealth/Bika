@@ -46,6 +46,7 @@
 </div>
 
 <script>
+var tablebind;
   require([
       //DOM manipulation
       "dojo/dom", 
@@ -108,7 +109,7 @@
     var edits = false;
 
     //@sfount - re-write this to inject these value all the way through, stupid to have them accesible to everyone
-    var tablebind = {};
+    tablebind = {};
     var fiscal_array = [{id : "previous"}, {id : "current"}, {id : "next"}];
 
     //This should be encapsulated somewhere
@@ -138,7 +139,8 @@
       } else { 
         budget_dependencies.fiscal = false;
         refreshUI();
-        settupBudget(fiscal_year_id, account_id);
+        //settupBudget(fiscal_year_id, account_id);
+        resetModel();
       }
     });
     
@@ -226,8 +228,12 @@
     }
 
     function resetModel() { 
-
-    }
+      for(index in tablebind) { 
+        tablebind[index].unbind();
+      }
+      tablebind = {};
+      settupBudget(fiscal_year_id, account_id);
+    } 
     
     function refreshUI() { 
       //basically duplicated code - not a good thing
@@ -564,14 +570,9 @@
         });
 
         account_select.on("change", function(value) {
-        console.log("account select change called");
-        account_id = value;
-            for(index in tablebind) { 
-              tablebind[index].unbind();
-            }
-            tablebind = {};
-
-          settupBudget(fiscal_year_id, account_id);
+          console.log("account select change called");
+          account_id = value;
+          resetModel();
         });
 
         return deferred.promise;
