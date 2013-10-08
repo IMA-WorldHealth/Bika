@@ -265,8 +265,8 @@ INSERT INTO `account` (`enterprise_id`, `id`, `locked`, `account_txt`, `account_
     (101, 760100, 0, 'Salaire de d\'etat', 1, '300'),
     (101, 760200, 0, 'Autres subventions de l\'etat', 1, '300'),
     (101, 760300, 0, 'Subventions organismes prives', 1, '300'),
-    (101, 760400, 0, 'Subventions locales', 1, '300'),
-    (101, 760500, 0, 'Autres subventions', 1, '300');
+    (102, 760400, 0, 'Subventions locales', 1, '300'),
+    (102, 760500, 0, 'Autres subventions', 1, '300');
 /*!40000 ALTER TABLE `account` ENABLE KEYS */;
 
 -- Dumping structure for table bika.currency

@@ -101,6 +101,7 @@
 
     //Value set with account-select
     var account_id;
+    var account_select;
 
     //@sfount - re-write this to inject these value all the way through, stupid to have them accesible to everyone
     var tablebind = {};
@@ -475,7 +476,7 @@
        
         var format_account_query = '?' + JSON.stringify(account_query);
 
-        var account_select = new Select({
+        account_select = new Select({
           store: account_select_store, 
           query: format_account_query
         }, "bika-units-budgeting-account");

@@ -121,6 +121,22 @@
       tabManager.startup();
 
       //LES FONCTIONS
+      function updateFiscalSelect(enterprise_id) { 
+        console.log("Fiscal year should update with", enterprise_id);
+
+        var fiscal_query = {};
+        var e = [{t : 'fiscal_year', c : ['id', 'start_month', 'start_year']}];
+        var c = [{t : 'fiscal_year', cl : 'enterprise_id', v : enterprise_id, z : '='}];
+        fiscal_query.e = e;
+        fiscal_query.c = c;
+        var formatRequest = JSON.stringify(fiscal_query);
+
+        fiscal_select.query = fiscal_query;
+        fiscal_select.removeOption(fiscal_select.getOptions());
+        fiscal_select.setStore(fiscal_select.store);
+        fiscal_select.set('value', fiscal_select.get('value'));
+      }
+      
       function initEnterpriseSelect() {
         var deferred = new Deferred();
         enterpriseSelect_query = {};
@@ -144,6 +160,9 @@
 
         //Make componenet available to entire application 
         app_state.setComponent("enterprise-select", enterpriseSelect);  
+
+        //TODO: use select pub/ sub vs. manual updateFiscal
+        app_state.register("bika", "enterprise-select", updateFiscalSelect);
         return deferred.promise;      
       }
 
