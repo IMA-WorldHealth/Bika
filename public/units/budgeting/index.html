@@ -40,6 +40,11 @@
   </fieldset>
 </div>
 
+<div id="bika-units-budgeting-controls">
+  <button id="bika-units-budgeting-submit" disabled>Submit Budget</button>
+  <button id="bika-units-budgeting-reset" disabled>Reset</button>
+</div>
+
 <script>
   require([
       //DOM manipulation
@@ -425,6 +430,12 @@
       }
     }
 
+    //TODO 
+    //  -updateAccount
+    //  -load fiscal years based on enterprise 
+    //  -update server (/flush to server update button)
+    //  -inputs on totals, spread costs across months
+
     function updateAccount(enterprise_id) { 
 
       budget_dependencies.enterprise = false;
@@ -438,6 +449,10 @@
      
       var format_update_query = '?' + JSON.stringify(update_query);
 
+      account_select.query = format_update_query;
+      account_select.removeOption(account_select.getOptions());
+      account_select.setStore(account_select.store);
+      account_select.set('value', account_select.get('value'));
     } 
 
     function initAccountSelect(enterprise_id) { 
