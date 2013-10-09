@@ -25,7 +25,7 @@ app.configure('production', function () {
 app.get('/data/', function (req, res) {
   var cb = function (err, ans) {
     if (err) throw err;
-    res.setHeader('Content-Range', '0-0/' + ans.length);
+    //res.setHeader('Content-Range', '0-0/' + ans.length);
     res.json(ans);
   };
   var myRequest = decodeURIComponent(url.parse(req.url).query);
@@ -35,12 +35,20 @@ app.get('/data/', function (req, res) {
   }catch(e){
     jsRequest = JSON.parse(JSON.stringify(myRequest));
   }  
-  var Qo = queryHandler.getQueryObj(jsRequest);
-  var sql = db.select(Qo);
+  var Qo = queryHandler.getQueryObj(jsRequest);  
+  if(!Qo.action){
+    var sql = db.select(Qo);
   db.execute(sql, cb);
+  }else{
+    var sql = db.delete(Qo.table, Qo.ids); //en attendant une meilleure solution
+    var cbDEL = function (err, ans) {
+    if (err) throw err;
+    res.send("succes!");
+  }
+    db.execute(sql, cbDEL);
+  }
+  
 });
-
-
 app.post('/data/', function (req, res) {
   var cb = function (err, ans) {
     if (err) throw err;
@@ -49,9 +57,6 @@ app.post('/data/', function (req, res) {
   var insertsql = db.insert(req.body.t, req.body.data);
   db.execute(insertsql, cb);
 });
-
-
-
 app.get('/tree', function(req, res) {
 um.manageUser(req, res);
 });

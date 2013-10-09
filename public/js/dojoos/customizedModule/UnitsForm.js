@@ -12,8 +12,7 @@ define("customizedModule/UnitsForm",
 			placeControls: function(values){
 				//creation des checks
 				for(var i=0; i<values.length; i++){
-					var control = new CheckBox({value:values[i].name},values[i].id);
-					console.log('fin creation', control);
+					var control = new CheckBox({id: values[i].id+'ID', value:values[i].name},""+values[i].id);
 					this.checks.push(control);
 				}
 			},
@@ -42,11 +41,10 @@ define("customizedModule/UnitsForm",
 						count++;
 					}
 			}
-			console.log(this);
 			return count;
 
 			},
-			uncheckedAll: function(){
+			unCheckAll: function(){
 				for(var i=0; i<this.checks.length; i++){
 					this.checks[i].set('checked', false);
 				}
