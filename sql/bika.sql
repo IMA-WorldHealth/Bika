@@ -489,27 +489,6 @@ INSERT INTO `permission` (`id`, `id_unit`, `id_user`) VALUES
     (13, 26, 1),
     (14, 27, 13);
     
--- Dumping structure for table bika.role
-DROP TABLE IF EXISTS `role`;
-CREATE TABLE IF NOT EXISTS `role` (
-  `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(60) NOT NULL,
-  `description` varchar(140) DEFAULT NULL,
-  `role_head` int(11) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
-
--- Dumping data for table bika.role: ~5 rows (environ)
-/*!40000 ALTER TABLE `role` DISABLE KEYS */;
-REPLACE INTO `role` (`id`, `name`, `description`, `role_head`) VALUES
-    (1, 'Administrator', 'To be finished', 0),
-    (2, 'admin', 'Administrateur simple', 1),
-    (3, 'Finance', 'The Finance', 5),
-    (4, 'Manager', 'Hospital Manager', 11),
-    (5, 'Doctor', 'The physicien', 15);
-/*!40000 ALTER TABLE `role` ENABLE KEYS */;
-
-
 DROP TABLE IF EXISTS `budget`;
 CREATE TABLE IF NOT EXISTS `budget` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -5770,7 +5749,6 @@ INSERT INTO `payment` (`id`, `days`, `months`, `text`, `note`) VALUES
 --
 -- Table `bika`.`organisation`
 --
-
 -- NOTE the british spelling.  This one's for you, steve.
 DROP TABLE IF EXISTS `organisation`;
 CREATE TABLE IF NOT EXISTS `organisation` (
@@ -5784,7 +5762,8 @@ CREATE TABLE IF NOT EXISTS `organisation` (
   `payment_id` tinyint unsigned NOT NULL,
   `phone` varchar(10),
   `email` varchar(30),
-  `locked` tinyint(1) DEFAULT '0',
+  `note`  text,
+  `locked` tinyint(1) DEFAULT 0,
   PRIMARY KEY (`id`),
   KEY `enterprise_id` (`enterprise_id`),
   KEY `account_number` (`account_number`),
@@ -5796,10 +5775,10 @@ CREATE TABLE IF NOT EXISTS `organisation` (
   CONSTRAINT `organisation_ibfk_4` FOREIGN KEY (`payment_id`) REFERENCES `payment` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB;
 
-INSERT INTO `organisation` (`id`, `enterprise_id`, `name`, `account_number`, `location_id`, `address_1`, `address_2`, `payment_id`, `phone`, `email`, `locked`) VALUES
-  (1, 101, "Bureau Centrale de Zone", 410100, 1, null, null, 2, null, null, 0),
-  (2, 101, "ITM Vanga", 410200, 1, null, null, 1, null, null, 0),
-  (3, 101, "All Patients", 600100, 1, null, null, 1, null, null, 0);
+INSERT INTO `organisation` (`id`, `enterprise_id`, `name`, `account_number`, `location_id`, `address_1`, `address_2`, `payment_id`, `phone`, `email`, `note`, `locked`) VALUES
+  (1, 101, "Bureau Centrale de Zone", 410100, 1, "BCZ Rd.", "Kikwit", 2, "0823431677", "bcz@congo.cd", "The BCZ for Vanga's zone", 0),
+  (2, 101, "ITM Vanga", 410200, 1, "ITM Rd.", "Vanga", 1, "0811546234", "vanga@itm.cd", "Note1", 0),
+  (3, 101, "All Patients", 600100, 1, null, null, 1, null, null, "Note2", 0);
 
 --
 -- Table `bika`.`patient`

@@ -1,9 +1,25 @@
-require(["dojo/dom", "bika/ApplicationState"], function(dom, AppState) {
+require(["bika/Form", "bika/ApplicationState"], function(Form, AppState) {
 
   // Import application variables
   var app = new AppState();
 
-  // using dojo's dom functions to make Steven proud
-  var textarea = dom.byId('bika-units-debitors-forms-note-form');
+  var formid = "bika-units-debitors-forms-note-form";
 
-  // note: use a dojo/form
+  var form = new Form({
+    id: formid,
+  }, formid);
+
+  var container = form.getParent();
+  
+  function addFormCallback(callback) {
+    return form.addCallback(callback);
+  }
+
+  function refreshForm(data) {
+    form.setValues(data);
+  }
+
+  container.set('addFormCallback', addFormCallback);
+  container.set('getFormValues', function() { return form.getValues(); });
+  container.set('refreshForm', function(data) { refreshForm(data); });
+});

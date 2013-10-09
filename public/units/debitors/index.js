@@ -47,7 +47,7 @@ require([
       {id : 'address_1'   , field   : 'address_1'   , label   : 'Address'},
       {id : 'address_2'   , field   : 'address_2'   , label   : 'Address'},
       {id : 'location_id' , field   : 'location_id' , label   : 'Location ID'},
-      {id : 'payment_id'  , field   : 'payment_id'  , label   : "Payment Id"},
+      {id : 'text'  , field   : 'text'  , label   : "Payment Text"},
       {id : 'phone'       , field   : 'phone'       , label   : 'Telephone'},
       {id : 'email'       , field   : 'email'       , label   : "Email"},
       {id : 'locked'      , field   : 'locked'      , label   : 'Locked'}
@@ -57,7 +57,7 @@ require([
 
   var query = {
     e: [
-      {t: 'organisation', c: ['id', 'name', 'account_number', 'address_1', 'address_2', 'location_id', 'payment_id', 'email', 'phone', 'locked']},
+      {t: 'organisation', c: ['id', 'name', 'account_number', 'address_1', 'address_2', 'location_id', 'payment_id', 'email', 'phone', 'locked', 'note']},
       {t: 'location', c: ['city', 'region'] },
       {t: 'payment', c: ['text']}
     ],
@@ -97,22 +97,32 @@ require([
   tc.startup();
 
   function refreshtabcontainer(rows) {
-        if (rows.length > 1) { return true; } // don't change for multi-row selects
-    var activeforms = tc.getChildren().filter(function(tab) { return tab.isLoaded; });
+    if (rows.length > 1) { return true; } // don't change for multi-row selects
+    var tabs = tc.getChildren();
     var griddata = rows.pop().data;
     storedata = store.get(griddata.id);
-    activeforms.forEach(function(tab) {
-      // set this here to prevet asynchronous errors.
-      // besides, it should fire after you set a row.
-      tab.addFormCallback(function(evt) {
-        console.log(tab.getFormValues());
-      });
-      // Ad-hock API:
-      //    expect each form to impliment a getParent() method that assigns
-      //    refreshform(rows) to the content pane that refreshs the contents
-      //    of each form.
-      tab.refreshForm(storedata);
+    tabs.forEach(function(tab) {
+      if (tab.isLoaded) {
+        // set this here to prevet asynchronous errors.
+        // besides, it should fire after you set a row.
+        tab.addFormCallback(function(evt) {
+          console.log(tab.getFormValues());
+        });
+        // Ad-hock API:
+        //    expect each form to impliment a getParent() method that assigns
+        //    refreshform(rows) to the content pane that refreshs the contents
+        //    of each form.
+        tab.refreshForm(storedata);
+      } else {
+        tab.set('onLoad', function() {
+          tab.refreshForm(storedata);
+          tab.addFormCallback(function(evt) {
+            console.log("from note!", tab.getFormValues());
+          });
+        });
+      }
     });
+
   }
   
 });
