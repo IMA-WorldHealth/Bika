@@ -514,7 +514,7 @@ CREATE TABLE IF NOT EXISTS `budget` (
   `enterprise_id` int(11) NOT NULL DEFAULT '0',
   `account_id` int(11) NOT NULL DEFAULT '0',
   `period_id` int(11) NOT NULL,
-  `budget` decimal(2,0) DEFAULT NULL,
+  `budget` DOUBLE DEFAULT NULL,
   PRIMARY KEY (`enterprise_id`,`account_id`,`period_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
