@@ -42,7 +42,7 @@
             bCreer = new Button({label:"Creer", onClick:validation}, "creerID");
             bModifier = new Button({label:"Modifier", onClick:modifier}, "modifierID");
             bSupprimer = new Button({label:"Supprimer", onClick:supprimer}, "supprimerID");
-            bAnnuler = new Button({label:"Annuler"},"annulerID");
+            bAnnuler = new Button({label:"Annuler", onClick:annuler},"annulerID");
             //stores
             crudStore = new JsonRest({target:'/data/'});
             crudStoreDEL = new JsonRest({target:'/data/:table/:id'});
@@ -51,8 +51,17 @@
              (function(){
               //formulaire pour admin role
               f = new UnitsForm({},"divformdroit");
+              //pour tout cocher
+              var node;
+                node = domCons.toDom("<td id=\""+"Tous"+"\"></td>"); 
+                domCons.place(node,"ligneID");
+                //pour tout cocher
+                node = domCons.toDom("<div id=\""+"All"+"\"></div><span>"+"Tous"+"</span><br/>");
+                domCons.place(node,"Tous");
+              f.addLastCheck("All"); 
+              
               var drawTDElements = function(id, roles){
-                var node;
+                var node;                                
                 for(var i=0; i<roles.length; i++){
                   tabContainerID.push(roles[i].id);
                   node = domCons.toDom("<td id=\""+roles[i].id+"\"></td>"); 
@@ -62,12 +71,12 @@
               }
 
               var drawDIVElements = function(id, units){
-                var node;
+                var node;                
                  for(var j=0; j<units.length; j++){                      
                       node = domCons.toDom("<div id=\""+units[j].id+"\"></div><span>"+units[j].name+"</span><br/>");
                       domCons.place(node,""+id);
                     }
-                    f.placeControls(units);
+                    f.placeControls(units);                    
                     deferred = undefined;
               }
 
@@ -76,7 +85,7 @@
                for(var j=0; j<tabContainerID.length; j++){
                 getChild(tabContainerID[j], drawDIVElements);
                }
-              });       
+              });                  
             
             })();
             document.getElementById("spanbademailID").style.display="none";
@@ -104,17 +113,24 @@
                 formReInit();
               });
             }
-            var modifier = function(){
+            function modifier(){
+              //je prefere une operation de suppression suivie d'une operation d'insertion
+              //a la place de plusieurs operations de plusieurs operstions des suppression et update eventuelle.
+              crudStore.query({t:'user', ids:{id:[selectedUserId]}, action:'DEL'});
+              creer();
+
+
               
             }
            function supprimer(){
             crudStore.query({t:'user', ids:{id:[selectedUserId]}, action:'DEL'}); 
             }
-            var annuler = function(){
+            function annuler(){
+              formReInit();
               
             }
             function getChild(id, cb){
-             sql={};    
+             var sql={};    
              sql.e = [{t:'unit', c:['id', 'name']}];
              sql.cond = [{t:'unit', cl:'parent', v:id, z:'='}];
              crudStore.query(sql).then(function(data){
@@ -122,6 +138,17 @@
              }); 
              if(deferred)
              return deferred.promise;              
+            }
+
+            function getPermissions(id){
+              var dif = new Deferred();
+              var sql = {};
+              sql.e = [{t:'permission', c:['id_unit']}];
+             sql.cond = [{t:'permission', cl:'id_user', v:id, z:'='}];
+             crudStore.query(sql).then(function(data){
+              dif.resolve(data);
+             });
+             return dif.promise;
             }
 
             function formReInit(){
@@ -156,6 +183,7 @@
 
               //creation d'un ecouteur et traitement evenement
                 userGrid.on("dgrid-select",function(event) {
+                  f.unCheckAll();
                             txtFirstName.setValue(event.rows[0].data.first);
                             txtLastName.setValue(event.rows[0].data.last);
                             txtEmail.setValue(event.rows[0].data.email);
@@ -163,6 +191,15 @@
                             txtPassWord.setValue(event.rows[0].data.password);
                             txtConformPassWord.setValue(event.rows[0].data.password);
                             selectedUserId = event.rows[0].data.id;
+
+                            //reconstitutioins des droits
+                            result = getPermissions(selectedUserId);
+                            result.then(function(values){
+                              for (var i =0; i< values.length; i++) {   
+                                f.check(values[i].id_unit);                                
+                              };
+
+                            });
                 }); 
             } 
 
@@ -223,18 +260,10 @@
               <span id="spanbadpasswordID"><div id="badpasswordID"></div></span><br/>
           </form>         
       </div> 
-      <!--cette div contient des bouttons-->     
-      <center><div id="divAction">
-        <fieldset >
-          <legend>Actions</legend>
-          <div id="creerID"></div>
-          <div id="modifierID"></div>
-          <div id="supprimerID"></div>
-          <div id="annulerID"></div>
-        </fieldset>                 
-      </div></center>
+     
       <!--cette div contient les checks box-->
-      <center><div id="divformdroit">
+      <center>
+        <div id="divformdroit">
         <fieldset>
           <legend>Droits</legend>
         <form id="droitformID">
@@ -244,7 +273,21 @@
           </table>
         </form>
       </fieldset>
-      </div>   </center> 
+      </div>
+      </center> 
+
+       <!--cette div contient des bouttons-->     
+      <center>
+        <div id="divAction">
+        <fieldset>
+          <legend>Actions</legend>
+          <div id="creerID"></div>
+          <div id="modifierID"></div>
+          <div id="supprimerID"></div>
+          <div id="annulerID"></div>
+        </fieldset>                 
+        </div>
+      </center>
       <!-- cette div contient un grid listant les utilisateurs-->
     <div id="divuser">        
     </div>     
