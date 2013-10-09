@@ -46,7 +46,9 @@ app.post('/data/', function (req, res) {
     if (err) throw err;
     res.send("succes!;");
   };
+  console.log("POST REQUEST:", req.body.t, req.body.data);
   var insertsql = db.insert(req.body.t, req.body.data);
+  console.log("insertsql:", insertsql);
   db.execute(insertsql, cb);
 });
 

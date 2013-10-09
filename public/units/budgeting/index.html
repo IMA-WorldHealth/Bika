@@ -77,7 +77,7 @@ var tablebind;
     //  -[Discuss] Should this just be done with D-Grid to provide uniform table structure
     //  -[Discuss] I read somewhere that var newFunc = function() { } is better practice than function() { }, is that true?
     //  -Flush budget changes to server (waiting on update of db.js)
-    //  -Unique ID for budget table (ref: Store rant in code)
+    //  -Unique ID for budget table (ref: Store rant in code) TODO(meta) This is done, udpate code accordingly 
     //  -Highlighting for errors on incorrect inputs for budgeting etc (Red box around invalid input)
     //  -If changes to budget are made, user should not be able to change accounts until discarded (reset) or updated
     //  -Highlight Start of fiscal year (row outline) ?End of fiscal year
@@ -86,12 +86,8 @@ var tablebind;
     ///////
     
     /////
-    // This update: 
-    //  -respond to enterprise and fiscal select changes
-    //  -refresh / remove rows manually - have them respond to changes to the store in future 
-    //  -
+    // Current - Total is an input, any value inserted into total should be spread evenly across te months
     /////
-
     var uid = "bika-units-budgeting";
     //TODO: return an initialised object, should not have to manually create instance
     var app_state = new ApplicationState();
@@ -222,6 +218,10 @@ var tablebind;
         for (var i = q.length - 1; i >= 0; i--) {
           if(q[i].budget != cache_change[fiscal_year]["change"][q[i].id]) { 
             console.log("Updating", q[i]);
+            console.log(request.post);
+            request.post("/data/", {table: 'budget', data: [q[i]], pk: [q[i].id]}).then(function(value) { 
+              console.log("Server returned", value);
+            });
           }
         }
       }
@@ -295,7 +295,7 @@ var tablebind;
           c : ['period_start', 'period_stop'] 
         }, {
           t : 'budget',
-          c : ['enterprise_id', 'account_id', 'period_id', 'budget']
+          c : ['id', 'enterprise_id', 'account_id', 'period_id', 'budget']
         }],
         'jc': [{
           ts: ['period', 'budget'],

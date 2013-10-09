@@ -35,6 +35,8 @@ html, body {
   margin  : 0;
   position: relative;
   border: none;
+  float: right;
+  right: 0;
 }
 
 #bika-center-panel {
