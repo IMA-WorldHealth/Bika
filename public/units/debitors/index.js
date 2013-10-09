@@ -1,4 +1,3 @@
-var tc;
 require([
   "dojo/_base/declare",
   "dojo/store/Memory",
@@ -15,10 +14,16 @@ require([
   function (declare, Memory, JsonRest, Cache, TabContainer,
     Select, ContentPane, OnDemandGrid, Selection, DijitRegistry, AppState) {
 
+  // Debitor Organisation Config page 
+  // TODO:
+  //   
+  //
+  //
+
   // import application-level variables
   var app = new AppState();
 
-  tc = new TabContainer({}, "bika-units-debitors-tabcontainer");
+  var tc = new TabContainer({}, "bika-units-debitors-tabcontainer");
 
   tc.addChild(new ContentPane({
       title  : "General",
@@ -35,46 +40,48 @@ require([
     href   : "units/debitors/forms/note.html",
   }));
 
-  tc.addChild(new ContentPane({
-    title  : "Text",
-    href   : "units/debitors/forms/text.html",
-  }));
-
   var columns = [
-      {id : 'id'        , field : 'id'       , label : 'Debitor'} ,
-      {id : 'name'      , field : 'name'     , label : 'Name'},
-      {id : 'address_1' , field : 'address_1', label : 'Address'},
-      {id : 'address_2' , field : 'address_2', label : 'Address'},
-      {id : 'group_id'  , field : 'group_id' , label : 'Group'},
-      {id : 'city'      , field : 'city'     , label : 'City'},
-      {id : 'country'   , field : 'country'  , label : 'Country'},
-      {id : 'phone'     , field : 'phone'    , label : 'Telephone'}
+      {id : 'id'          , field   : 'id'          , label   : 'Org. ID'},
+      {id : 'name'        , field   : 'name'        , label   : 'Name'},
+      {id : 'account_number', field : 'account_number', label : 'Account'},
+      {id : 'address_1'   , field   : 'address_1'   , label   : 'Address'},
+      {id : 'address_2'   , field   : 'address_2'   , label   : 'Address'},
+      {id : 'location_id' , field   : 'location_id' , label   : 'Location ID'},
+      {id : 'payment_id'  , field   : 'payment_id'  , label   : "Payment Id"},
+      {id : 'phone'       , field   : 'phone'       , label   : 'Telephone'},
+      {id : 'email'       , field   : 'email'       , label   : "Email"},
+      {id : 'locked'      , field   : 'locked'      , label   : 'Locked'}
   ];
 
   var esval = app.getValue("enterprise-select");
 
   var query = {
-    e: [{t: 'debitor', c: ['id', 'name', 'address_1', 'address_2', 'group_id', 'location_id', 'email', 'phone', 'max_credit', 'interest', 'price_group_id']}],
-    c: [{t: 'debitor', cl: 'enterprise_id', z: '=', v: esval}]
+    e: [
+      {t: 'organisation', c: ['id', 'name', 'account_number', 'address_1', 'address_2', 'location_id', 'payment_id', 'email', 'phone', 'locked']},
+      {t: 'location', c: ['city', 'region'] },
+      {t: 'payment', c: ['text']}
+    ],
+    jc: [
+      {ts: ['organisation', 'location'], c: ['location_id', 'id'], l: 'AND'},
+      {ts: ['organisation', 'payment'], c: ['payment_id', 'id'], l: 'AND'}
+    ],
+    c: [
+      {t: 'organisation', cl: 'enterprise_id', z: '=', v: esval}
+    ]
   };
 
-  var grid_rest_store = new JsonRest({
+  var store = new Cache(new JsonRest({
     target   : '/data/',
     getLabel : function (data) {
       return data.id;
     }
-  });
-
-  var store = new Cache(grid_rest_store, new Memory());
+  }), new Memory());
 
   var grid = new (declare([OnDemandGrid, DijitRegistry, Selection]))({
       store   : store,
       query   : '?' + JSON.stringify(query),
       columns : columns
   }, 'bika-units-debitors-grid');
-
-  app.setComponent("units-debitors-grid", grid);
-  //app.setComponent("units-debitors-store", store);
 
   // suppress sorting
   grid.on("dgrid-sort", function (evt) {
@@ -90,13 +97,22 @@ require([
   tc.startup();
 
   function refreshtabcontainer(rows) {
+        if (rows.length > 1) { return true; } // don't change for multi-row selects
     var activeforms = tc.getChildren().filter(function(tab) { return tab.isLoaded; });
+    var griddata = rows.pop().data;
+    storedata = store.get(griddata.id);
     activeforms.forEach(function(tab) {
+      // set this here to prevet asynchronous errors.
+      // besides, it should fire after you set a row.
+      tab.addFormCallback(function(evt) {
+        console.log(tab.getFormValues());
+      });
       // Ad-hock API:
       //    expect each form to impliment a getParent() method that assigns
       //    refreshform(rows) to the content pane that refreshs the contents
       //    of each form.
-      tab.refreshform(rows);
+      tab.refreshForm(storedata);
     });
   }
+  
 });

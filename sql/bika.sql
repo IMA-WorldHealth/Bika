@@ -9,7 +9,7 @@ GRANT ALL ON `bika`.* TO 'bika'@'%' IDENTIFIED BY 'HISCongo2013';
 -- Dumping structure for table bika.enterprise
 DROP TABLE IF EXISTS `enterprise`;
 CREATE TABLE IF NOT EXISTS `enterprise` (
-  `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
+  `id` smallint unsigned NOT NULL AUTO_INCREMENT,
   `region` varchar(70) NOT NULL,
   `country` varchar(70) NOT NULL,
   `city` varchar(70) NOT NULL,
@@ -30,7 +30,6 @@ CREATE TABLE IF NOT EXISTS `account_type` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table bika.account_type: ~6 rows (environ)
 /*!40000 ALTER TABLE `account_type` DISABLE KEYS */;
 REPLACE INTO `account_type` (`id`, `type`) VALUES
     (1, 'income/expense'),
@@ -39,7 +38,6 @@ REPLACE INTO `account_type` (`id`, `type`) VALUES
 /*!40000 ALTER TABLE `account_type` ENABLE KEYS */;
 
 
--- Dumping data for table bika.enterprise: ~2 rows (environ)
 /*!40000 ALTER TABLE `enterprise` DISABLE KEYS */;
 
 REPLACE INTO `enterprise` (`id`, `region`, `country`, `city`, `name`, `phone`, `email`, `type`, `cash_account`) VALUES
@@ -50,8 +48,8 @@ REPLACE INTO `enterprise` (`id`, `region`, `country`, `city`, `name`, `phone`, `
 -- Dumping structure for table bika.account
 DROP TABLE IF EXISTS `account`;
 CREATE TABLE IF NOT EXISTS `account` (
-  `enterprise_id` smallint(5) unsigned NOT NULL,
-  `id` mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
+  `enterprise_id` smallint unsigned NOT NULL,
+  `id` mediumint unsigned NOT NULL AUTO_INCREMENT,
   `locked` tinyint(1) NOT NULL,
   `account_txt` text,
   `account_type_id` mediumint(8) unsigned NOT NULL,
@@ -269,29 +267,28 @@ INSERT INTO `account` (`enterprise_id`, `id`, `locked`, `account_txt`, `account_
     (101, 760500, 0, 'Autres subventions', 1, '300');
 /*!40000 ALTER TABLE `account` ENABLE KEYS */;
 
--- Dumping structure for table bika.currency
+--
+-- `bika`.`currency`
+--
 DROP TABLE IF EXISTS `currency`;
 CREATE TABLE IF NOT EXISTS `currency` (
-  `id` tinyint(3) unsigned NOT NULL,
+  `id` tinyint unsigned NOT NULL,
   `name` text NOT NULL,
   `symbol` varchar(15) NOT NULL,
+  `note` text,
+  `current_rate` mediumint unsigned,
+  `last_rate` mediumint unsigned,
+  `updated` date NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB;
 
--- Dumping data for table bika.currency: ~3 rows (environ)
-/*!40000 ALTER TABLE `currency` DISABLE KEYS */;
-REPLACE INTO `currency` (`id`, `name`, `symbol`) VALUES
-    (1, 'Franc Congolais', 'FC'),
-    (2, 'United States Dollar', 'USD'),
-    (3, 'Euro', 'EU');
-/*!40000 ALTER TABLE `currency` ENABLE KEYS */;
-
-
--- Dumping structure for table bika.fiscal_year
+--
+-- table `bika`.`fiscal_year`
+--
 DROP TABLE IF EXISTS `fiscal_year`;
 CREATE TABLE IF NOT EXISTS `fiscal_year` (
-  `enterprise_id` smallint(5) unsigned NOT NULL,
-  `id` mediumint(8) unsigned NOT NULL,
+  `enterprise_id` smallint unsigned NOT NULL,
+  `id` mediumint unsigned NOT NULL,
   `number_of_months` mediumint(8) unsigned NOT NULL,
   `fiscal_year_txt` text NOT NULL,
   `transaction_start_number` int(10) unsigned NOT NULL,
@@ -329,10 +326,9 @@ CREATE TABLE IF NOT EXISTS `user` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8;
 
--- Dumping data for table bika.user: ~12 rows (environ)
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
 REPLACE INTO `user` (`id`, `username`, `password`, `first`, `last`, `email`, `logged_in`) VALUES
-    (1, 'jniles', 'K3mb3J@m', 'Jonathan', 'Niles', 'jonathanwniles@gmail.com', 0),
+    (1, 'jniles', 'malamumoke', 'Jonathan', 'Niles', 'jonathanwniles@gmail.com', 0),
     (2, 'chris', 'c', 'CHRIS ', 'LOMAME', 'chris@ima.org', 0),
     (3, 'rdc', 'r', 'CONGO', 'DEMOCRATIQUE', 'rdc@rdc.cd', 0),
     (4, 'docta', 'd', 'Docteur House', 'Machine', 'd@his.cd', 0),
@@ -347,28 +343,31 @@ REPLACE INTO `user` (`id`, `username`, `password`, `first`, `last`, `email`, `lo
     (13, 'sfount', '1', 'Steven', 'Fountain', 'StevenFountain@live.co.uk', 0);
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 
+--
+-- table `bika`.`journal`
+
 -- Dumping structure for table bika.journal
 DROP TABLE IF EXISTS `journal`;
 CREATE TABLE IF NOT EXISTS `journal` (
-  `fiscal_year_id` mediumint(8) unsigned NOT NULL,
-  `id` mediumint(8) unsigned NOT NULL,
+  `fiscal_year_id` mediumint unsigned NOT NULL,
+  `id` mediumint unsigned NOT NULL,
   `date` date NOT NULL,
-  `user_id` smallint(5) unsigned NOT NULL,
+  `user_id` smallint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `fiscal_year_id` (`fiscal_year_id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `journal_ibfk_1` FOREIGN KEY (`fiscal_year_id`) REFERENCES `fiscal_year` (`id`),
   CONSTRAINT `journal_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB;
 
--- Dumping data for table bika.journal: ~1 rows (environ)
 /*!40000 ALTER TABLE `journal` DISABLE KEYS */;
 REPLACE INTO `journal` (`fiscal_year_id`, `id`, `date`, `user_id`) VALUES
     (2013001, 1000, '2013-07-23', 1);
 /*!40000 ALTER TABLE `journal` ENABLE KEYS */;
 
-
--- Dumping structure for table bika.period
+--
+-- table `bika`.`period`
+--
 DROP TABLE IF EXISTS `period`;
 CREATE TABLE IF NOT EXISTS `period` (
   `fiscal_year_id` mediumint(8) unsigned NOT NULL,
@@ -511,7 +510,7 @@ REPLACE INTO `role` (`id`, `name`, `description`, `role_head`) VALUES
 
 DROP TABLE IF EXISTS `budget`;
 CREATE TABLE IF NOT EXISTS `budget` (
-  `enterprise_id` int(11) NOT NULL DEFAULT '0',
+  `enterprise_id` smallint unsigned NOT NULL DEFAULT '0',
   `account_id` int(11) NOT NULL DEFAULT '0',
   `period_id` int(11) NOT NULL,
   `budget` decimal(2,0) DEFAULT NULL,
@@ -5445,50 +5444,18 @@ INSERT INTO `budget` (`enterprise_id`, `account_id`, `period_id`, `budget`) VALU
 (101, 760500, 33, 0.00),
 (101, 760500, 34, 0.00);
 
--- Dumping structure for table bika.transaction
-DROP TABLE IF EXISTS `transaction`;
-CREATE TABLE IF NOT EXISTS `transaction` (
-  `journal_id` mediumint(8) unsigned NOT NULL,
-  `line_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `account_id` mediumint(8) unsigned NOT NULL,
-  `credit` int(11) NOT NULL,
-  `debit` int(11) NOT NULL,
-  `doc_id` tinytext NOT NULL,
-  `description` tinytext,
-  `trans_number` int(10) unsigned NOT NULL,
-  `trans_date` date NOT NULL,
-  `sys_currency` tinyint(3) unsigned NOT NULL,
-  `trans_currency` tinyint(3) unsigned NOT NULL,
-  `exchange_rate` decimal(6,2) NOT NULL,
-  PRIMARY KEY (`line_id`),
-  KEY `journal_id` (`journal_id`),
-  KEY `account_id` (`account_id`),
-  KEY `sys_currency` (`sys_currency`),
-  KEY `trans_currency` (`trans_currency`),
-  CONSTRAINT `transaction_ibfk_1` FOREIGN KEY (`journal_id`) REFERENCES `journal` (`id`),
-  CONSTRAINT `transaction_ibfk_2` FOREIGN KEY (`account_id`) REFERENCES `account` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
-
--- Dumping data for table bika.transaction: ~5 rows (environ)
-/*!40000 ALTER TABLE `transaction` DISABLE KEYS */;
-REPLACE INTO `transaction` (`journal_id`, `line_id`, `account_id`, `credit`, `debit`, `doc_id`, `description`, `trans_number`, `trans_date`, `sys_currency`, `trans_currency`, `exchange_rate`) VALUES
-    (1000, 1, 220700, 40, 0, '20', 'descrip 1', 3, '2013-07-23', 1, 1, 920.00),
-    (1000, 2, 220700, 0, 20, '40', 'descrip 2', 3, '2013-07-23', 1, 1, 930.00),
-    (1000, 3, 650100, 100, 0, '0', 'descrip 3', 4, '2013-02-15', 1, 1, 910.00),
-    (1000, 4, 711000, 23, 0, '0', 'descrip 4', 5, '2013-03-01', 1, 1, 910.00),
-    (1000, 5, 711100, 0, 100, '0', 'descrip 5', 4, '2013-02-15', 1, 1, 910.00);
-/*!40000 ALTER TABLE `transaction` ENABLE KEYS */;
-
+--
+-- table `bika`.`country`
+--
 DROP TABLE IF EXISTS `country`;
-
 CREATE TABLE `country` (
-  `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
-  `code` int(3) NOT NULL,
+  `id` smallint unsigned NOT NULL AUTO_INCREMENT,
+  `code` smallint unsigned NOT NULL,
   `country_en` varchar(45) NOT NULL,
   `country_fr` varchar(45) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `code_unique` (`code`)
-) ENGINE=InnoDB ;
+) ENGINE=InnoDB;
 
 INSERT INTO `country`(`id`,`code`,`country_en`,`country_fr`) VALUES 
   (1,4,'Afghanistan','Afghanistan'),
@@ -5735,49 +5702,49 @@ INSERT INTO `country`(`id`,`code`,`country_en`,`country_fr`) VALUES
 
 /* Table bika.location */ 	
 DROP TABLE IF EXISTS `location`;
-
 CREATE TABLE `location` (
-  `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
+  `id` smallint unsigned NOT NULL AUTO_INCREMENT,
   `city` varchar(45) DEFAULT NULL,
   `region` varchar(45) DEFAULT NULL,
-  `country_code` smallint(6) NOT NULL,
+  `country_code` smallint unsigned NOT NULL,
   `zone` varchar(45) DEFAULT NULL,
   `village` varchar(45) DEFAULT NULL,
-  PRIMARY KEY (`id`,`country_code`)
+  PRIMARY KEY (`id`),
+  KEY `country_code` (`country_code`)
+--  CONSTRAINT `location_ibfk_1` FOREIGN KEY `country_code` REFERENCES `country` (`code`)
 ) ENGINE=InnoDB;
 
 /*Data for the table `location` */
 
-INSERT INTO `location`(`id`,`city`,`region`,`country_code`) VALUES 
-  (1,'Kinshasa','Kinshasa',52),
-  (2,'Lubumbashi','Katanga',52),
-  (3,'Mbuji-Mayi','Kasaï-Oriental',52),
-  (4,'Kananga','Kasaï-Occidental',52),
-  (5,'Kisangani','Orientale',52),
-  (6,'Bukavu','Sud-Kivu',52),
-  (7,'Tshikapa','Kasaï-Occidental',52),
-  (8,'Kolwezi','Katanga',52),
-  (9,'Likasi','Katanga',52),
-  (10,'Goma','Nord-Kivu',52), 
-  (11,'Kikwit','Bandundu',52),
-  (12,'Uvira','Sud-Kivu',52),
-  (13,'Bunia','Orientale',52),
-  (14,'Mbandaka','Équateur',52),
-  (15,'Matadi','Bas-Congo',52),
-  (16,'Kabinda','Kasaï-Oriental',52),
-  (17,'Butembo','Nord-Kivu',52),
-  (18,'Mwene-Ditu','Kasaï-Oriental',52),
-  (19,'Isiro','Orientale',52),
-  (20,'Kindu','Maniema',52), 
-  (21,'Boma','Bas-Congo',52),
-  (22,'Kamina','Katanga',52),
-  (23,'Gandajika','Kasaï-Oriental',52),
-  (24,'Bandundu','Bandundu',52),
-  (25,'Gemena','Équateur',52),
-  (26,'Kipushi','Katanga',52),
-  (27,'Bumba','Équateur',52),
-  (28,'Mbanza-Ngungu','Bas-Congo',52);
-
+INSERT INTO `location`(`id`,`city`,`region`,`country_code`, `zone`, `village`) VALUES 
+  (1,'Kinshasa','Kinshasa',52, null, null),
+  (2,'Lubumbashi','Katanga',52, null, null),
+  (3,'Mbuji-Mayi','Kasaï-Oriental',52, null, null),
+  (4,'Kananga','Kasaï-Occidental',52, null, null),
+  (5,'Kisangani','Orientale',52, null, null),
+  (6,'Bukavu','Sud-Kivu',52, null, null),
+  (7,'Tshikapa','Kasaï-Occidental',52, null, null),
+  (8,'Kolwezi','Katanga',52, null, null),
+  (9,'Likasi','Katanga',52, null, null),
+  (10,'Goma','Nord-Kivu',52, null, null), 
+  (11,'Kikwit','Bandundu',52, null, null),
+  (12,'Uvira','Sud-Kivu',52, null, null),
+  (13,'Bunia','Orientale',52, null, null),
+  (14,'Mbandaka','Équateur',52, null, null),
+  (15,'Matadi','Bas-Congo',52, null, null),
+  (16,'Kabinda','Kasaï-Oriental',52, null, null),
+  (17,'Butembo','Nord-Kivu',52, null, null),
+  (18,'Mwene-Ditu','Kasaï-Oriental',52, null, null),
+  (19,'Isiro','Orientale',52, null, null),
+  (20,'Kindu','Maniema',52, null, null), 
+  (21,'Boma','Bas-Congo',52, null, null),
+  (22,'Kamina','Katanga',52, null, null),
+  (23,'Gandajika','Kasaï-Oriental',52, null, null),
+  (24,'Bandundu','Bandundu',52, null, null),
+  (25,'Gemena','Équateur',52, null, null),
+  (26,'Kipushi','Katanga',52, null, null),
+  (27,'Bumba','Équateur',52, null, null),
+  (28,'Mbanza-Ngungu','Bas-Congo',52, null, null);
 
 --
 -- table `bika`.`payment`
@@ -5785,7 +5752,7 @@ INSERT INTO `location`(`id`,`city`,`region`,`country_code`) VALUES
 -- months is mediumint to allow "infinite" amount of time
 DROP TABLE IF EXISTS `payment`;
 CREATE TABLE IF NOT EXISTS `payment` (
-  `id`        smallint unsigned NOT NULL,
+  `id`        tinyint unsigned NOT NULL,
   `days`      smallint unsigned DEFAULT 0,
   `months`    mediumint unsigned DEFAULT 0,
   `text`      varchar(50) NOT NULL,
@@ -5797,49 +5764,103 @@ INSERT INTO `payment` (`id`, `days`, `months`, `text`, `note`) VALUES
   (1, 14, 0, "Two Weeks", ""),
   (2, 0, 1, "One Month", "");
 
-
 --
--- Table `bika`.`debitor`
+-- Table `bika`.`organisation`
 --
 
--- FIXME: Do we need to remove the enterprise_id from here?
-DROP TABLE IF EXISTS `debitor`;
-CREATE TABLE IF NOT EXISTS `debitor` (
-  `enterprise_id`  smallint unsigned NOT NULL,
-  `id`             varchar(15) NOT NULL,
-  `address_1`      text,
-  `address_2`      text,
-  `location_id`    smallint unsigned NOT NULL,
-  `contact`        text,
-  `dun`            varchar(3) DEFAULT NULL,
-  `email`          text,
-  `group_id`       mediumint DEFAULT NULL,
-  `interest`       varchar(3) DEFAULT NULL,
-  `locked`         tinyint NOT NULL DEFAULT '0',
-  `max_credit`     varchar(45) DEFAULT NULL,
-  `name`           text,
-  `note`           text,
-  `our_contact`    int(11) DEFAULT NULL,
-  `payment_id`     smallint unsigned NOT NULL,
-  `phone`          text,
-  `price_group_id` int(11) DEFAULT NULL,
-  `debitor_text1`  text,
-  `debitor_text2`  text,
-  `debitor_text3`  text,
-  `debitor_text4`  text,
-  `debitor_text5`  text,
-  `internet_order` varchar(3) DEFAULT NULL,
-  `international`  varchar(3) DEFAULT NULL,
-  PRIMARY KEY (`enterprise_id`,`id`),
-  KEY `location_id` (`location_id`),
+-- NOTE the british spelling.  This one's for you, steve.
+DROP TABLE IF EXISTS `organisation`;
+CREATE TABLE IF NOT EXISTS `organisation` (
+  `id`  smallint unsigned NOT NULL,
+  `enterprise_id` smallint unsigned NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `account_number` mediumint unsigned NOT NULL,
+  `location_id` smallint unsigned NOT NULL,
+  `address_1`  varchar(150),
+  `address_2` varchar(150),
+  `payment_id` tinyint unsigned NOT NULL,
+  `phone` varchar(10),
+  `email` varchar(30),
+  `locked` tinyint(1) DEFAULT '0',
+  PRIMARY KEY (`id`),
   KEY `enterprise_id` (`enterprise_id`),
+  KEY `account_number` (`account_number`),
+  KEY `location_id` (`location_id`),
   KEY `payment_id` (`payment_id`),
-  CONSTRAINT `debitor_ibfk_1` FOREIGN KEY (`location_id`) REFERENCES `location` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `debitor_ibfk_2` FOREIGN KEY (`enterprise_id`) REFERENCES `enterprise` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `debitor_ibfk_3` FOREIGN KEY (`payment_id`) REFERENCES `payment` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `organisation_ibfk_1` FOREIGN KEY (`enterprise_id`) REFERENCES `enterprise` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `organisation_ibfk_2` FOREIGN KEY (`account_number`) REFERENCES `account` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `organisation_ibfk_3` FOREIGN KEY (`location_id`) REFERENCES `location` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `organisation_ibfk_4` FOREIGN KEY (`payment_id`) REFERENCES `payment` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB;
 
-INSERT INTO `debitor` (`enterprise_id`,`id`,`address_1`,`address_2`,`location_id`,`contact`,`dun`,`email`, `group_id`,`interest`,`locked`,`max_credit`,`name`,`note`,`our_contact`,`payment_id`,`phone`,`price_group_id`,`debitor_text1`,`debitor_text2`,`debitor_text3`,`debitor_text4`,`debitor_text5`,`internet_order`,`international`) VALUES
-  (101, '1', 'Bandal', 'Masina', 1,'e54','non','carloscnk@francite.com',2,'34',0,'344','Carlos','je suis toujours la',212,1,'3454',234,'papa','maman','yaya','koko','noko','44','33'),
-  (102,'3','Lemba','Limete',1,'fxv','d','gered@caramail.com',2,'767',0,'55','Gered','ils vont bien depuis longtemps',980,1,'802',789,'jon','cnk','ded','chris','ger','77','86');
+INSERT INTO `organisation` (`id`, `enterprise_id`, `name`, `account_number`, `location_id`, `address_1`, `address_2`, `payment_id`, `phone`, `email`, `locked`) VALUES
+  (1, 101, "Bureau Centrale de Zone", 410100, 1, null, null, 2, null, null, 0),
+  (2, 101, "ITM Vanga", 410200, 1, null, null, 1, null, null, 0),
+  (3, 101, "All Patients", 600100, 1, null, null, 1, null, null, 0);
 
+--
+-- Table `bika`.`patient`
+--
+-- NOTE the british spelling of organisation.  It's still for you, steve.
+DROP TABLE IF EXISTS `patient`;
+CREATE TABLE IF NOT EXISTS `patient` (
+  `id` int unsigned NOT NULL,
+  `organisation_id` smallint unsigned NOT NULL,
+  `first_name` varchar(150) NOT NULL,
+  `last_name` varchar(150) NOT NULL,
+  `dob` date NOT NULL,
+  `parent_name` varchar(150),
+  `sex` char(1) NOT NULL, -- 'm' or 'f'
+  `religion` varchar(50) NOT NULL,
+  `marital_status` varchar(50),
+  `phone` varchar(12),
+  `email` varchar(20),
+  `addr_1` varchar(100),
+  `addr_2` varchar(100),
+  `village` varchar(100),
+  `zone` varchar(100),
+  `city` varchar(100),
+  `country` varchar(100),
+  PRIMARY KEY (`id`),
+  KEY `first_name` (`first_name`),
+  KEY `organisation_id` (`organisation_id`),
+  CONSTRAINT `patient_ibfk_1` FOREIGN KEY (`organisation_id`) REFERENCES `organisation` (`id`) ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+INSERT INTO `patient` (`id`, `organisation_id`, `first_name`, `last_name`, `dob`, `parent_name`, `sex`, `religion`, `marital_status`, `phone`, `email`, `addr_1`, `addr_2`, `village`, `zone`, `city`, `country`) VALUES 
+  (1, 3, "Steven", "Fountain", '1993-02-08', "Paul", "m", "christian", "single", null, "sfount@example.com", null, null, "Vanga", "Vanga", "Kikwit", "Republic Democratic du Congo"),
+  (2, 3, "Jonathan", "Niles", '1992-06-07', "Wayne", "m", "christian", "single", null, "jniles@example.com", null, null, "Cafu La Mour", "Nord", "Cap Haitian", "Haiti"),
+  (3, 3, "Dedrick", "Kitamuka", '1988-05-16', "Deiu", "m", "catholic", "single", null, "kitamuka@example.com", null, null, "Kinshasa", "Ngili", "Kinshasa", "Republic Democratic du Congo"),
+  (4, 3, "Chris", "Niles", '1990-05-19', "Wayne", "m", "christian", "divorced", null, "cniles@example.com", null, null, "Vanga", "Vanga", "Kikwit", "Republic Democratic du Congo");
+
+--
+-- table `bika`.`transaction`
+--
+DROP TABLE IF EXISTS `transaction`;
+CREATE TABLE IF NOT EXISTS `transaction` (
+  `enterprise_id` smallint unsigned NOT NULL,
+  `fiscal_year_id` mediumint unsigned NOT NULL,
+  `id` int unsigned NOT NULL,
+  `invoice_number` int unsigned NOT NULL,
+  `journal_id` mediumint unsigned NOT NULL,
+  `account_number` mediumint unsigned NOT NULL,
+  `debit` mediumint unsigned NOT NULL,
+  `credit` mediumint unsigned NOT NULL,
+  `currency` tinyint unsigned NOT NULL,
+  `organisation_id` smallint unsigned NOT NULL,
+  `text` text,
+  `date` date NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `enterprise_id` (`enterprise_id`),
+  KEY `fiscal_year_id` (`fiscal_year_id`),
+  KEY `journal_id` (`journal_id`),
+  KEY `account_number` (`account_number`),
+  KEY `currency` (`currency`),
+  KEY `organisation_id` (`organisation_id`),
+  CONSTRAINT `transaction_ibfk_1` FOREIGN KEY (`enterprise_id`) REFERENCES `enterprise` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
+  CONSTRAINT `transaction_ibfk_2` FOREIGN KEY (`fiscal_year_id`) REFERENCES `fiscal_year` (`id`) ON UPDATE CASCADE,
+  CONSTRAINT `transaction_ibfk_3` FOREIGN KEY (`journal_id`) REFERENCES `journal` (`id`),
+  CONSTRAINT `transaction_ibfk_4` FOREIGN KEY (`account_number`) REFERENCES `account` (`id`),
+  CONSTRAINT `transaction_ibfk_5` FOREIGN KEY (`currency`) REFERENCES `currency` (`id`),
+  CONSTRAINT `transaction_ibfk_6` FOREIGN KEY (`organisation_id`) REFERENCES `organisation` (`id`)
+) ENGINE=InnoDB;
