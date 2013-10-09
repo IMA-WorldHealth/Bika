@@ -7,7 +7,8 @@
         <link rel = "stylesheet" type = "text/css" href="../css/userPermission.css" media="screen" />
         <script>
         require([
-         	"customizedModule/UnitsForm",
+           "dojo/_base/declare",
+           "customizedModule/UnitsForm",
            "dojo/store/JsonRest",
            "dijit/form/TextBox",
            "dijit/form/CheckBox",
@@ -17,30 +18,34 @@
            "dojo/topic",
            "dijit/Dialog",
            "dojo/dom-construct",
+           "dgrid/OnDemandGrid",
+           "dgrid/Selection",
            "dojo/domReady!"
-           ], function (UnitsForm, JsonRest,TextBox,CheckBox, Button, on, Deferred, topic, Dialog, domCons){
-           	//declarations des variables
-           	var bCreer, bAnnuler,bModifier,bSupprimer, txtFirstName, txtLastName, txtEmail,
-           	 txtUserName, txtPassWord, txtConformPassWord, chkAdministrator, roleStore,
-               userGrid, userStore, roleGridQuery = {}, userGridQuery = {}, 
-               crudStore,f, dialog, roleGrid, tabContainerID=[];
-               var deferred = new Deferred();
+           ], function (declare, UnitsForm, JsonRest,TextBox,CheckBox, Button, on, Deferred, topic, Dialog, domCons, OnDemandGrid, Selection){
+            //declarations des variables
+            var bCreer, bAnnuler, bModifier, bSupprimer, txtFirstName, txtLastName,
+                txtEmail, txtUserName, txtPassWord, txtConformPassWord, chkAdministrator,
+                roleStore, userGrid, userStore, roleGridQuery = {}, userGridQuery = {},
+                crudStore, crudStoreDEL,f, dialog, FullGrid, tabContainerID=[], selectedUserId;
+            var deferred = new Deferred();
 
-           	  //creations champs des saisies
-           	txtFirstName = new TextBox({class:"saisie", style:"width:220px;"},"firstnameID");
-           	txtLastName = new TextBox({class:"saisie", style:"width:220px;"},"lastnameID");
-           	txtEmail = new TextBox({class:"saisie", style:"width:220px;"},"emailID");
-           	txtUserName = new TextBox({class:"saisie", style:"width:220px;"},"usernameID");
-           	txtPassWord = new TextBox({class:"saisie", type:"password", style:"width:220px;"},"passwordID");
-           	txtConformPassWord = new TextBox({class:"saisie", type:"password", style:"width:220px;"},"confirmpasswordID");
+
+              //creations champs des saisies
+            txtFirstName = new TextBox({class:"saisie", style:"width:220px;"},"firstnameID");
+            txtLastName = new TextBox({class:"saisie", style:"width:220px;"},"lastnameID");
+            txtEmail = new TextBox({class:"saisie", style:"width:220px;"},"emailID");
+            txtUserName = new TextBox({class:"saisie", style:"width:220px;"},"usernameID");
+            txtPassWord = new TextBox({class:"saisie", type:"password", style:"width:220px;"},"passwordID");
+            txtConformPassWord = new TextBox({class:"saisie", type:"password", style:"width:220px;"},"confirmpasswordID");
 
             //creation des boutons
-            bCreer = new Button({label:"Creer", onClick:creer}, "creerID");
+            bCreer = new Button({label:"Creer", onClick:validation}, "creerID");
             bModifier = new Button({label:"Modifier", onClick:modifier}, "modifierID");
             bSupprimer = new Button({label:"Supprimer", onClick:supprimer}, "supprimerID");
             bAnnuler = new Button({label:"Annuler", onClick:annuler},"annulerID");
             //stores
             crudStore = new JsonRest({target:'/data/'});
+            crudStoreDEL = new JsonRest({target:'/data/:table/:id'});
              
 
              (function(){
@@ -62,7 +67,6 @@
                   node = domCons.toDom("<td id=\""+roles[i].id+"\"></td>"); 
                   domCons.place(node,"ligneID");
                 }
-                console.log('tout va bien');
                 deferred.resolve(true);
               }
 
@@ -70,7 +74,6 @@
                 var node;                
                  for(var j=0; j<units.length; j++){                      
                       node = domCons.toDom("<div id=\""+units[j].id+"\"></div><span>"+units[j].name+"</span><br/>");
-                      console.log('id est ', id);
                       domCons.place(node,""+id);
                     }
                     f.placeControls(units);                    
@@ -79,22 +82,36 @@
 
               var res = getChild(0, drawTDElements);
               res.then(function(value){
-                console.log('nous on commence');
                for(var j=0; j<tabContainerID.length; j++){
                 getChild(tabContainerID[j], drawDIVElements);
                }
               });                  
             
             })();
+            document.getElementById("spanbademailID").style.display="none";
+            document.getElementById("spanbadpasswordID").style.display="none";
+            initUserGrid(); 
 
-           initUserGrid();
-           
+            //*********************************************
+            //**************LES FONCTIONS******************
+            //*********************************************
 
-            //********************************************************
-            //*******************LES FONCTIONS************************
-            //********************************************************
-            var creer = function(){
-
+            function creer(){
+              var sql_insertion = {t:'user', data:[{id:'', username: txtUserName.value, password: txtPassWord.value, first: txtFirstName.value, last:txtLastName.value, email:txtEmail.value, logged_in:0}]};
+              crudStore.put(sql_insertion);
+              //recherche du dernier id inserer
+              var sql_selection={};
+              sql_selection.e=[{t:'user', c:['id']}];
+              sql_selection.cond = [{t:'user', cl:'username', v:txtUserName.value, z:'=', l:'AND'}, {t:'user', cl:'password', v:txtPassWord.value, z:'='}];
+              crudStore.query(sql_selection).then(function(data){
+                for(var i=0; i<f.checks.length; i++){
+                  if(f.checks[i].get('checked')==true){
+                    crudStore.put({t:'permission', data:[{id:'', id_unit: f.checks[i].id, id_user: data[0].id}]});
+                  }
+                }
+                f.unCheckAll();
+                formReInit();
+              });
             }
             function modifier(){
               //je prefere une operation de suppression suivie d'une operation d'insertion
@@ -105,14 +122,13 @@
 
               
             }
-            var supprimer = function(){
-              
+           function supprimer(){
+            crudStore.query({t:'user', ids:{id:[selectedUserId]}, action:'DEL'}); 
             }
             function annuler(){
               formReInit();
               
-            }           
-
+            }
             function getChild(id, cb){
              var sql={};    
              sql.e = [{t:'unit', c:['id', 'name']}];
@@ -123,6 +139,7 @@
              if(deferred)
              return deferred.promise;              
             }
+
             function getPermissions(id){
               var dif = new Deferred();
               var sql = {};
@@ -225,22 +242,21 @@
     </head>
     <body class = "claro">
      <div id="principal">
-     	<div id="divForm">
-     	    <form id="newuserformID">
-	            <div><label><b>First Name :</b></label><div class="saisie" id="firstnameID"></div></div>
-	            <br/>
-	            <div><label><b>Last Name :</b></label><div class="saisie" id="lastnameID"></div></div>
-	            <br/>
-	            <div><label><b>Email :</b></label><div class="saisie" id="emailID"></div></div>
-	            <br/>
-	            <span id="spanbademailID"><div id="bademailID"></div></span>
-	            <br/>
-	            <div><label><b>User Name :</b></label><div  class="saisie" id="usernameID"></div></div>
-	            <br/> 
-	            <div><label><b>Password :</b></label><div class="saisie" id="passwordID"></div></div>
-	            <br/>
-	            <div><label><b>Confirm Password :</b></label><div class="saisie" id="confirmpasswordID"></div></div>
-	            <br/>
+      <div id="divForm">
+          <form id="newuserformID">
+              <div><label><b>First Name :</b></label><div class="saisie" id="firstnameID"></div></div>
+              <br/>
+              <div><label><b>Last Name :</b></label><div class="saisie" id="lastnameID"></div></div>
+              <br/>
+              <div><label><b>Email :</b></label><div class="saisie" id="emailID"></div></div>
+              <span id="spanbademailID"><div id="bademailID"></div></span>
+              <br/>
+              <div><label><b>User Name :</b></label><div  class="saisie" id="usernameID"></div></div>
+              <br/> 
+              <div><label><b>Password :</b></label><div class="saisie" id="passwordID"></div></div>
+              <br/>
+              <div><label><b>Confirm Password :</b></label><div class="saisie" id="confirmpasswordID"></div></div>
+              <br/>
               <span id="spanbadpasswordID"><div id="badpasswordID"></div></span><br/>
           </form>         
       </div> 
@@ -276,6 +292,6 @@
     <div id="divuser">        
     </div>     
     </div>
-    </body>
-</html>   
-
+  </body> 
+    
+</html> 
