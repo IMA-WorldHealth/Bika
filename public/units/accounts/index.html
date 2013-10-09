@@ -79,6 +79,7 @@ function(declare, JsonRest, Memory, Cache, CheckBox, Select, OnDemandGrid, Colum
         data.locked = (evt.value === false) ? 0 : 1;
         break; 
     }
+ 
     grid.store.put({table: 'account', data: [data], pk: [store.idProperty]});
   });
 });

@@ -218,10 +218,19 @@ var tablebind;
         for (var i = q.length - 1; i >= 0; i--) {
           if(q[i].budget != cache_change[fiscal_year]["change"][q[i].id]) { 
             console.log("Updating", q[i]);
-            console.log(request.post);
-            request.post("/data/", {table: 'budget', data: [q[i]], pk: [q[i].id]}).then(function(value) { 
+            
+            /*request.post("/data/", {data: {table: 'budget', data: [q[i]], pk: [q[i].id]}}).then(function(value) { 
               console.log("Server returned", value);
+            });*/
+            console.log(cache_change[fiscal_year]["interface"]);
+            //Manually create new object to insert, current models object is a reslut of a join
+            var interface = new JsonRest({ 
+              target: '/data/'
             });
+
+            interface.put({"t" : "budget", "data" : [{"id" : q[i].id, "budget" : [q[i].budget]}], "pk" : ["id"]}, {});
+            //update cache model 
+            cache_change[fiscal_year]["change"][q[i].id] = q[i].budget;
           }
         }
       }
@@ -326,12 +335,11 @@ var tablebind;
         //initialise all input errors to false 
         //temporary id hack
         var tid = "bika-units-budgeting-" + id;
-        cache_change[tid] = {"error" : [], "model" : {}, "change" : []};
+        cache_change[tid] = {"error" : [], "model" : model, "change" : [], "interface" : cache};
         for (var i = model.data.length - 1; i >= 0; i--) {
           cache_change[tid]["error"].push(false);
           cache_change[tid]["change"][model.data[i].id] = model.data[i].budget;
         };
-        cache_change[tid]["model"] = model;
 
       });
 
