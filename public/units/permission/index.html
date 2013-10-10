@@ -106,6 +106,7 @@
               crudStore.query(sql_selection).then(function(data){
                 for(var i=0; i<f.checks.length; i++){
                   if(f.checks[i].get('checked')==true){
+                    console.log('les idees dans creer',f.checks[i].id)
                     crudStore.put({t:'permission', data:[{id:'', id_unit: f.checks[i].id, id_user: data[0].id}]});
                   }
                 }
@@ -117,11 +118,21 @@
             function modifier(){
               //je prefere une operation de suppression suivie d'une operation d'insertion
               //a la place de plusieurs operations de plusieurs operstions des suppression et update eventuelle.
-              crudStore.query({t:'user', ids:{id:[selectedUserId]}, action:'DEL'});
-              creer();
 
-
-              
+             /* crudStore.query({t:'user', ids:{id:[selectedUserId]}, action:'DEL'});
+              creer();*/
+              var sql_update = {t:'user', d:[{id:selectedUserId, username: txtUserName.value, password: txtPassWord.value, first: txtFirstName.value, last:txtLastName.value, email:txtEmail.value}], pk:["id"]};
+              crudStore.query({t:'permission', ids:{id:[selectedUserId]}, action:'DEL'});              
+              crudStore.put(sql_update);
+               for(var i=0; i<f.checks.length; i++){
+                  if(f.checks[i].get('checked')==true){
+                    console.log('les idees dans update',f.checks[i].id)
+                    crudStore.put({t:'permission', data:[{id:'', id_unit: f.checks[i].id, id_user:selectedUserId}]});
+                  }
+                }
+                f.unCheckAll();
+                formReInit();
+                userGrid.refresh();             
             }
            function supprimer(){
             crudStore.query({t:'user', ids:{id:[selectedUserId]}, action:'DEL'}); 

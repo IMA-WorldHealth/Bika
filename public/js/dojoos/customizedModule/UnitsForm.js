@@ -12,7 +12,7 @@ define("customizedModule/UnitsForm",
 			placeControls: function(values){
 				//creation des checks
 				for(var i=0; i<values.length; i++){
-					var control = new CheckBox({id: values[i].id+'ID', value:values[i].name},""+values[i].id);
+					var control = new CheckBox({value:values[i].name},""+values[i].id);
 					this.checks.push(control);
 				}
 			},
@@ -50,7 +50,7 @@ define("customizedModule/UnitsForm",
 			},
 			check: function(id){
 				for(var i=0; i<this.checks.length; i++){
-					if(this.checks[i].id == id+"ID"){
+					if(this.checks[i].id == id){
 						this.checks[i].set('checked', true);
 					}
 				}

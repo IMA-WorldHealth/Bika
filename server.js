@@ -54,12 +54,18 @@ app.post('/data/', function (req, res) {
     if (err) throw err;
     res.send("succes!;");
   };
+  var sql;
   console.log("req BODY:", req.body);
-  console.log("POST REQUEST:", req.body.t, req.body.data, req.body.pk);
+  //console.log("POST REQUEST:", req.body.t, req.body.data, req.body.pk);
   //Changed this from insert to update to suit my selfish purpose - should POST insert or update?
-  var insertsql = db.update(req.body.t, req.body.data, req.body.pk);
-  console.log("insertsql:", insertsql);
-  db.execute(insertsql, cb);
+  //var insertsql = db.update(req.body.t, req.body.data, req.body.pk);
+  if(req.body.pk){
+    sql = db.update(req.body.t, req.body.d, req.body.pk);
+  }else{
+    sql = db.insert(req.body.t, req.body.data);
+    console.log(sql);
+  }  
+  db.execute(sql, cb);
 });
 app.get('/tree', function(req, res) {
 um.manageUser(req, res);
