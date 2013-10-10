@@ -49,18 +49,25 @@ app.get('/data/', function (req, res) {
   }
   
 });
+
+//dojo store forces an ID to be passed with a PUT request, the server must match this pattern, even if the db.js API doesn't require it
+app.put('/data/:id', function(req, res) { 
+  var updatesql = db.updatesqlpdate(req.body.t, req.body.data, req.body.pk);
+  db.execute(updatesql, function(err, ans) { 
+    if(err) throw err;
+    res.send("success!");
+  });
+});
+
 app.post('/data/', function (req, res) {
   var cb = function (err, ans) {
     if (err) throw err;
     res.send("succes!;");
   };
-  console.log("req BODY:", req.body);
-  console.log("POST REQUEST:", req.body.t, req.body.data, req.body.pk);
-  //Changed this from insert to update to suit my selfish purpose - should POST insert or update?
-  var insertsql = db.update(req.body.t, req.body.data, req.body.pk);
-  console.log("insertsql:", insertsql);
+  var insertsql = db.insert(req.body.t, req.body.data);
   db.execute(insertsql, cb);
 });
+
 app.get('/tree', function(req, res) {
 um.manageUser(req, res);
 });
