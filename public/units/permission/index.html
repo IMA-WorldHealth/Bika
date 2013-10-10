@@ -116,14 +116,9 @@
               });
             }
             function modifier(){
-              //je prefere une operation de suppression suivie d'une operation d'insertion
-              //a la place de plusieurs operations de plusieurs operstions des suppression et update eventuelle.
-
-             /* crudStore.query({t:'user', ids:{id:[selectedUserId]}, action:'DEL'});
-              creer();*/
-              var sql_update = {t:'user', d:[{id:selectedUserId, username: txtUserName.value, password: txtPassWord.value, first: txtFirstName.value, last:txtLastName.value, email:txtEmail.value}], pk:["id"]};
-              crudStore.query({t:'permission', ids:{id:[selectedUserId]}, action:'DEL'});              
-              crudStore.put(sql_update);
+              var sql_update = {t:'user', data:[{id:selectedUserId, username: txtUserName.value, password: txtPassWord.value, first: txtFirstName.value, last:txtLastName.value, email:txtEmail.value}], pk:["id"]};
+              crudStore.query({t:'permission', ids:{id_user:[selectedUserId]}, action:'DEL'});              
+              crudStore.put(sql_update, {id:selectedUserId});
                for(var i=0; i<f.checks.length; i++){
                   if(f.checks[i].get('checked')==true){
                     console.log('les idees dans update',f.checks[i].id)

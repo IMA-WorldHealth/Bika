@@ -80,7 +80,7 @@ function(declare, JsonRest, Memory, Cache, CheckBox, Select, OnDemandGrid, Colum
         break; 
     }
  
-    grid.store.put({table: 'account', data: [data], pk: [store.idProperty]}, {id: data.id});
+    grid.store.put({t: 'account', data: [data], pk: [store.idProperty]}, {id: data.id});
   });
 });
 </script>
