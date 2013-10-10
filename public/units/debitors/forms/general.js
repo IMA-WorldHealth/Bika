@@ -13,15 +13,16 @@ require([
   var form = new Form({
     id: prefix + 'form'
   }, prefix + 'form');
+  
   // import application variables
   var app = new AppState();
   // organisation select declaration
   var orgstore = new Cache(new JsonRest({ target: 'data/' }), new Memory());
 
   var orgquery = {
-    e: [{"t": "organisation", c: ["id", "name", "account_number", "location_id", "address_1", "address_2", "phone", "email"]}],
+    e: [{t: "organisation", c: ["id", "name", "account_number", "location_id", "address_1", "address_2", "phone", "email"]}],
     c: [
-      {"t": "organisation", cl: "enterprise_id", z: "=", v: app.getValue("enterprise-select")}
+      {t: "organisation", cl: "enterprise_id", z: "=", v: app.getValue("enterprise-select")}
     ]
   };
 
@@ -38,9 +39,7 @@ require([
   var locationstore = new Cache(new JsonRest({ target: 'data/' }), new Memory());
 
   var locationquery = {
-    e: [
-      {t: 'location', c: ['id', 'city', 'region', 'country_code']},
-    ],
+    e: [{t: 'location', c: ['id', 'city', 'region', 'country_code']}],
   };
 
   var countrystore = new Cache(new JsonRest({ target: 'data/' }), new Memory());

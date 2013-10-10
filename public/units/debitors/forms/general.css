@@ -1,29 +1,36 @@
-.tab {
-  display: block;
-  height: 100%;
+.bika-form {
   overflow: hidden;
-  float: left;
-  margin: 0;
-}
-
-.tab fieldset {
-  height: 100%;
-  width: 30%;
   padding: 0;
   margin: 0;
 }
 
-.tab label {
+.bika-form fieldset {
+  border: none;
+  height: 100%;
+  width: 30%;
+  padding: 1em;
+  margin: 0;
+  display: block;
+  float: left;
+}
+
+.bika-form label {
   display: block;
   clear: both;
 }
 
-.tab input {
-  padding-left: 3.5em;
+/* leave checkboxes alone */
+.bika-form input:not([type=checkbox]) {
   float: right;
+  width: 73%;
 }
 
-.tab button {
+.bika-form button {
   float: right;
+  clear: both;
 }
 
+.bika-form select {
+  float: right;
+  width: 74%;
+}

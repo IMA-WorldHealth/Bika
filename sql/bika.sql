@@ -17,12 +17,18 @@ CREATE TABLE IF NOT EXISTS `enterprise` (
   `phone` varchar(20) NOT NULL,
   `email` varchar(70) NOT NULL,
   `type` varchar(70) NOT NULL,
-  `cash_account` mediumint(8) unsigned NOT NULL,
+  `cash_account` mediumint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `enterprise_ibfk_1` (`cash_account`)
 ) ENGINE=InnoDB CHARSET=utf8;
 
--- Dumping structure for table bika.account_type
+REPLACE INTO `enterprise` (`id`, `region`, `country`, `city`, `name`, `phone`, `email`, `type`, `cash_account`) VALUES
+    (101, 'Kinshasa', 'RDC', 'Kinshasa', 'IMA', '9419614377', 'jniles@example.com', '1', 570000),
+    (102, 'Bandundu', 'RDC', 'Kikwit', 'IMAKik', '--', 'jniles@example.com', '1', 570000);
+
+--
+-- table `bika`.`account_type`
+--
 DROP TABLE IF EXISTS `account_type`;
 CREATE TABLE IF NOT EXISTS `account_type` (
   `id` mediumint(8) unsigned NOT NULL,
@@ -37,14 +43,6 @@ REPLACE INTO `account_type` (`id`, `type`) VALUES
     (3, 'title');
 /*!40000 ALTER TABLE `account_type` ENABLE KEYS */;
 
-
-/*!40000 ALTER TABLE `enterprise` DISABLE KEYS */;
-
-REPLACE INTO `enterprise` (`id`, `region`, `country`, `city`, `name`, `phone`, `email`, `type`, `cash_account`) VALUES
-    (101, 'Kinshasa', 'RDC', 'Kinshasa', 'IMA', '9419614377', 'jniles@example.com', '1', 570000),
-    (102, 'Bandundu', 'RDC', 'Kikwit', 'IMAKik', '--', 'jniles@example.com', '1', 570000);
-
-/*!40000 ALTER TABLE `enterprise` ENABLE KEYS */;
 -- Dumping structure for table bika.account
 DROP TABLE IF EXISTS `account`;
 CREATE TABLE IF NOT EXISTS `account` (
@@ -433,7 +431,7 @@ REPLACE INTO `unit` (`id`, `name`, `desc`, `parent`, `has_children`, `url`) VALU
   (1, 'Admin', 'The Administration Super-Category', 0, 1, ''),
   (2, 'Enterprises', 'Manage the registered enterprises from here', 1, 0, '/units/enterprise/'),
   (3, 'Form Manager', 'Manage your forms', 1, 0, '/units/formmanager/'),
-  (4, 'Users & Permissions', 'Manage user privileges and permissions', 1, 0, '/units/permission/ 4'),
+  (4, 'Users & Permissions', 'Manage user privileges and permissions', 1, 0, '/units/permission/'),
   (5, 'Finance', 'The Finance Super-Category', 0, 1, ''),
   (6, 'Accounts', 'The chart of accounts', 5, 0, '/units/accounts/'),
   (7, 'Charts', 'Analyze how your company is doing', 5, 0, '/units/charts/'),
@@ -5729,6 +5727,21 @@ INSERT INTO `location`(`id`,`city`,`region`,`country_code`, `zone`, `village`) V
   (28,'Mbanza-Ngungu','Bas-Congo',52, null, null);
 
 --
+-- table `bika`.`taxinfo`
+--
+DROP TABLE IF EXISTS `taxinfo`;
+CREATE TABLE IF NOT EXISTS `taxinfo` (
+  `id`      smallint unsigned NOT NULL AUTO_INCREMENT,
+  `registration` mediumint unsigned NOT NULL,
+  `note`    text,
+  PRIMARY KEY (`id`)
+) ENGINE=Innodb;
+
+INSERT INTO `taxinfo` (`id`, `registration`, `note`) VALUES
+  (1, 1, "first registration"),
+  (2, 2, "second metadata");
+
+--
 -- table `bika`.`payment`
 --    describes the amount of time you can go with paying
 -- months is mediumint to allow "infinite" amount of time
@@ -5747,6 +5760,47 @@ INSERT INTO `payment` (`id`, `days`, `months`, `text`, `note`) VALUES
   (2, 0, 1, "One Month", "");
 
 --
+-- table `bika`.`department`
+--
+DROP TABLE IF EXISTS `department`;
+CREATE TABLE IF NOT EXISTS `department` (
+  `enterprise_id`    smallint unsigned NOT NULL,
+  `id`               smallint unsigned NOT NULL,
+  `name`             varchar(100) NOT NULL,
+  `note`             text,
+  PRIMARY KEY (`id`),
+  KEY `enterprise_id` (`enterprise_id`),
+  CONSTRAINT `department_ibfk_1` FOREIGN KEY (`enterprise_id`) REFERENCES `enterprise` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
+) ENGINE=Innodb;
+
+INSERT INTO `department` (`enterprise_id`, `id`, `name`, `note`) VALUES 
+  (101, 1, "Vanga Admin", null),
+  (101, 2, "Vanga Atelier", "The workforce at Vanga"),
+  (101, 3, "Vanga Pharamacy", null),
+  (101, 4, "Vanga Accounting", "Keeping track of accounts");
+
+--
+-- table `bika`.`employee`
+--
+DROP TABLE IF EXISTS `employee`;
+CREATE TABLE IF NOT EXISTS `employee` (
+  `id`    smallint unsigned NOT NULL,
+  `name`  varchar(50) NOT NULL,
+  `title` varchar(50),
+  `location_id` smallint unsigned NOT NULL,
+  `department_id` smallint unsigned NOT NULL,
+  `initials`      varchar(3) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `location_id` (`location_id`),
+  KEY `department_id` (`department_id`),
+  CONSTRAINT `employee_ibfk_1` FOREIGN KEY (`location_id`) REFERENCES `location` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `employee_ibfk_2` FOREIGN KEY (`department_id`) REFERENCES `department` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=Innodb;
+
+INSERT INTO `employee` (`id`, `name`, `title`, `location_id`, `department_id`, `initials`) VALUES
+  (1, "Dodi", "Chief Accountant", 11, 4, "DK"),
+  (2, "Jon", "MCZ", 11, 3, "JN");
+--
 -- Table `bika`.`organisation`
 --
 -- NOTE the british spelling.  This one's for you, steve.
@@ -5764,21 +5818,28 @@ CREATE TABLE IF NOT EXISTS `organisation` (
   `email` varchar(30),
   `note`  text,
   `locked` tinyint(1) DEFAULT 0,
+  `contact_id` smallint unsigned NOT NULL,
+  `tax_id`     smallint unsigned NOT NULL,
+  `max_credit` mediumint unsigned DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `enterprise_id` (`enterprise_id`),
   KEY `account_number` (`account_number`),
   KEY `location_id` (`location_id`),
   KEY `payment_id` (`payment_id`),
+  KEY `contact_id` (`contact_id`),
+  KEY `tax_id` (`tax_id`),
   CONSTRAINT `organisation_ibfk_1` FOREIGN KEY (`enterprise_id`) REFERENCES `enterprise` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `organisation_ibfk_2` FOREIGN KEY (`account_number`) REFERENCES `account` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `organisation_ibfk_3` FOREIGN KEY (`location_id`) REFERENCES `location` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `organisation_ibfk_4` FOREIGN KEY (`payment_id`) REFERENCES `payment` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `organisation_ibfk_4` FOREIGN KEY (`payment_id`) REFERENCES `payment` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `organisation_ibfk_5` FOREIGN KEY (`contact_id`) REFERENCES `employee` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `organisation_ibfk_6` FOREIGN KEY (`tax_id`) REFERENCES `taxinfo` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB;
 
-INSERT INTO `organisation` (`id`, `enterprise_id`, `name`, `account_number`, `location_id`, `address_1`, `address_2`, `payment_id`, `phone`, `email`, `note`, `locked`) VALUES
-  (1, 101, "Bureau Centrale de Zone", 410100, 1, "BCZ Rd.", "Kikwit", 2, "0823431677", "bcz@congo.cd", "The BCZ for Vanga's zone", 0),
-  (2, 101, "ITM Vanga", 410200, 1, "ITM Rd.", "Vanga", 1, "0811546234", "vanga@itm.cd", "Note1", 0),
-  (3, 101, "All Patients", 600100, 1, null, null, 1, null, null, "Note2", 0);
+INSERT INTO `organisation` (`id`, `enterprise_id`, `name`, `account_number`, `location_id`, `address_1`, `address_2`, `payment_id`, `phone`, `email`, `note`, `locked`, `contact_id`, `tax_id`, `max_credit`) VALUES
+  (1, 101, "Bureau Centrale de Zone", 410100, 11, "BCZ Rd.", "Kikwit", 2, "0823431677", "bcz@congo.cd", "The BCZ for Vanga's zone", 0, 1, 1, 1000),
+  (2, 101, "ITM Vanga", 410200, 11, "ITM Rd.", "Vanga", 1, "0811546234", "vanga@itm.cd", "Note1", 0, 1, 1, 0),
+  (3, 101, "All Patients", 600100, 11, null, null, 1, null, null, "Note2", 0, 1, 2, 100);
 
 --
 -- Table `bika`.`patient`
@@ -5846,3 +5907,21 @@ CREATE TABLE IF NOT EXISTS `transaction` (
   CONSTRAINT `transaction_ibfk_5` FOREIGN KEY (`currency`) REFERENCES `currency` (`id`),
   CONSTRAINT `transaction_ibfk_6` FOREIGN KEY (`organisation_id`) REFERENCES `organisation` (`id`)
 ) ENGINE=InnoDB;
+
+
+--
+-- table `bika`.`pricegroup`
+--
+DROP TABLE IF EXISTS `pricegroup`;
+CREATE TABLE IF NOT EXISTS `pricegroup` (
+  `id`    smallint unsigned NOT NULL AUTO_INCREMENT,
+  `note`  varchar(100) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=Innodb;
+
+INSERT INTO `pricegroup` (`id`, `note`) VALUES 
+  (1, "Vanga ITM"),
+  (2, "Vanga ISTM"),
+  (3, "Employees"); 
+
+

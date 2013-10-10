@@ -57,7 +57,7 @@ require([
 
   var query = {
     e: [
-      {t: 'organisation', c: ['id', 'name', 'account_number', 'address_1', 'address_2', 'location_id', 'payment_id', 'email', 'phone', 'locked', 'note']},
+      {t: 'organisation', c: ['id', 'name', 'account_number', 'address_1', 'address_2', 'location_id', 'payment_id', 'email', 'phone', 'locked', 'note', 'contact_id', 'tax_id', 'max_credit']},
       {t: 'location', c: ['city', 'region'] },
       {t: 'payment', c: ['text']}
     ],
@@ -116,9 +116,6 @@ require([
       } else {
         tab.set('onLoad', function() {
           tab.refreshForm(storedata);
-          tab.addFormCallback(function(evt) {
-            console.log("from note!", tab.getFormValues());
-          });
         });
       }
     });

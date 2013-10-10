@@ -1,45 +1,90 @@
-require(["dojo/_base/declare", "dojo/store/Memory", "dojo/store/JsonRest", "dojo/store/Cache", "dijit/form/Select", "dgrid/Grid", "dgrid/editor", "dojo/domReady!"],
-function (declare, Memory, JsonRest, Cache, Select, Grid, editor) {
+require([
+  "dojo/store/Memory", 
+  "dojo/store/JsonRest", 
+  "dojo/store/Cache", 
+  "bika/Select", 
+  "bika/Form",
+  "dgrid/OnDemandGrid", 
+  "dojo/domReady!"],
+function (Memory, JsonRest, Cache, Select, Form, OnDemandGrid)  {
 
-  var payment_rest_store = new JsonRest({target: "data/"});
-  var payment_mem_store = new Memory({});
-  var payment_store = new Cache(payment_rest_store, payment_mem_store);
-  var payment_query = {};
+  // prefix for this page.
+  var prefix = "bika-units-debitors-forms-invoicing-";
+  var form = new Form({
+    id: prefix + "form" // FIXME: why are we doing this.
+  }, prefix + "form");
 
-  var payment_select = new Select({
-    store: payment_store,
-    query: payment_query
-  }, "bika-units-debitors-forms-invoicing-payment");
+  // payment select feeds from payment_id
+  var pstore = new Cache(new JsonRest({target: "data/"}), new Memory());
+  var pquery = {
+    e: [{t: "payment", c: ["id", "days", "months", "text", "note"]}] // FIXME: remove cols we don't need 
+  };
 
-  var contact_rest_store = new JsonRest({target: "data/"});
-  var contact_mem_store = new Memory({});
-  var contact_store = new Cache(contact_rest_store, contact_mem_store);
-  var contact_query = {};
+  var pselect = new Select({
+    id: prefix + "payment",
+    store: pstore,
+    query: "?" + JSON.stringify(pquery),
+    getLabel: function(data) { return data.text; },
+    emptyNode: true // FIXME: make this default
+  });
 
-  var contact_select = new Select({
-    store: contact_store,
-    query: contact_query
-  }, "bika-units-debitors-forms-invoicing-contact");
+  pselect.startup();
 
-  var pricegrid_rest_store = new JsonRest({target: "data/"});
-  var pricegrid_mem_store = new Memory({});
-  var pricegrid_store = new Cache(pricegrid_rest_store, pricegrid_mem_store);
-  var pricegrid_query = {};
+  var cstore = new Cache(new JsonRest({target: "data/"}), new Memory());
+  var cquery = {
+    e: [
+      {t: "employee", c:["id", "name", "title", "location_id", "department_id", "initials"]}
+    ],
+  };
 
-  var columns = [
-    {id: 'pricegroups', field: 'pricegroups'},
-    {id: 'discount', field: 'discount'},
-    {id: 'salesprice', field: 'salesprice'}
+  var cselect = new Select({
+    id: prefix + "contact",
+    store: cstore,
+    query: "?" + JSON.stringify(cquery),
+    getLabel: function(data) {
+      return data.name;
+    },
+    emptyNode: true // FIXME: make this default
+  });
+
+  cselect.startup();
+
+  var pgstore = new Cache(new JsonRest({target: "data/"}), new Memory());
+  var pgquery= {
+    e: [{t: "pricegroup", c: ["id", "note"]}] 
+  };
+
+  // FIXME: I don't understand what this is supposed to do
+  // enough to properly impliment it.
+  var pgcolumns = [
+    {id: "note", field: "note", label: "Price Group"}
   ];
 
-  var pricegrid = new Grid({
-    store: pricegrid_store,
-    query: pricegrid_query
-  }, "bika-units-debitors-forms-invoicing-pricegrid");
+  var pricegrid = new OnDemandGrid({
+    store: pgstore,
+    query: "?" + JSON.stringify(pgquery),
+    columns: pgcolumns
+  }, prefix + "pricegrid");
 
+  // expose exterior methods
+  
+  var container = form.getParent();
 
-  function updateInvoicing() {
-    
+  function refreshForm(data) {
+    form.setValues(data);
+
+    var payid = data.payment_id;
+    var payobj = pstore.get(payid);
+    pselect.setOption(pstore.getIdentity(payobj));
+
+    var contactid = data.contact_id;
+    var contactobj = cstore.get(contactid);
+    cselect.setOption(cstore.getIdentity(contactobj));
+
   }
+
+  container.set('refreshForm', refreshForm);
+  container.set('getFormValues', function() { return form.getValues(); });
+  container.set('addFormCallback', function(callback, evt) { return form.addCallback(callback, evt); });
 
 });
