@@ -441,7 +441,6 @@ REPLACE INTO `unit` (`id`, `name`, `desc`, `parent`, `has_children`, `url`) VALU
   (11, 'Inventory', 'The Inventory Super-Category', 0, 1, ''),
   (12, 'Orders', 'Manage your purchase orders', 11, 0, '/units/orders/'),
   (13, 'Stock', 'What is in stock?', 11, 0, '/units/stock/'),
-  (14, 'Timeline', 'Inventory reporting and timeline', 11, 0, '/units/timeline/'),
   (15, 'Hospital', 'The Hospital Super-Category', 0, 1, ''),
   (16, 'Pharmacy', 'What\'s in your pharmacy?', 15, 0, '/units/pharmacy/'),
   (17, 'Laboratory', 'Analyze lab results', 15, 0, '/units/laboratory/'),
@@ -5923,5 +5922,3 @@ INSERT INTO `pricegroup` (`id`, `note`) VALUES
   (1, "Vanga ITM"),
   (2, "Vanga ISTM"),
   (3, "Employees"); 
-
-
