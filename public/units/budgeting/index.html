@@ -240,6 +240,12 @@ var tablebind;
           }
         }
       }
+
+      //TODO: 
+      //  -this should only happen on successful server response, database updated 
+      //  -resolve syntax error 
+      dom.byId("bika-units-budgeting-submit").disabled = true;
+      dom.byId("bika-units-budgeting-reset").disabled = true;
     }
 
     function resetModel() { 
