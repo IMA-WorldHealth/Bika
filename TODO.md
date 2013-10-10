@@ -1,6 +1,7 @@
 TODO
 ================================
 
+0. Find a reason for 'syntax error' when using PUT on a JsonRest store
 1. Use [Jed](www.jed.io "http://www.jed.io") for localization to French
 2. Support Multiple Databases
   1. ~~MySQL~~

@@ -10,6 +10,16 @@
 	width: 500px
 }
 
+#bika-units-budgeting-controls { 
+	text-align: center;
+	margin-top: 20px;
+}
+
+#bika-units-budgeting-controls button { 
+	width: 150px;
+	height: 40px;
+}
+
 fieldset { 
 	margin: 0;
 	padding: 5;
