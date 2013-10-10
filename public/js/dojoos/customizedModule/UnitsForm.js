@@ -12,18 +12,18 @@ define("customizedModule/UnitsForm",
 			placeControls: function(values){
 				//creation des checks
 				for(var i=0; i<values.length; i++){
-					var control = new CheckBox({id: values[i].id+'ID', value:values[i].name},""+values[i].id);
+					var control = new CheckBox({value:values[i].name},""+values[i].id);
 					this.checks.push(control);
 				}
 			},
 			addLastCheck: function(id){
-				var control = new CheckBox({value:"Tous"},id);
+				console.log('jolie');
+				var control = new CheckBox({id:'last', value:'Tous'},id);
 				var that = this;
 				on(control, 'change', function(value){
 					if(value){
 						for(var i=0; i<that.checks.length; i++){
 							that.checks[i].set('checked', true);
-
 						}
 					}else{
 						for(var i=0; i<that.checks.length; i++){
@@ -31,7 +31,6 @@ define("customizedModule/UnitsForm",
 						}
 					}
 				});
-				this.checks.push(control);
 			},
 			getCheckSelectedCount: function(){
 				var count=0;
@@ -48,6 +47,15 @@ define("customizedModule/UnitsForm",
 				for(var i=0; i<this.checks.length; i++){
 					this.checks[i].set('checked', false);
 				}
+			},
+			check: function(id){
+				for(var i=0; i<this.checks.length; i++){
+					if(this.checks[i].id == id){
+						this.checks[i].set('checked', true);
+					}
+				}
+
+
 			}
 
 

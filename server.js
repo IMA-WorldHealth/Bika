@@ -52,7 +52,7 @@ app.get('/data/', function (req, res) {
 
 //dojo store forces an ID to be passed with a PUT request, the server must match this pattern, even if the db.js API doesn't require it
 app.put('/data/:id', function(req, res) { 
-  var updatesql = db.updatesqlpdate(req.body.t, req.body.data, req.body.pk);
+  var updatesql = db.update(req.body.t, req.body.data, req.body.pk);
   db.execute(updatesql, function(err, ans) { 
     if(err) throw err;
     res.send("success!");
@@ -60,10 +60,12 @@ app.put('/data/:id', function(req, res) {
 });
 
 app.post('/data/', function (req, res) {
+  
   var cb = function (err, ans) {
     if (err) throw err;
     res.send("succes!;");
   };
+
   var insertsql = db.insert(req.body.t, req.body.data);
   db.execute(insertsql, cb);
 });

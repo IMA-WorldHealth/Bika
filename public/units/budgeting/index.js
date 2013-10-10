@@ -176,12 +176,12 @@ require([
           if(q[i].budget != cache_change[fiscal_year]["change"][q[i].id]) { 
             console.log("Updating", q[i]);
        
-            var interface = new JsonRest({ 
+            var store = new JsonRest({ 
               target: 'data/'
             });
 
             //Manually create new object to insert, current models object is a reslut of a join
-            interface.put({"t" : "budget", "data" : [{"id" : q[i].id, "enterprise_id" : q[i].enterprise_id, "account_id" : q[i].account_id, "period_id" : q[i].period_id, "budget" : [q[i].budget]}], "pk" : ["id"]}, {id: q[i].id});
+            store.put({"t" : "budget", "data" : [{"id" : q[i].id, "enterprise_id" : q[i].enterprise_id, "account_id" : q[i].account_id, "period_id" : q[i].period_id, "budget" : [q[i].budget]}], "pk" : ["id"]}, {id: q[i].id});
             //update cache model 
             cache_change[fiscal_year]["change"][q[i].id] = q[i].budget;
           }
