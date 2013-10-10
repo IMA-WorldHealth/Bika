@@ -14,8 +14,8 @@
   </script>
   <script type="text/javascript" src="js/dojoos/dojo/dojo.js"></script>
   <script>
-    require(["dijit/layout/BorderContainer", "dijit/Menu", "dijit/MenuItem", "dijit/MenuSeparator", "bika/TabManager", "dijit/tree/ObjectStoreModel", "dijit/Tree", "dojo/store/JsonRest", "dijit/layout/ContentPane", "customizedModule/SelectX", "bika/ApplicationState", "dojo/domReady!"],
-      function(BorderContainer, Menu, MenuItem, MenuSeparator, TabManager, ObjectStoreModel, Tree, JsonRest, ContentPane, SelectX, ApplicationState) {
+    require(["dojo/Deferred", "dijit/layout/BorderContainer", "dijit/Menu", "dijit/MenuItem", "dijit/MenuSeparator", "bika/TabManager", "dijit/tree/ObjectStoreModel", "dijit/Tree", "dojo/store/JsonRest", "dijit/layout/ContentPane", "customizedModule/SelectX", "bika/ApplicationState", "dojo/domReady!"],
+      function(Deferred, BorderContainer, Menu, MenuItem, MenuSeparator, TabManager, ObjectStoreModel, Tree, JsonRest, ContentPane, SelectX, ApplicationState) {
 
         /////
         // Applicaton Structure
@@ -28,8 +28,13 @@
         var app_state = new ApplicationState();
         var enterpriseSelect, enterpriseSelect_query, fiscal_select;
 
-        initEnterpriseSelect();
-        initFiscalSelect(100);
+        var init = initEnterpriseSelect();
+        
+        init.then(function(value) {
+          console.log("Entrrprise set, returned", value);
+          initFiscalSelect(value);
+        });
+
         var bc = new BorderContainer({}, "bika-border-container");
 
         var tabManager = new TabManager({}, "bika-tab-container");
@@ -116,7 +121,24 @@
       tabManager.startup();
 
       //LES FONCTIONS
+      function updateFiscalSelect(enterprise_id) { 
+        console.log("Fiscal year should update with", enterprise_id);
+
+        var fiscal_query = {};
+        var e = [{t : 'fiscal_year', c : ['id', 'start_month', 'start_year']}];
+        var c = [{t : 'fiscal_year', cl : 'enterprise_id', v : enterprise_id, z : '='}];
+        fiscal_query.e = e;
+        fiscal_query.c = c;
+        var formatRequest = JSON.stringify(fiscal_query);
+
+        fiscal_select.query = fiscal_query;
+        fiscal_select.removeOption(fiscal_select.getOptions());
+        fiscal_select.setStore(fiscal_select.store);
+        fiscal_select.set('value', fiscal_select.get('value'));
+      }
+      
       function initEnterpriseSelect() {
+        var deferred = new Deferred();
         enterpriseSelect_query = {};
         var e = [{t : 'enterprise', c : ['id', 'region', 'country', 'city', 'name', 'phone', 'email', 'type', 'cash_account']}];
         enterpriseSelect_query.e = e;
@@ -132,19 +154,30 @@
           query: '?' + requetteEntreprise,
         }, "bika-enterprise-select");    
 
+        enterpriseSelect.on("setStore", function() { 
+          deferred.resolve(this.get('value'));
+        });
+
         //Make componenet available to entire application 
-        app_state.setComponent("enterprise-select", enterpriseSelect);        
+        app_state.setComponent("enterprise-select", enterpriseSelect);  
+
+        //TODO: use select pub/ sub vs. manual updateFiscal
+        app_state.register("bika", "enterprise-select", updateFiscalSelect);
+        return deferred.promise;      
       }
 
       function initFiscalSelect(enterprise_id) { 
         //Settup model and view for the fiscal year Selection componenet
         
         var fiscal_query = {};
-        var e = [{t : 'fiscal_year', c : ['id', 'start_month', 'start_year']}];
+        var e = [{t : 'fiscal_year', c : ['id', 'start_month', 'start_year', 'fiscal_year_txt']}];
+        var c = [{t : 'fiscal_year', cl : 'enterprise_id', v : enterprise_id, z : '='}];
         fiscal_query.e = e;
+        fiscal_query.c = c;
         var formatRequest = JSON.stringify(fiscal_query);
 
         //Using to make use of getLabel - dojo/request may be a better option
+        //TODO: Change label to show fiscal_year_txt
         var fiscal_store = new JsonRest({
           target : "/data/",
           getLabel :  function(data) { 
@@ -154,6 +187,7 @@
         
         fiscal_select = new SelectX({ 
           store : fiscal_store,
+          searchAttr : 'start_month',
           query : '?' + formatRequest
         }, "bika-fiscal-select");
 
