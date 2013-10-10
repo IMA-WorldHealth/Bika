@@ -456,6 +456,7 @@ REPLACE INTO `unit` (`id`, `name`, `desc`, `parent`, `has_children`, `url`) VALU
   (24, 'Balance', 'The Balance Sheet', 5, 0, '/units/balance/'),
   (25, 'Transaction', 'The Transaction Page', 5, 0, '/units/transaction/'),
   (26, 'Debitors', 'The debitors configuraiton page', 5, 0, '/units/debitors/');
+  (27, 'Fiscal Year', 'Fiscal year configuration page', 1, 0, '/units/fiscalyear/');
 /*!40000 ALTER TABLE `unit` ENABLE KEYS */;
 
 -- Dumping structure for table bika.permission
@@ -485,7 +486,8 @@ INSERT INTO `permission` (`id`, `id_unit`, `id_user`) VALUES
     (10, 3, 1),
     (11, 6, 1),
     (12, 7, 1),
-    (13, 26, 1);
+    (13, 26, 1),
+    (14, 27, 13);
     
 -- Dumping structure for table bika.role
 DROP TABLE IF EXISTS `role`;
